@@ -67,8 +67,6 @@ const PageHero = ({
         />
       ))}
 
-      <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/50" />
-
       <div
         className={`relative z-10 mx-auto max-w-7xl px-4 sm:px-6 sm:pt-28 ${
           variant === "car-mobile-tight"
@@ -85,20 +83,20 @@ const PageHero = ({
         }`}
       >
         {eyebrow && (
-          <p className="mb-4 text-[12px] font-bold uppercase tracking-[0.26em] text-white/80 drop-shadow-[0_3px_10px_rgba(0,0,0,0.75)] sm:mb-5 sm:text-[14px] md:text-[15px]">
+          <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.24em] !text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] sm:mb-5 sm:text-[14px] md:text-[15px]">
             {eyebrow}
           </p>
         )}
 
         {title && (
-          <h1 className="max-w-5xl font-serif text-[36px] font-bold leading-[1.08] tracking-[-0.035em] text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.35)] sm:text-5xl md:text-6xl lg:text-[68px]">
+          <h1 className="max-w-5xl text-[34px] !font-medium leading-[1.12] tracking-[-0.015em] !text-white drop-shadow-[0_3px_10px_rgba(0,0,0,0.55)] sm:text-5xl md:text-6xl lg:text-[56px]">
             <span className="sm:hidden">{mobileTitle || title}</span>
             <span className="hidden sm:inline">{title}</span>
           </h1>
         )}
 
         {description && (
-          <p className="mt-4 hidden max-w-4xl text-sm font-medium leading-7 text-white/85 sm:block sm:text-base md:text-[17px] lg:text-lg">
+          <p className="mt-4 hidden max-w-4xl text-sm font-medium leading-7 !text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)] sm:block sm:text-base md:text-[17px] lg:text-lg">
             {formatDescription(description)}
           </p>
         )}

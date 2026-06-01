@@ -38,42 +38,31 @@ const TestimonialsSection = () => {
 
   useEffect(() => {
     const updateVisibleCards = () => {
-      if (window.innerWidth >= 1024) {
-        setVisibleCards(3)
-      } else if (window.innerWidth >= 768) {
-        setVisibleCards(2)
-      } else {
-        setVisibleCards(1)
-      }
+      if (window.innerWidth >= 1024) setVisibleCards(3)
+      else if (window.innerWidth >= 768) setVisibleCards(2)
+      else setVisibleCards(1)
     }
 
     updateVisibleCards()
     window.addEventListener("resize", updateVisibleCards)
-
     return () => window.removeEventListener("resize", updateVisibleCards)
   }, [])
 
   const maxIndex = Math.max(testimonials.length - visibleCards, 0)
 
   useEffect(() => {
-    if (index > maxIndex) {
-      setIndex(maxIndex)
-    }
+    if (index > maxIndex) setIndex(maxIndex)
   }, [index, maxIndex])
 
   const canGoLeft = index > 0
   const canGoRight = index < maxIndex
 
   const nextSlide = () => {
-    if (canGoRight) {
-      setIndex((prev) => prev + 1)
-    }
+    if (canGoRight) setIndex((prev) => prev + 1)
   }
 
   const prevSlide = () => {
-    if (canGoLeft) {
-      setIndex((prev) => prev - 1)
-    }
+    if (canGoLeft) setIndex((prev) => prev - 1)
   }
 
   return (
@@ -84,18 +73,18 @@ const TestimonialsSection = () => {
 
           <h2 className="text-slate-950">What our customers say</h2>
 
-          <p className="mt-4 text-slate-600">
+          <p className="mt-4 !text-slate-600">
             Real experiences from travelers who trusted TravelEx for Umrah,
             flights, tours, and visa assistance.
           </p>
         </div>
 
- <div className="relative px-3 sm:px-0">
+        <div className="relative px-3 sm:px-0">
           {maxIndex > 0 && canGoLeft && (
             <button
               type="button"
               onClick={prevSlide}
-              className="absolute -left-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-left-4 md:-left-5"
+              className="absolute -left-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-left-4 md:-left-5"
               aria-label="Previous review"
             >
               ‹
@@ -106,7 +95,7 @@ const TestimonialsSection = () => {
             <button
               type="button"
               onClick={nextSlide}
-              className="absolute -right-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-right-4 md:-right-5"
+              className="absolute -right-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-right-4 md:-right-5"
               aria-label="Next review"
             >
               ›
@@ -125,33 +114,35 @@ const TestimonialsSection = () => {
                   key={item.name}
                   className="min-w-full px-1 md:min-w-[50%] md:px-3 lg:min-w-[33.3333%]"
                 >
-                  <article className="flex min-h-[310px] flex-col rounded-[1.5rem] border border-slate-200 bg-[#F8FAFC] p-6 shadow-md shadow-slate-200/80 transition duration-300 hover:-translate-y-1 hover:shadow-xl">
+                  <article className="flex min-h-[310px] flex-col rounded-[5px] border border-slate-200 bg-[#F8FAFC] p-6 shadow-md shadow-slate-200/80 transition duration-300 hover:-translate-y-1 hover:shadow-xl">
                     <div className="mb-4 flex items-center justify-between">
                       <div className="flex gap-1">
-                        {Array.from({ length: item.rating }).map((_, starIndex) => (
-                          <FaStar
-                            key={starIndex}
-                            className="text-sm text-[#FFB703]"
-                          />
-                        ))}
+                        {Array.from({ length: item.rating }).map(
+                          (_, starIndex) => (
+                            <FaStar
+                              key={starIndex}
+                              className="text-sm text-[#FFB703]"
+                            />
+                          )
+                        )}
                       </div>
 
                       <FaQuoteLeft className="text-base text-slate-300" />
                     </div>
 
                     <div className="flex flex-1 flex-col">
-                      <p className="text-slate-600">“{item.review}”</p>
+                      <p className="!text-slate-600">“{item.review}”</p>
                     </div>
 
                     <div className="mt-auto flex items-center gap-3 pt-5">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#00AEEF] text-sm font-semibold text-white">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[5px] bg-[#00AEEF] text-sm font-semibold text-white">
                         {item.initials}
                       </div>
 
                       <div>
                         <h3 className="text-slate-950">{item.name}</h3>
 
-                        <p className="mt-0.5 text-xs font-medium text-slate-500">
+                        <p className="mt-0.5 text-xs font-medium !text-slate-500">
                           {item.location} • {item.service}
                         </p>
                       </div>
@@ -170,7 +161,7 @@ const TestimonialsSection = () => {
                 type="button"
                 key={dotIndex}
                 onClick={() => setIndex(dotIndex)}
-                className={`h-2 rounded-full transition-all ${
+                className={`h-2 rounded-[5px] transition-all ${
                   index === dotIndex ? "w-8 bg-[#00AEEF]" : "w-2 bg-slate-300"
                 }`}
                 aria-label={`Go to review slide ${dotIndex + 1}`}
@@ -179,15 +170,15 @@ const TestimonialsSection = () => {
           </div>
         )}
 
-        <div className="mx-auto mt-10 flex max-w-3xl flex-col items-center justify-between gap-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 px-6 py-5 text-center shadow-sm sm:flex-row sm:text-left">
-          <p className="text-sm font-medium text-slate-600">
+        <div className="mx-auto mt-10 flex max-w-3xl flex-col items-center justify-between gap-4 rounded-[5px] border border-slate-200 bg-slate-50 px-6 py-5 text-center shadow-sm sm:flex-row sm:text-left">
+          <p className="text-sm font-medium !text-slate-600">
             Trusted by 500+ happy travelers for Umrah, tours, flights, and visa
             support.
           </p>
 
           <Link
             to="/contact"
-            className="shrink-0 rounded-full bg-[#FF6B00] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#00AEEF]"
+            className="shrink-0 rounded-[5px] bg-[#FF6B00] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#00AEEF]"
           >
             Book Your Trip
           </Link>

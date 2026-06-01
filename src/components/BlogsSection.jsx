@@ -16,42 +16,31 @@ const BlogsSection = () => {
 
   useEffect(() => {
     const updateVisibleCards = () => {
-      if (window.innerWidth >= 1024) {
-        setVisibleCards(4)
-      } else if (window.innerWidth >= 768) {
-        setVisibleCards(2)
-      } else {
-        setVisibleCards(1)
-      }
+      if (window.innerWidth >= 1024) setVisibleCards(4)
+      else if (window.innerWidth >= 768) setVisibleCards(2)
+      else setVisibleCards(1)
     }
 
     updateVisibleCards()
     window.addEventListener("resize", updateVisibleCards)
-
     return () => window.removeEventListener("resize", updateVisibleCards)
   }, [])
 
   const maxIndex = Math.max(blogs.length - visibleCards, 0)
 
   useEffect(() => {
-    if (index > maxIndex) {
-      setIndex(maxIndex)
-    }
+    if (index > maxIndex) setIndex(maxIndex)
   }, [index, maxIndex])
 
   const canGoLeft = index > 0
   const canGoRight = index < maxIndex
 
   const nextSlide = () => {
-    if (canGoRight) {
-      setIndex((prev) => prev + 1)
-    }
+    if (canGoRight) setIndex((prev) => prev + 1)
   }
 
   const prevSlide = () => {
-    if (canGoLeft) {
-      setIndex((prev) => prev - 1)
-    }
+    if (canGoLeft) setIndex((prev) => prev - 1)
   }
 
   return (
@@ -63,7 +52,7 @@ const BlogsSection = () => {
 
             <h2 className="text-slate-950">Travel tips before you plan</h2>
 
-            <p className="mt-4 max-w-3xl text-slate-600">
+            <p className="mt-4 max-w-3xl !text-slate-600">
               Helpful guides from <BrandName /> about international
               destinations, Umrah packages, visa support, local tours, and
               travel planning.
@@ -72,7 +61,7 @@ const BlogsSection = () => {
 
           <Link
             to="/blogs"
-            className="hidden rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF] md:inline-flex"
+            className="hidden rounded-[5px] border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF] md:inline-flex"
           >
             View All Blogs
           </Link>
@@ -83,7 +72,7 @@ const BlogsSection = () => {
             <button
               type="button"
               onClick={prevSlide}
-              className="absolute left-0 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white md:-left-5 md:h-10 md:w-10 md:text-2xl"
+              className="absolute left-0 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white md:-left-5 md:h-10 md:w-10 md:text-2xl"
               aria-label="Previous blog"
             >
               ‹
@@ -94,7 +83,7 @@ const BlogsSection = () => {
             <button
               type="button"
               onClick={nextSlide}
-              className="absolute right-0 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white md:-right-5 md:h-10 md:w-10 md:text-2xl"
+              className="absolute right-0 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white md:-right-5 md:h-10 md:w-10 md:text-2xl"
               aria-label="Next blog"
             >
               ›
@@ -113,7 +102,7 @@ const BlogsSection = () => {
                   key={blog.id}
                   className="min-w-full px-1 md:min-w-[50%] md:px-3 lg:min-w-[25%]"
                 >
-                  <article className="group h-full overflow-hidden rounded-[1.5rem] bg-white shadow-md shadow-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
+                  <article className="group h-full overflow-hidden rounded-[5px] bg-white shadow-md shadow-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
                     <div className="relative h-44 overflow-hidden">
                       <img
                         src={blog.image}
@@ -123,7 +112,7 @@ const BlogsSection = () => {
 
                       <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
 
-                      <div className="badge-label absolute left-4 top-4 rounded-full bg-white px-3 py-1.5 text-[#00AEEF] shadow-md">
+                      <div className="badge-label absolute left-4 top-4 rounded-[5px] bg-white px-3 py-1.5 text-[#00AEEF] shadow-md">
                         {blog.tag}
                       </div>
                     </div>
@@ -136,7 +125,7 @@ const BlogsSection = () => {
 
                       <h3 className="text-slate-950">{blog.title}</h3>
 
-                      <p className="mt-3 text-sm leading-6 text-slate-600">
+                      <p className="mt-3 text-sm leading-6 !text-slate-600">
                         {blog.excerpt}
                       </p>
 
@@ -162,7 +151,7 @@ const BlogsSection = () => {
                 type="button"
                 key={dotIndex}
                 onClick={() => setIndex(dotIndex)}
-                className={`h-2 rounded-full transition-all ${
+                className={`h-2 rounded-[5px] transition-all ${
                   index === dotIndex ? "w-8 bg-[#00AEEF]" : "w-2 bg-slate-300"
                 }`}
                 aria-label={`Go to blog slide ${dotIndex + 1}`}
@@ -174,7 +163,7 @@ const BlogsSection = () => {
         <div className="mt-6 text-center md:hidden">
           <Link
             to="/blogs"
-            className="inline-flex rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
+            className="inline-flex rounded-[5px] border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
           >
             View All Blogs
           </Link>

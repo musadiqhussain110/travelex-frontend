@@ -36,18 +36,18 @@ const Footer = () => {
       {/* Newsletter Strip */}
       <div className="bg-[#F8FAFC] py-10 text-slate-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="grid gap-6 rounded-[2rem] bg-white p-6 shadow-md shadow-slate-200/70 md:grid-cols-[1fr_1.1fr] md:items-center md:p-8">
+          <div className="grid gap-6 rounded-[5px] bg-white p-6 shadow-md shadow-slate-200/70 md:grid-cols-[1fr_1.1fr] md:items-center md:p-8">
             <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-2xl text-[#00AEEF]">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[5px] bg-sky-50 text-2xl text-[#00AEEF]">
                 <FaPaperPlane />
               </div>
 
               <div>
-                <h3 className="text-2xl font-black text-slate-950">
+                <h3 className="text-2xl font-medium text-slate-950">
                   Get Updates & More
                 </h3>
 
-                <p className="mt-1 text-sm font-semibold text-slate-500">
+                <p className="mt-1 text-sm font-semibold !text-slate-500">
                   Travel tips, package updates, and offers straight to your inbox.
                 </p>
               </div>
@@ -57,12 +57,12 @@ const Footer = () => {
               <input
                 type="email"
                 placeholder="Your Email"
-                className="min-h-14 flex-1 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF]"
+                className="min-h-14 flex-1 rounded-[5px] border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF]"
               />
 
               <button
                 type="submit"
-                className="min-h-14 rounded-2xl bg-slate-950 px-7 text-sm font-black uppercase text-white transition-colors duration-300 hover:bg-[#FF6B00]"
+                className="min-h-14 rounded-[5px] bg-slate-950 px-7 text-sm font-semibold uppercase text-white transition-colors duration-300 hover:bg-[#FF6B00]"
               >
                 Subscribe
               </button>
@@ -74,7 +74,6 @@ const Footer = () => {
       {/* Main Footer */}
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1.2fr]">
-          {/* Brand */}
           <div>
             <Link to="/" className="inline-flex">
               <img
@@ -84,7 +83,7 @@ const Footer = () => {
               />
             </Link>
 
-            <p className="mt-4 max-w-sm text-sm leading-7 text-slate-300">
+            <p className="mt-4 max-w-sm text-sm leading-7 !text-slate-300">
               TravelEx helps travelers explore Umrah packages, customized tours,
               visa assistance, hotel support, flights, and travel consultation
               with quick WhatsApp follow-up.
@@ -95,7 +94,7 @@ const Footer = () => {
                 href="https://www.facebook.com/TravelExAirServices"
                 target="_blank"
                 rel="noreferrer"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition-colors duration-300 hover:bg-[#00AEEF]"
+                className="flex h-11 w-11 items-center justify-center rounded-[5px] bg-white/10 text-white transition-colors duration-300 hover:bg-[#00AEEF]"
                 aria-label="Facebook"
               >
                 <FaFacebookF />
@@ -105,7 +104,7 @@ const Footer = () => {
                 href="https://www.instagram.com/travelexpk?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
                 target="_blank"
                 rel="noreferrer"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition-colors duration-300 hover:bg-[#00AEEF]"
+                className="flex h-11 w-11 items-center justify-center rounded-[5px] bg-white/10 text-white transition-colors duration-300 hover:bg-[#00AEEF]"
                 aria-label="Instagram"
               >
                 <FaInstagram />
@@ -113,7 +112,7 @@ const Footer = () => {
 
               <a
                 href="#"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition-colors duration-300 hover:bg-[#00AEEF]"
+                className="flex h-11 w-11 items-center justify-center rounded-[5px] bg-white/10 text-white transition-colors duration-300 hover:bg-[#00AEEF]"
                 aria-label="LinkedIn"
               >
                 <FaLinkedinIn />
@@ -123,7 +122,7 @@ const Footer = () => {
                 href="https://wa.me/923111444192"
                 target="_blank"
                 rel="noreferrer"
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-[#25D366] text-white transition-transform duration-300 hover:scale-105"
+                className="flex h-11 w-11 items-center justify-center rounded-[5px] bg-[#25D366] text-white transition-transform duration-300 hover:scale-105"
                 aria-label="WhatsApp"
               >
                 <FaWhatsapp />
@@ -131,9 +130,8 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-black text-white">Quick Links</h3>
+            <h3 className="text-lg font-medium text-white">Quick Links</h3>
 
             <ul className="mt-5 grid gap-3">
               {quickLinks.map(([label, link]) => (
@@ -149,9 +147,8 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Services */}
           <div>
-            <h3 className="text-lg font-black text-white">Services</h3>
+            <h3 className="text-lg font-medium text-white">Services</h3>
 
             <ul className="mt-5 grid gap-3">
               {services.map(([label, link]) => (
@@ -167,9 +164,8 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact */}
           <div>
-            <h3 className="text-lg font-black text-white">Contact TravelEx</h3>
+            <h3 className="text-lg font-medium text-white">Contact TravelEx</h3>
 
             <div className="mt-5 grid gap-4">
               <a
@@ -204,19 +200,19 @@ const Footer = () => {
               </div>
             </div>
 
-            <div className="mt-6 rounded-[1.5rem] bg-white/10 p-4">
-              <p className="text-xs font-black uppercase tracking-wider text-[#00AEEF]">
+            <div className="mt-6 rounded-[5px] bg-white/10 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#00AEEF]">
                 Need quick help?
               </p>
 
-              <p className="mt-2 text-sm leading-6 text-slate-300">
+              <p className="mt-2 text-sm leading-6 !text-slate-300">
                 Share your travel plan and TravelEx will guide you through
                 WhatsApp or phone support.
               </p>
 
               <Link
                 to="/contact"
-                className="mt-4 inline-flex rounded-full bg-[#FF6B00] px-5 py-3 text-sm font-black text-white transition-colors duration-300 hover:bg-[#00AEEF]"
+                className="mt-4 inline-flex rounded-[5px] bg-[#FF6B00] px-5 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#00AEEF]"
               >
                 Send Inquiry
               </Link>
@@ -227,14 +223,14 @@ const Footer = () => {
         <div className="mt-10 border-t border-white/10 pt-6">
           <div className="flex flex-col justify-between gap-4 text-sm font-semibold text-slate-400 md:flex-row md:items-center">
             <div>
-              <p>Travelex©2026. All Rights reserved.</p>
-              <p className="mt-1">
+              <p className="!text-slate-400">Travelex©2026. All Rights reserved.</p>
+              <p className="mt-1 !text-slate-400">
                 Powered by{" "}
                 <a
-                  href="https://stackexpert.pk"
+
                   target="_blank"
                   rel="noreferrer"
-                  className="font-black text-[#00AEEF] transition-colors duration-300 hover:text-[#FF6B00]"
+                  className="font-semibold text-[#00AEEF] transition-colors duration-300 hover:text-[#FF6B00]"
                 >
                   The Order Of Pen (Toop)
                 </a>

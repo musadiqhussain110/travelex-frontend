@@ -124,19 +124,19 @@ const PackageDetails = () => {
     return (
       <main className="bg-[#F8FAFC] py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="rounded-[2rem] bg-white p-8 text-center shadow-md shadow-slate-200/70">
-            <h1 className="text-3xl font-black text-slate-950">
+          <div className="rounded-[5px] bg-white p-8 text-center shadow-md shadow-slate-200/70">
+            <h1 className="text-3xl font-medium text-slate-950">
               Package not found
             </h1>
 
-            <p className="mt-3 text-sm leading-7 text-slate-600">
+            <p className="mt-3 text-sm leading-7 !text-slate-600">
               The package you are looking for does not exist or may have been
               moved.
             </p>
 
             <Link
               to="/umrah"
-              className="mt-6 inline-flex rounded-full bg-[#FF6B00] px-6 py-3 text-sm font-black text-white transition-colors duration-300 hover:bg-[#00AEEF]"
+              className="mt-6 inline-flex rounded-[5px] bg-[#FF6B00] px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#00AEEF]"
             >
               Back to Umrah Packages
             </Link>
@@ -153,29 +153,27 @@ const PackageDetails = () => {
         <img
           src={pkg.image}
           alt={pkg.title}
-          className="absolute inset-0 h-full w-full object-cover opacity-35"
+          className="absolute inset-0 h-full w-full object-cover opacity-70"
         />
-
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/40" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
           <Link
             to="/umrah"
-            className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-slate-300 transition-colors duration-300 hover:text-[#00AEEF]"
+            className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-300 transition-colors duration-300 hover:text-[#00AEEF]"
           >
             <FaArrowLeft />
             Back to packages
           </Link>
 
-          <p className="mb-3 inline-flex rounded-full bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-wider text-[#00AEEF]">
+          <p className="mb-3 inline-flex rounded-[5px] bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#00AEEF]">
             {pkg.type}
           </p>
 
-          <h1 className="max-w-3xl text-4xl font-black leading-tight sm:text-5xl md:text-6xl">
+          <h1 className="max-w-3xl text-4xl font-medium leading-tight text-white sm:text-5xl md:text-6xl">
             {pkg.title}
           </h1>
 
-          <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300 md:text-base">
+          <p className="mt-4 max-w-3xl text-sm leading-7 !text-slate-300 md:text-base">
             {pkg.overview}
           </p>
 
@@ -184,7 +182,7 @@ const PackageDetails = () => {
               href="https://wa.me/923111444192"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3 text-sm font-black text-white transition-colors duration-300 hover:bg-[#00AEEF]"
+              className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#00AEEF]"
             >
               <FaWhatsapp />
               Ask on WhatsApp
@@ -192,7 +190,7 @@ const PackageDetails = () => {
 
             <a
               href="tel:03111444192"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-black text-slate-950 transition-colors duration-300 hover:bg-[#FF6B00] hover:text-white"
+              className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-white px-6 py-3 text-sm font-semibold text-slate-950 transition-colors duration-300 hover:bg-[#FF6B00] hover:text-white"
             >
               <FaPhoneAlt />
               Call 03 111 444 192
@@ -205,7 +203,7 @@ const PackageDetails = () => {
       <section className="py-12 sm:py-20">
         <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:grid-cols-[1fr_0.42fr]">
           <div className="grid gap-6">
-            <div className="overflow-hidden rounded-[2rem] bg-white shadow-md shadow-slate-200/70">
+            <div className="overflow-hidden rounded-[5px] bg-white shadow-md shadow-slate-200/70">
               <img
                 src={pkg.image}
                 alt={pkg.title}
@@ -213,41 +211,41 @@ const PackageDetails = () => {
               />
 
               <div className="p-6 sm:p-8">
-                <h2 className="text-2xl font-black text-slate-950">
+                <h2 className="text-2xl font-medium text-slate-950">
                   Package Overview
                 </h2>
 
-                <p className="mt-3 text-sm leading-7 text-slate-600 md:text-base">
+                <p className="mt-3 text-sm leading-7 !text-slate-600 md:text-base">
                   {pkg.overview}
                 </p>
 
                 <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-2xl bg-slate-50 p-4">
+                  <div className="rounded-[5px] bg-slate-50 p-4">
                     <FaRegClock className="text-xl text-[#00AEEF]" />
-                    <p className="mt-3 text-xs font-black uppercase tracking-wider text-slate-400">
+                    <p className="mt-3 text-xs font-semibold uppercase tracking-wider !text-slate-400">
                       Duration
                     </p>
-                    <p className="mt-1 text-sm font-black text-slate-950">
+                    <p className="mt-1 text-sm font-semibold !text-slate-950">
                       {pkg.duration}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-slate-50 p-4">
+                  <div className="rounded-[5px] bg-slate-50 p-4">
                     <FaPlaneDeparture className="text-xl text-[#00AEEF]" />
-                    <p className="mt-3 text-xs font-black uppercase tracking-wider text-slate-400">
+                    <p className="mt-3 text-xs font-semibold uppercase tracking-wider !text-slate-400">
                       Departure
                     </p>
-                    <p className="mt-1 text-sm font-black text-slate-950">
+                    <p className="mt-1 text-sm font-semibold !text-slate-950">
                       {pkg.from}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-slate-50 p-4">
+                  <div className="rounded-[5px] bg-slate-50 p-4">
                     <FaHotel className="text-xl text-[#00AEEF]" />
-                    <p className="mt-3 text-xs font-black uppercase tracking-wider text-slate-400">
+                    <p className="mt-3 text-xs font-semibold uppercase tracking-wider !text-slate-400">
                       Plan Type
                     </p>
-                    <p className="mt-1 text-sm font-black text-slate-950">
+                    <p className="mt-1 text-sm font-semibold !text-slate-950">
                       {pkg.type}
                     </p>
                   </div>
@@ -255,8 +253,8 @@ const PackageDetails = () => {
               </div>
             </div>
 
-            <div className="rounded-[2rem] bg-white p-6 shadow-md shadow-slate-200/70 sm:p-8">
-              <h2 className="text-2xl font-black text-slate-950">
+            <div className="rounded-[5px] bg-white p-6 shadow-md shadow-slate-200/70 sm:p-8">
+              <h2 className="text-2xl font-medium text-slate-950">
                 Package Highlights
               </h2>
 
@@ -264,7 +262,7 @@ const PackageDetails = () => {
                 {pkg.highlights.map((item) => (
                   <p
                     key={item}
-                    className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700"
+                    className="flex items-center gap-3 rounded-[5px] bg-slate-50 px-4 py-3 text-sm font-semibold !text-slate-700"
                   >
                     <FaCheckCircle className="shrink-0 text-[#00AEEF]" />
                     {item}
@@ -273,8 +271,8 @@ const PackageDetails = () => {
               </div>
             </div>
 
-            <div className="rounded-[2rem] bg-white p-6 shadow-md shadow-slate-200/70 sm:p-8">
-              <h2 className="text-2xl font-black text-slate-950">
+            <div className="rounded-[5px] bg-white p-6 shadow-md shadow-slate-200/70 sm:p-8">
+              <h2 className="text-2xl font-medium text-slate-950">
                 What can be included?
               </h2>
 
@@ -282,7 +280,7 @@ const PackageDetails = () => {
                 {pkg.inclusions.map((item) => (
                   <p
                     key={item}
-                    className="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700"
+                    className="flex items-center gap-3 rounded-[5px] bg-slate-50 px-4 py-3 text-sm font-semibold !text-slate-700"
                   >
                     <FaCheckCircle className="shrink-0 text-[#FF6B00]" />
                     {item}
@@ -290,19 +288,19 @@ const PackageDetails = () => {
                 ))}
               </div>
 
-              <p className="mt-6 rounded-2xl bg-sky-50 px-4 py-4 text-sm font-semibold leading-7 text-slate-600">
+              <p className="mt-6 rounded-[5px] bg-sky-50 px-4 py-4 text-sm font-semibold leading-7 !text-slate-600">
                 {pkg.note}
               </p>
             </div>
           </div>
 
           {/* Sidebar */}
-          <aside className="h-fit rounded-[2rem] bg-white p-6 shadow-md shadow-slate-200/70 lg:sticky lg:top-28">
-            <p className="text-xs font-black uppercase tracking-wider text-slate-400">
+          <aside className="h-fit rounded-[5px] bg-white p-6 shadow-md shadow-slate-200/70 lg:sticky lg:top-28">
+            <p className="text-xs font-semibold uppercase tracking-wider !text-slate-400">
               Starting Price
             </p>
 
-            <p className="mt-2 text-2xl font-black text-[#FF6B00]">
+            <p className="mt-2 text-2xl font-semibold !text-[#FF6B00]">
               {pkg.price}
             </p>
 
@@ -311,7 +309,7 @@ const PackageDetails = () => {
                 href="https://wa.me/923111444192"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3 text-sm font-black text-white transition-colors duration-300 hover:bg-[#00AEEF]"
+                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#00AEEF]"
               >
                 <FaWhatsapp />
                 WhatsApp Inquiry
@@ -319,7 +317,7 @@ const PackageDetails = () => {
 
               <a
                 href="tel:03111444192"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 px-6 py-3 text-sm font-black text-slate-900 transition-colors duration-300 hover:bg-slate-950 hover:text-white"
+                className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-900 transition-colors duration-300 hover:bg-slate-950 hover:text-white"
               >
                 <FaPhoneAlt />
                 Call Now
@@ -327,18 +325,18 @@ const PackageDetails = () => {
 
               <Link
                 to="/contact"
-                className="inline-flex items-center justify-center rounded-full bg-[#FF6B00] px-6 py-3 text-sm font-black text-white transition-colors duration-300 hover:bg-[#00AEEF]"
+                className="inline-flex items-center justify-center rounded-[5px] bg-[#FF6B00] px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#00AEEF]"
               >
                 Send Inquiry
               </Link>
             </div>
 
-            <div className="mt-6 rounded-2xl bg-slate-50 p-4">
-              <p className="text-sm font-black text-slate-950">
+            <div className="mt-6 rounded-[5px] bg-slate-50 p-4">
+              <p className="text-sm font-semibold !text-slate-950">
                 Need customization?
               </p>
 
-              <p className="mt-2 text-sm leading-6 text-slate-600">
+              <p className="mt-2 text-sm leading-6 !text-slate-600">
                 Share your departure city, travel date, hotel preference, and
                 number of passengers. TravelEx can customize your Umrah plan.
               </p>

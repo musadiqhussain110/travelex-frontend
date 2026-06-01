@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
-
 @import "tailwindcss";
 
 html {
@@ -15,7 +13,7 @@ body {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 400;
   background: #f8fafc;
   color: #1e293b;
@@ -30,36 +28,42 @@ body {
 }
 
 h1 {
-  font-family: "Playfair Display", serif;
-  font-weight: 700;
+  font-family: "Fredoka", sans-serif;
+  font-weight: 500;
   font-size: clamp(2rem, 4vw, 3rem);
   letter-spacing: -0.02em;
   line-height: 1.15;
 }
 
 h2 {
-  font-family: "Playfair Display", serif;
-  font-weight: 600;
+  font-family: "Fredoka", sans-serif;
+  font-weight: 500;
   font-size: clamp(1.5rem, 3vw, 2.25rem);
   letter-spacing: -0.01em;
   line-height: 1.2;
 }
 
-h3 {
-  font-family: "Plus Jakarta Sans", sans-serif;
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Fredoka", sans-serif;
   font-weight: 600;
-  font-size: 15px;
   line-height: 1.35;
+}
+
+h3 {
+  font-size: 15px;
 }
 
 body,
 p,
 li {
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 400;
   font-size: 14px;
   line-height: 1.7;
-  color: #6b7280;
+
 }
 
 button,
@@ -68,15 +72,18 @@ select,
 textarea,
 label,
 a {
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: "Poppins", sans-serif;
 }
+
 h1 span,
-h2 span {
+h2 span,
+h3 span {
   font-family: inherit;
 }
+
 nav a,
 nav button {
-  font-family: "Plus Jakarta Sans", sans-serif;
+  font-family: "Poppins", sans-serif;
   font-weight: 500;
   font-size: 14px;
   letter-spacing: 0.01em;
@@ -88,8 +95,8 @@ nav button {
 .field-label,
 label.search-label,
 [data-label="eyebrow"] {
-  font-family: "Plus Jakarta Sans", sans-serif;
-  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;

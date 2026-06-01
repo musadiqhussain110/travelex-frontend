@@ -178,13 +178,13 @@ const BookingPage = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <Link
           to="/flights"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-black text-slate-600 transition hover:text-[#00AEEF]"
+          className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-[#00AEEF]"
         >
           <FaArrowLeft />
           Back to flights
         </Link>
 
-        <div className="mb-8 rounded-[2rem] bg-white p-5 shadow-md shadow-slate-200/70">
+        <div className="mb-8 rounded-[5px] bg-white p-5 shadow-md shadow-slate-200/70">
           <div className="grid gap-3 sm:grid-cols-3">
             {[
               ["1", "Personal Details"],
@@ -212,42 +212,42 @@ const BookingPage = () => {
                     }
                   }
                 }}
-                className={`rounded-2xl px-5 py-4 text-left transition ${
+                className={`rounded-[5px] px-5 py-4 text-left transition ${
                   step === Number(number)
                     ? "bg-[#00AEEF] text-white"
                     : "bg-slate-50 text-slate-700"
                 }`}
               >
-                <p className="text-xs font-black uppercase tracking-wider">
+                <p className="text-xs font-semibold uppercase tracking-wider">
                   Step {number}
                 </p>
-                <p className="mt-1 text-sm font-black">{label}</p>
+                <p className="mt-1 text-sm font-semibold">{label}</p>
               </button>
             ))}
           </div>
         </div>
 
         {error && (
-          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-bold text-red-600">
+          <div className="mb-6 rounded-[5px] border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-600">
             {error}
           </div>
         )}
 
         <div className="grid gap-8 lg:grid-cols-[1fr_0.42fr]">
-          <section className="rounded-[2rem] bg-white p-5 shadow-md shadow-slate-200/70 sm:p-8">
+          <section className="rounded-[5px] bg-white p-5 shadow-md shadow-slate-200/70 sm:p-8">
             {step === 1 && (
               <>
-                <h1 className="text-3xl font-black text-slate-950">
+                <h1 className="text-3xl font-medium text-slate-950">
                   Personal Details
                 </h1>
 
-                <p className="mt-2 text-sm font-semibold text-slate-500">
+                <p className="mt-2 text-sm font-semibold !text-slate-500">
                   Fill your basic information to continue booking.
                 </p>
 
                 <div className="mt-8 grid gap-5 md:grid-cols-2">
                   <div>
-                    <label className="text-sm font-black text-slate-950">
+                    <label className="text-sm font-semibold text-slate-950">
                       First Name <span className="text-[#FF6B00]">*</span>
                     </label>
                     <input
@@ -257,12 +257,12 @@ const BookingPage = () => {
                         handlePersonalChange("firstName", e.target.value)
                       }
                       placeholder="First Name"
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
+                      className="mt-2 w-full rounded-[5px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-sm font-black text-slate-950">
+                    <label className="text-sm font-semibold text-slate-950">
                       Last Name <span className="text-[#FF6B00]">*</span>
                     </label>
                     <input
@@ -272,12 +272,12 @@ const BookingPage = () => {
                         handlePersonalChange("lastName", e.target.value)
                       }
                       placeholder="Last Name"
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
+                      className="mt-2 w-full rounded-[5px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-sm font-black text-slate-950">
+                    <label className="text-sm font-semibold text-slate-950">
                       Email <span className="text-[#FF6B00]">*</span>
                     </label>
                     <input
@@ -287,12 +287,12 @@ const BookingPage = () => {
                         handlePersonalChange("email", e.target.value)
                       }
                       placeholder="email@domain.com"
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
+                      className="mt-2 w-full rounded-[5px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-sm font-black text-slate-950">
+                    <label className="text-sm font-semibold text-slate-950">
                       Phone <span className="text-[#FF6B00]">*</span>
                     </label>
                     <input
@@ -302,12 +302,12 @@ const BookingPage = () => {
                         handlePersonalChange("phone", e.target.value)
                       }
                       placeholder="Your Phone"
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
+                      className="mt-2 w-full rounded-[5px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-sm font-black text-slate-950">
+                    <label className="text-sm font-semibold text-slate-950">
                       Address Line 1 <span className="text-[#FF6B00]">*</span>
                     </label>
                     <input
@@ -317,12 +317,12 @@ const BookingPage = () => {
                         handlePersonalChange("address1", e.target.value)
                       }
                       placeholder="Address line 1"
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
+                      className="mt-2 w-full rounded-[5px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-sm font-black text-slate-950">
+                    <label className="text-sm font-semibold text-slate-950">
                       City <span className="text-[#FF6B00]">*</span>
                     </label>
                     <input
@@ -332,12 +332,12 @@ const BookingPage = () => {
                         handlePersonalChange("city", e.target.value)
                       }
                       placeholder="Your City"
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
+                      className="mt-2 w-full rounded-[5px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
                     />
                   </div>
 
                   <div>
-                    <label className="text-sm font-black text-slate-950">
+                    <label className="text-sm font-semibold text-slate-950">
                       Country <span className="text-[#FF6B00]">*</span>
                     </label>
                     <select
@@ -345,7 +345,7 @@ const BookingPage = () => {
                       onChange={(e) =>
                         handlePersonalChange("country", e.target.value)
                       }
-                      className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
+                      className="mt-2 w-full rounded-[5px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
                     >
                       <option value="">-- Select --</option>
                       <option>Pakistan</option>
@@ -360,7 +360,7 @@ const BookingPage = () => {
                   <button
                     type="button"
                     onClick={() => goToStep(2)}
-                    className="rounded-full bg-[#FF6B00] px-8 py-3 text-sm font-black text-white transition hover:bg-[#00AEEF]"
+                    className="rounded-[5px] bg-[#FF6B00] px-8 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
                   >
                     Continue
                   </button>
@@ -370,16 +370,16 @@ const BookingPage = () => {
 
             {step === 2 && (
               <>
-                <h1 className="text-3xl font-black text-slate-950">
+                <h1 className="text-3xl font-medium text-slate-950">
                   Tickets / Guests Information
                 </h1>
 
-                <p className="mt-2 text-sm font-semibold text-slate-500">
+                <p className="mt-2 text-sm font-semibold !text-slate-500">
                   Enter passenger details for the selected booking.
                 </p>
 
-                <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200">
-                  <div className="bg-slate-50 px-5 py-4 text-sm font-black text-slate-950">
+                <div className="mt-8 overflow-hidden rounded-[5px] border border-slate-200">
+                  <div className="bg-slate-50 px-5 py-4 text-sm font-semibold text-slate-950">
                     Guest #1
                   </div>
 
@@ -391,7 +391,7 @@ const BookingPage = () => {
                         handleGuestChange("firstName", e.target.value)
                       }
                       placeholder="First Name"
-                      className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
+                      className="rounded-[5px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
                     />
 
                     <input
@@ -401,7 +401,7 @@ const BookingPage = () => {
                         handleGuestChange("lastName", e.target.value)
                       }
                       placeholder="Last Name"
-                      className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
+                      className="rounded-[5px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
                     />
 
                     <input
@@ -411,7 +411,7 @@ const BookingPage = () => {
                         handleGuestChange("email", e.target.value)
                       }
                       placeholder="email@domain.com"
-                      className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
+                      className="rounded-[5px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
                     />
 
                     <input
@@ -421,7 +421,7 @@ const BookingPage = () => {
                         handleGuestChange("phone", e.target.value)
                       }
                       placeholder="Your Phone"
-                      className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
+                      className="rounded-[5px] border border-slate-200 px-4 py-3 text-sm font-semibold outline-none focus:border-[#00AEEF]"
                     />
                   </div>
                 </div>
@@ -433,7 +433,7 @@ const BookingPage = () => {
                       setStep(1)
                       setError("")
                     }}
-                    className="rounded-full border border-slate-200 px-8 py-3 text-sm font-black text-slate-900"
+                    className="rounded-[5px] border border-slate-200 px-8 py-3 text-sm font-semibold text-slate-900"
                   >
                     Back
                   </button>
@@ -441,7 +441,7 @@ const BookingPage = () => {
                   <button
                     type="button"
                     onClick={() => goToStep(3)}
-                    className="rounded-full bg-[#FF6B00] px-8 py-3 text-sm font-black text-white transition hover:bg-[#00AEEF]"
+                    className="rounded-[5px] bg-[#FF6B00] px-8 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
                   >
                     Continue to Payment
                   </button>
@@ -451,16 +451,16 @@ const BookingPage = () => {
 
             {step === 3 && (
               <>
-                <div className="rounded-2xl bg-slate-50 p-6 text-center">
-                  <p className="text-sm font-semibold text-slate-500">
+                <div className="rounded-[5px] bg-slate-50 p-6 text-center">
+                  <p className="text-sm font-semibold !text-slate-500">
                     Amount to be paid
                   </p>
-                  <h1 className="mt-2 text-5xl font-black text-slate-950">
+                  <h1 className="mt-2 text-5xl font-semibold text-slate-950">
                     PKR {booking.price.toLocaleString()}
                   </h1>
                 </div>
 
-                <h2 className="mt-8 text-2xl font-black text-slate-950">
+                <h2 className="mt-8 text-2xl font-medium text-slate-950">
                   Select Payment Method
                 </h2>
 
@@ -473,7 +473,7 @@ const BookingPage = () => {
                         setSelectedPayment(method.title)
                         setError("")
                       }}
-                      className={`flex items-center justify-between rounded-2xl border px-5 py-4 text-left transition ${
+                      className={`flex items-center justify-between rounded-[5px] border px-5 py-4 text-left transition ${
                         selectedPayment === method.title
                           ? "border-[#00AEEF] bg-sky-50"
                           : "border-slate-200 bg-white hover:border-[#00AEEF]"
@@ -484,10 +484,10 @@ const BookingPage = () => {
                           {method.icon}
                         </span>
                         <div>
-                          <p className="text-sm font-black text-slate-950">
+                          <p className="text-sm font-semibold text-slate-950">
                             {method.title}
                           </p>
-                          <p className="mt-1 text-xs font-semibold text-slate-500">
+                          <p className="mt-1 text-xs font-semibold !text-slate-500">
                             {method.subtitle}
                           </p>
                         </div>
@@ -520,7 +520,7 @@ const BookingPage = () => {
                       setStep(2)
                       setError("")
                     }}
-                    className="rounded-full border border-slate-200 px-8 py-3 text-sm font-black text-slate-900"
+                    className="rounded-[5px] border border-slate-200 px-8 py-3 text-sm font-semibold text-slate-900"
                   >
                     Back
                   </button>
@@ -528,7 +528,7 @@ const BookingPage = () => {
                   <button
                     type="button"
                     onClick={handleSubmitBooking}
-                    className="rounded-full bg-[#FF6B00] px-8 py-3 text-sm font-black text-white transition hover:bg-[#00AEEF]"
+                    className="rounded-[5px] bg-[#FF6B00] px-8 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
                   >
                     Submit Booking
                   </button>
@@ -537,8 +537,8 @@ const BookingPage = () => {
             )}
           </section>
 
-          <aside className="h-fit rounded-[2rem] bg-white p-6 shadow-md shadow-slate-200/70 lg:sticky lg:top-28">
-            <h2 className="text-2xl font-black text-slate-950">
+          <aside className="h-fit rounded-[5px] bg-white p-6 shadow-md shadow-slate-200/70 lg:sticky lg:top-28">
+            <h2 className="text-2xl font-medium text-slate-950">
               Your Booking
             </h2>
 
@@ -548,13 +548,15 @@ const BookingPage = () => {
               className="mt-6 h-28 w-full object-contain"
             />
 
-            <p className="mt-4 font-black text-slate-950">{booking.airline}</p>
+            <p className="mt-4 font-semibold text-slate-950">
+              {booking.airline}
+            </p>
 
-            <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
+            <p className="mt-2 text-sm font-semibold leading-6 !text-slate-600">
               {booking.route}
             </p>
 
-            <p className="mt-3 text-sm font-black text-slate-950">
+            <p className="mt-3 text-sm font-semibold text-slate-950">
               {booking.duration}
             </p>
 
@@ -562,10 +564,10 @@ const BookingPage = () => {
               <div className="flex gap-3">
                 <FaPlaneDeparture className="mt-1 text-2xl text-[#00AEEF]" />
                 <div>
-                  <p className="font-black text-slate-950">
+                  <p className="font-semibold text-slate-950">
                     {booking.takeOff}
                   </p>
-                  <p className="text-xs font-semibold text-slate-500">
+                  <p className="text-xs font-semibold !text-slate-500">
                     {booking.fromAirport}
                   </p>
                 </div>
@@ -574,10 +576,10 @@ const BookingPage = () => {
               <div className="flex gap-3">
                 <FaPlaneArrival className="mt-1 text-2xl text-[#00AEEF]" />
                 <div>
-                  <p className="font-black text-slate-950">
+                  <p className="font-semibold text-slate-950">
                     {booking.landing}
                   </p>
-                  <p className="text-xs font-semibold text-slate-500">
+                  <p className="text-xs font-semibold !text-slate-500">
                     {booking.toAirport}
                   </p>
                 </div>
@@ -609,18 +611,18 @@ const BookingPage = () => {
                 <span>PKR {booking.price.toLocaleString()}</span>
               </div>
 
-              <div className="mt-4 flex overflow-hidden rounded-xl border border-slate-200">
+              <div className="mt-4 flex overflow-hidden rounded-[5px] border border-slate-200">
                 <input
                   type="text"
                   placeholder="Coupon code"
                   className="min-w-0 flex-1 px-4 py-3 text-sm font-semibold outline-none"
                 />
-                <button className="bg-[#FF6B00] px-5 text-sm font-black text-white">
+                <button className="bg-[#FF6B00] px-5 text-sm font-semibold text-white">
                   Apply
                 </button>
               </div>
 
-              <div className="mt-5 flex justify-between text-xl font-black text-slate-950">
+              <div className="mt-5 flex justify-between text-xl font-semibold text-slate-950">
                 <span>Total:</span>
                 <span className="text-[#00AEEF]">
                   PKR {booking.price.toLocaleString()}

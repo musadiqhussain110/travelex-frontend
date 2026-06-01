@@ -122,7 +122,7 @@ const ServicesPage = () => {
               What We Provide
             </p>
 
-            <h2 className="text-3xl font-black leading-tight text-slate-950 sm:text-4xl md:text-5xl">
+            <h2 className="text-3xl font-medium leading-tight text-slate-950 sm:text-4xl md:text-5xl">
               TravelEx service categories
             </h2>
 
@@ -144,7 +144,7 @@ const ServicesPage = () => {
                   {service.icon}
                 </div>
 
-                <h3 className="text-xl font-black text-slate-950">
+                <h3 className="text-xl font-medium text-slate-950">
                   {service.title}
                 </h3>
 
@@ -170,7 +170,7 @@ const ServicesPage = () => {
           <div className="rounded-[2rem] bg-white p-6 shadow-md shadow-slate-200/70 sm:p-8">
             <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
               <div>
-                <h3 className="text-2xl font-black text-slate-950">
+                <h3 className="text-2xl font-medium text-slate-950">
                   Not sure which service you need?
                 </h3>
 

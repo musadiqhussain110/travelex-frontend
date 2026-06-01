@@ -23,7 +23,7 @@ const continueBooking = () => {
         </button>
 
         <div className="text-center">
-          <h2 className="text-3xl font-black text-slate-950 sm:text-4xl">
+          <h2 className="text-3xl font-medium text-slate-950 sm:text-4xl">
             Welcome to TravelEx
           </h2>
 

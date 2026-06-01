@@ -61,44 +61,46 @@ const FAQPage = () => {
   return (
     <main className="bg-[#F8FAFC]">
       {/* Page Hero */}
-      <section className="relative overflow-hidden bg-slate-950 py-10 text-white sm:py-20">
-  <img
-    src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=1600&auto=format&fit=crop"
-    alt="TravelEx FAQ"
-    className="absolute inset-0 h-full w-full object-cover opacity-110"
-  />
+      <section className="relative overflow-hidden bg-slate-950 py-16 text-white sm:py-20">
+        <img
+          src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?q=80&w=1600&auto=format&fit=crop"
+          alt="TravelEx FAQ"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
 
-  <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/50" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-black/10 to-transparent" />
 
-  <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
-    <p className="eyebrow mb-3 !text-[12px] !tracking-[0.18em] text-[#00AEEF] sm:mb-4 sm:!text-[16px]">
-      FAQ
-    </p>
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
+          <p className="mb-4 text-[12px] font-semibold uppercase tracking-[0.24em] !text-[#00AEEF] sm:text-[14px]">
+            FAQ
+          </p>
 
-    <h1 className="max-w-3xl text-[30px] leading-[1.08] text-white sm:text-5xl md:text-6xl">
-      Answers before you travel
-    </h1>
+          <h1 className="max-w-4xl text-[34px] !font-medium leading-[1.12] tracking-[-0.01em] !text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] sm:text-5xl lg:text-[56px]">
+            ANSWERS BEFORE YOU TRAVEL
+          </h1>
 
-    <p className="mt-3 max-w-2xl !text-[14px] !font-medium !leading-6 !text-white/90 sm:mt-4 sm:!text-[18px] sm:!leading-8">
-      Quick answers about packages, bookings, payments, visas, and support.
-    </p>
-  </div>
-</section>
+          <p className="mt-4 max-w-3xl text-sm font-medium leading-7 !text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)] sm:text-base lg:text-lg">
+            Quick answers about packages, bookings, payments, visas, and support.
+          </p>
+        </div>
+      </section>
+
       {/* FAQ Content */}
       <section className="py-12 sm:py-20">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="mb-8 text-center sm:mb-12">
-            <p className="mb-3 text-xs font-black uppercase tracking-[0.25em] text-[#00AEEF] sm:text-sm">
-  Help Center
-</p>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-[#00AEEF] sm:text-sm">
+              Help Center
+            </p>
 
-<h2 className="text-3xl font-black leading-tight text-slate-950 sm:text-4xl md:text-5xl">
-  Questions travelers ask most
-</h2>
+            <h2 className="text-3xl font-medium leading-tight text-slate-950 sm:text-4xl md:text-5xl">
+              Questions travelers ask most
+            </h2>
 
-<p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600 md:text-base">
-  Find simple answers before choosing a package or contacting our team.
-</p>
+            <p className="mx-auto mt-4 max-w-3xl text-sm leading-7 !text-slate-600 md:text-base">
+              Find simple answers before choosing a package or contacting our
+              team.
+            </p>
           </div>
 
           <div className="grid gap-3">
@@ -108,18 +110,18 @@ const FAQPage = () => {
               return (
                 <div
                   key={faq.question}
-                  className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:shadow-md"
+                  className="overflow-hidden rounded-[5px] border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:shadow-md"
                 >
                   <button
                     onClick={() => setOpenIndex(isOpen ? null : index)}
                     className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
                   >
-                    <span className="text-sm font-black text-slate-950 sm:text-base">
+                    <span className="text-sm font-semibold text-slate-950 sm:text-base">
                       {faq.question}
                     </span>
 
                     <span
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sky-50 text-xs text-[#00AEEF] shadow-sm transition-transform duration-300 ${
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[5px] bg-sky-50 text-xs text-[#00AEEF] shadow-sm transition-transform duration-300 ${
                         isOpen ? "rotate-180" : ""
                       }`}
                     >
@@ -133,7 +135,7 @@ const FAQPage = () => {
                     }`}
                   >
                     <div className="overflow-hidden">
-                      <p className="px-4 pb-4 text-sm leading-6 text-slate-600">
+                      <p className="px-4 pb-4 text-sm leading-6 !text-slate-600">
                         {faq.answer}
                       </p>
                     </div>
@@ -143,19 +145,19 @@ const FAQPage = () => {
             })}
           </div>
 
-          <div className="mt-8 rounded-[1.5rem] bg-white p-6 text-center shadow-md shadow-slate-200/70">
-            <h3 className="text-2xl font-black text-slate-950">
+          <div className="mt-8 rounded-[5px] bg-white p-6 text-center shadow-md shadow-slate-200/70">
+            <h3 className="text-2xl font-medium text-slate-950">
               Still have questions?
             </h3>
 
-            <p className="mx-auto mt-2 max-w-2xl text-sm leading-7 text-slate-600">
+            <p className="mx-auto mt-2 max-w-2xl text-sm leading-7 !text-slate-600">
               Contact TravelEx support or continue your inquiry on WhatsApp.
             </p>
 
             <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
               <a
                 href="tel:03111444192"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 px-6 py-3 text-sm font-black text-slate-900 transition-colors duration-300 hover:bg-slate-950 hover:text-white"
+                className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-900 transition-colors duration-300 hover:bg-slate-950 hover:text-white"
               >
                 <FaPhoneAlt />
                 Call Now
@@ -165,7 +167,7 @@ const FAQPage = () => {
                 href="https://wa.me/923111444192"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3 text-sm font-black text-white transition-colors duration-300 hover:bg-[#00AEEF]"
+                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#00AEEF]"
               >
                 <FaWhatsapp />
                 WhatsApp
@@ -173,7 +175,7 @@ const FAQPage = () => {
 
               <Link
                 to="/contact"
-                className="inline-flex items-center justify-center rounded-full bg-[#FF6B00] px-6 py-3 text-sm font-black text-white transition-colors duration-300 hover:bg-[#00AEEF]"
+                className="inline-flex items-center justify-center rounded-[5px] bg-[#FF6B00] px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#00AEEF]"
               >
                 Contact Page
               </Link>

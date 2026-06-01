@@ -104,15 +104,15 @@ const CustomTours = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mb-8 flex flex-col justify-between gap-5 sm:mb-12 md:flex-row md:items-end">
           <div>
-            <p className="mb-3 text-xs font-black uppercase tracking-[0.25em] text-[#00AEEF] sm:text-sm">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-[#00AEEF] sm:text-sm">
               Customized Tours
             </p>
 
-            <h2 className="text-3xl font-black leading-tight text-slate-950 sm:text-4xl md:text-5xl">
+            <h2 className="text-3xl font-medium leading-tight text-slate-950 sm:text-4xl md:text-5xl">
               Explore tours made for your travel style
             </h2>
 
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600 md:text-base">
+            <p className="mt-4 max-w-3xl text-sm leading-7 !text-slate-600 md:text-base">
               Choose from ready tour options or contact us to customize the
               destination, hotel, transport, dates, and group plan according to
               your comfort and budget.
@@ -121,7 +121,7 @@ const CustomTours = () => {
 
           <Link
             to="/tours"
-            className="hidden rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-black text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF] md:inline-flex"
+            className="hidden rounded-[5px] border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF] md:inline-flex"
           >
             View All Tours
           </Link>
@@ -130,8 +130,9 @@ const CustomTours = () => {
         <div className="relative">
           {maxIndex > 0 && canGoLeft && (
             <button
+              type="button"
               onClick={prevSlide}
-              className="absolute left-2 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white text-2xl font-black text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white md:-left-5"
+              className="absolute left-2 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-2xl font-semibold text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white md:-left-5"
               aria-label="Previous tour"
             >
               ‹
@@ -140,8 +141,9 @@ const CustomTours = () => {
 
           {maxIndex > 0 && canGoRight && (
             <button
+              type="button"
               onClick={nextSlide}
-              className="absolute right-2 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white text-2xl font-black text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white md:-right-5"
+              className="absolute right-2 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-2xl font-semibold text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white md:-right-5"
               aria-label="Next tour"
             >
               ›
@@ -160,7 +162,7 @@ const CustomTours = () => {
                   key={tour.id}
                   className="min-w-full px-1 md:min-w-[50%] md:px-3 lg:min-w-[25%]"
                 >
-                  <article className="group overflow-hidden rounded-[1.5rem] bg-[#F8FAFC] shadow-md shadow-slate-200/60 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
+                  <article className="group overflow-hidden rounded-[5px] bg-[#F8FAFC] shadow-md shadow-slate-200/60 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
                     <div className="relative h-44 overflow-hidden">
                       <img
                         src={tour.image}
@@ -170,23 +172,23 @@ const CustomTours = () => {
 
                       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
 
-                      <div className="absolute left-4 top-4 rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-[#00AEEF] shadow-md">
+                      <div className="absolute left-4 top-4 rounded-[5px] bg-white px-3 py-1.5 text-[11px] font-semibold text-[#00AEEF] shadow-md">
                         {tour.duration}
                       </div>
 
                       <div className="absolute bottom-4 left-4 right-4">
-                        <h3 className="text-lg font-black leading-tight text-white">
+                        <h3 className="text-lg font-medium leading-tight text-white">
                           {tour.title}
                         </h3>
 
-                        <p className="mt-1 text-xs font-semibold text-white/85">
+                        <p className="mt-1 text-xs font-semibold !text-white/85">
                           {tour.type}
                         </p>
                       </div>
                     </div>
 
                     <div className="p-4">
-                      <p className="mb-4 text-base font-black text-[#FF6B00]">
+                      <p className="mb-4 text-base font-semibold !text-[#FF6B00]">
                         {tour.price}
                       </p>
 
@@ -194,7 +196,7 @@ const CustomTours = () => {
                         {tour.points.map((point) => (
                           <p
                             key={point}
-                            className="rounded-xl bg-white px-3 py-2 text-xs font-semibold text-slate-600"
+                            className="rounded-[5px] bg-white px-3 py-2 text-xs font-semibold !text-slate-600"
                           >
                             ✓ {point}
                           </p>
@@ -204,7 +206,7 @@ const CustomTours = () => {
                       <div className="mt-4 grid grid-cols-2 gap-2">
                         <Link
                           to={`/tours/${tour.id}`}
-                          className="rounded-full border border-slate-200 bg-white px-3 py-2.5 text-center text-xs font-black text-slate-800 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
+                          className="rounded-[5px] border border-slate-200 bg-white px-3 py-2.5 text-center text-xs font-semibold text-slate-800 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
                         >
                           View Details
                         </Link>
@@ -213,7 +215,7 @@ const CustomTours = () => {
                           href="https://wa.me/923111444192"
                           target="_blank"
                           rel="noreferrer"
-                          className="rounded-full bg-[#FF6B00] px-3 py-2.5 text-center text-xs font-black text-white transition-colors duration-300 hover:bg-[#00AEEF]"
+                          className="rounded-[5px] bg-[#FF6B00] px-3 py-2.5 text-center text-xs font-semibold text-white transition-colors duration-300 hover:bg-[#00AEEF]"
                         >
                           WhatsApp Us
                         </a>
@@ -230,9 +232,10 @@ const CustomTours = () => {
           <div className="mt-5 flex justify-center gap-2">
             {Array.from({ length: maxIndex + 1 }).map((_, dotIndex) => (
               <button
+                type="button"
                 key={dotIndex}
                 onClick={() => setIndex(dotIndex)}
-                className={`h-2 rounded-full transition-all ${
+                className={`h-2 rounded-[5px] transition-all ${
                   index === dotIndex ? "w-8 bg-[#00AEEF]" : "w-2 bg-slate-300"
                 }`}
                 aria-label={`Go to tour slide ${dotIndex + 1}`}
@@ -244,7 +247,7 @@ const CustomTours = () => {
         <div className="mt-6 text-center md:hidden">
           <Link
             to="/tours"
-            className="inline-flex rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-black text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
+            className="inline-flex rounded-[5px] border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
           >
             View All Tours
           </Link>

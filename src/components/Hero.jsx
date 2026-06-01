@@ -15,12 +15,14 @@ import {
   FaChevronRight,
   FaSearch,
 } from "react-icons/fa"
+
 import airplane from "../assets/airplane.jpeg"
 import clockTower from "../assets/clock-tower.avif"
-import kaaba from "../assets/kaaba.avif"
-import madinah from "../assets/madinah.jpeg"
+import kaaba from "../assets/Umrah/KAABA1.avif"
+import madinah from "../assets/Umrah/madinah1.jpg"
 import naran from "../assets/Naran-Kaghan.webp"
-const heroImages = [kaaba, madinah, naran, clockTower, airplane]
+
+const heroImages = [airplane, clockTower, naran, kaaba, madinah]
 
 const services = ["Umrah", "Hotels", "Tours", "Flights", "Car Rental"]
 
@@ -347,10 +349,7 @@ const Hero = () => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    const years = Array.from(
-      { length: 8 },
-      (_, i) => today.getFullYear() + i
-    )
+    const years = Array.from({ length: 8 }, (_, i) => today.getFullYear() + i)
 
     const days = []
 
@@ -363,12 +362,12 @@ const Hero = () => {
     }
 
     return (
-      <div className="absolute left-1/2 top-[4.8rem] z-[999] w-[min(23rem,calc(100vw-2rem))] -translate-x-1/2 rounded-[1.5rem] border border-slate-100 bg-white p-4 shadow-2xl sm:left-0 sm:w-96 sm:translate-x-0">
+      <div className="absolute left-1/2 top-[4.3rem] z-[999] w-[min(23rem,calc(100vw-2rem))] -translate-x-1/2 rounded-[5px] border border-slate-100 bg-white p-4 shadow-2xl sm:left-0 sm:w-96 sm:translate-x-0">
         <div className="mb-4 flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => setCalendarMonth(new Date(year, month - 1, 1))}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition hover:bg-[#00AEEF] hover:text-white"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[5px] bg-slate-100 text-slate-700 transition hover:bg-[#00AEEF] hover:text-white"
             aria-label="Previous month"
           >
             <FaChevronLeft />
@@ -380,7 +379,7 @@ const Hero = () => {
               onChange={(e) =>
                 setCalendarMonth(new Date(year, Number(e.target.value), 1))
               }
-              className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-900 outline-none focus:border-[#00AEEF]"
+              className="h-10 rounded-[5px] border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-900 outline-none focus:border-[#00AEEF]"
             >
               {monthNames.map((monthName, index) => (
                 <option key={monthName} value={index}>
@@ -394,7 +393,7 @@ const Hero = () => {
               onChange={(e) =>
                 setCalendarMonth(new Date(Number(e.target.value), month, 1))
               }
-              className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-900 outline-none focus:border-[#00AEEF]"
+              className="h-10 rounded-[5px] border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-900 outline-none focus:border-[#00AEEF]"
             >
               {years.map((yearOption) => (
                 <option key={yearOption} value={yearOption}>
@@ -407,7 +406,7 @@ const Hero = () => {
           <button
             type="button"
             onClick={() => setCalendarMonth(new Date(year, month + 1, 1))}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition hover:bg-[#00AEEF] hover:text-white"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[5px] bg-slate-100 text-slate-700 transition hover:bg-[#00AEEF] hover:text-white"
             aria-label="Next month"
           >
             <FaChevronRight />
@@ -439,7 +438,7 @@ const Hero = () => {
                   }))
                   setCalendarOpen(false)
                 }}
-                className={`h-9 rounded-xl text-sm font-medium transition ${
+                className={`h-9 rounded-[5px] text-sm font-medium transition ${
                   disabled
                     ? "cursor-not-allowed text-slate-300"
                     : selected
@@ -458,55 +457,52 @@ const Hero = () => {
 
   return (
     <section
-  id="home"
-  className="relative min-h-[calc(100vh-5rem)] overflow-visible bg-cover bg-center bg-no-repeat"
-  style={{ backgroundImage: `url(${heroImages[active]})` }}
->
-  {heroImages.map((img, index) => (
-    <img
-      key={img}
-      src={img}
-      alt="TravelEx background"
-      className={`absolute inset-0 h-full w-full object-cover transition-all duration-1000 ${
-        index === active ? "opacity-100 scale-100" : "opacity-0 scale-105"
-      }`}
-    />
-  ))}
+      id="home"
+      className="relative min-h-[calc(100vh-5rem)] overflow-visible bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${heroImages[active]})` }}
+    >
+      {heroImages.map((img, index) => (
+        <img
+          key={img}
+          src={img}
+          alt="TravelEx background"
+          className={`absolute inset-0 h-full w-full object-cover transition-all duration-1000 ${
+            index === active ? "opacity-100 scale-100" : "opacity-0 scale-105"
+          }`}
+        />
+      ))}
 
-  <div className="absolute inset-0 bg-[#07111f]/55" />
-
-  <div className="absolute inset-0 bg-gradient-to-r from-[#07111f]/85 via-[#07111f]/55 to-transparent" />
       <div className="relative z-10 mx-auto flex min-h-[calc(100vh-5rem)] max-w-7xl flex-col px-4 sm:px-6">
         <div className="flex flex-1 items-center py-8 sm:py-10">
           <div className="w-full max-w-6xl text-white">
-    <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.22em] text-white/80 sm:mb-4 sm:text-sm md:text-base">
-  UMRAH • TOURS • VISA SUPPORT
-</p>
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] sm:mb-4 sm:text-sm md:text-base">
+              UMRAH • CUSTOMIZED TOURS • VISA SUPPORT
+            </p>
 
-            <h1 className="max-w-4xl text-[30px] leading-[1.08] text-white sm:text-5xl lg:text-6xl">
-  Start Your Journey with{" "}
-  <span className="font-sans font-extrabold">
+     <h1 className="max-w-4xl text-[36px] !font-medium leading-[1.08] tracking-[-0.015em] !text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)] sm:text-5xl lg:text-[50px]">
+  START YOUR JOURNEY WITH{" "}
+  <span>
     <span className="text-[#FF6B00]">Travel</span>
     <span className="text-[#00AEEF]">Ex</span>
   </span>
-  .pk
 </h1>
 
-<p className="mt-3 hidden max-w-2xl text-sm font-medium leading-7 text-white/90 sm:block sm:text-base lg:text-lg">
-  Serving travelers from Peshawar with transparent packages, WhatsApp support,
-  and 17+ years of experience.
-</p>
+            <p className="mt-3 hidden max-w-2xl text-sm font-medium leading-7 !text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.75)] sm:block sm:text-base lg:text-lg">
+              Serving travelers from Peshawar with transparent packages,
+              WhatsApp support, and <br></br>17+ years of experience.
+            </p>
+
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:gap-4">
               <Link
                 to="/umrah"
-                className="rounded-full bg-white px-7 py-3 text-center text-sm font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#FF6B00] hover:text-white"
+                className="rounded-[5px] bg-white px-7 py-3 text-center text-sm font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#07111f] hover:text-white"
               >
                 View Packages
               </Link>
 
               <Link
                 to="/contact"
-                className="rounded-full bg-[#00AEEF] px-7 py-3 text-center text-sm font-medium text-white shadow-lg transition-colors duration-300 hover:bg-white hover:text-[#00AEEF]"
+                className="rounded-[5px] bg-[#00AEEF] px-7 py-3 text-center text-sm font-medium text-white shadow-lg transition-colors duration-300 hover:bg-[#FF6B00] hover:text-[#FFF]"
               >
                 Talk to Consultant
               </Link>
@@ -515,15 +511,15 @@ const Hero = () => {
             {/* SEARCH BAR */}
             <div
               ref={searchRef}
-              className="mt-5 w-full max-w-6xl rounded-[1.5rem] border border-white/20 bg-white/10 p-3 shadow-2xl backdrop-blur-2xl sm:rounded-[2rem]"
+              className="mt-5 w-full max-w-5xl rounded-[5px] border border-white/30 bg-white/20 p-2.5 shadow-xl backdrop-blur-md"
             >
               {/* Services */}
-              <div className="relative mb-3">
+              <div className="relative mb-2">
                 {canScrollLeft && (
                   <button
                     type="button"
                     onClick={() => scrollServices("left")}
-                    className="absolute left-0 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white text-sm font-medium text-slate-900 shadow-md md:hidden"
+                    className="absolute left-0 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-sm font-medium text-slate-900 shadow-md md:hidden"
                     aria-label="Scroll services left"
                   >
                     ‹
@@ -545,7 +541,7 @@ const Hero = () => {
                         setActiveDropdown(null)
                         setCalendarOpen(false)
                       }}
-                      className={`min-w-fit rounded-full px-5 py-2 text-sm font-medium transition-colors duration-300 ${
+                      className={`min-w-fit rounded-[5px] px-5 py-1.5 text-sm font-medium transition-colors duration-300 ${
                         service === item
                           ? "bg-[#00AEEF] text-white"
                           : "bg-white/90 text-slate-800 hover:bg-white"
@@ -560,7 +556,7 @@ const Hero = () => {
                   <button
                     type="button"
                     onClick={() => scrollServices("right")}
-                    className="absolute right-0 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white text-sm font-medium text-slate-900 shadow-md md:hidden"
+                    className="absolute right-0 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-sm font-medium text-slate-900 shadow-md md:hidden"
                     aria-label="Scroll services right"
                   >
                     ›
@@ -569,7 +565,7 @@ const Hero = () => {
               </div>
 
               {/* Fields */}
-              <div className="rounded-[1.25rem] bg-white p-3 text-slate-900 shadow-sm sm:rounded-[1.5rem]">
+              <div className="rounded-[5px] bg-white p-2.5 text-slate-900 shadow-sm">
                 <div
                   className={`grid gap-3 ${
                     getFields().length === 4
@@ -600,11 +596,11 @@ const Hero = () => {
                               setActiveDropdown(field.label)
                             }}
                             placeholder={field.placeholder}
-                            className="peer h-16 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 pl-12 pt-5 text-sm font-medium text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-500 focus:border-[#00AEEF] focus:bg-white"
+                            className="peer h-12 w-full rounded-[5px] border border-slate-200 bg-slate-50 px-4 pl-12 pt-5 text-sm font-medium text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-500 focus:border-[#00AEEF] focus:bg-white"
                           />
 
                           {activeDropdown === field.label && (
-                            <div className="absolute left-1/2 top-[4.8rem] z-[999] w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white shadow-2xl sm:left-0 sm:w-80 sm:translate-x-0">
+                            <div className="absolute left-1/2 top-[4.3rem] z-[999] w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-[5px] border border-slate-100 bg-white shadow-2xl sm:left-0 sm:w-80 sm:translate-x-0">
                               <div className="max-h-60 overflow-y-auto p-2">
                                 {getFilteredOptions(field).map((option) => (
                                   <button
@@ -617,7 +613,7 @@ const Hero = () => {
                                       }))
                                       setActiveDropdown(null)
                                     }}
-                                    className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-sky-50 hover:text-[#00AEEF]"
+                                    className="flex w-full items-center gap-3 rounded-[5px] px-3 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-sky-50 hover:text-[#00AEEF]"
                                   >
                                     <span className="text-[#00AEEF]">
                                       {field.icon}
@@ -652,7 +648,7 @@ const Hero = () => {
                               )
                               setActiveDropdown(null)
                             }}
-                            className="peer h-16 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 pl-12 pt-5 text-left text-sm font-medium text-slate-900 outline-none transition-all duration-300 hover:border-[#00AEEF] hover:bg-white"
+                            className="peer h-12 w-full rounded-[5px] border border-slate-200 bg-slate-50 px-4 pl-12 pt-5 text-left text-sm font-medium text-slate-900 outline-none transition-all duration-300 hover:border-[#00AEEF] hover:bg-white"
                           >
                             {formValues[field.label] || field.placeholder}
                           </button>
@@ -674,14 +670,14 @@ const Hero = () => {
                               )
                               setCalendarOpen(false)
                             }}
-                            className="peer flex h-16 w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 pl-12 pt-5 text-left text-sm font-medium text-slate-900 outline-none transition-all duration-300 hover:border-[#00AEEF] hover:bg-white"
+                            className="peer flex h-12 w-full items-center justify-between rounded-[5px] border border-slate-200 bg-slate-50 px-4 pl-12 pt-5 text-left text-sm font-medium text-slate-900 outline-none transition-all duration-300 hover:border-[#00AEEF] hover:bg-white"
                           >
                             <span>{field.placeholder}</span>
                             <FaChevronDown className="text-xs text-slate-400" />
                           </button>
 
                           {activeDropdown === field.label && (
-                            <div className="absolute left-1/2 top-[4.8rem] z-[999] w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 rounded-[1.5rem] border border-slate-100 bg-white p-4 shadow-2xl sm:left-0 sm:w-80 sm:translate-x-0">
+                            <div className="absolute left-1/2 top-[4.3rem] z-[999] w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 rounded-[5px] border border-slate-100 bg-white p-4 shadow-2xl sm:left-0 sm:w-80 sm:translate-x-0">
                               {[
                                 {
                                   key: "adults",
@@ -717,7 +713,7 @@ const Hero = () => {
                                       onClick={() =>
                                         updatePassenger(item.key, "minus")
                                       }
-                                      className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-700 transition hover:bg-slate-200"
+                                      className="flex h-9 w-9 items-center justify-center rounded-[5px] bg-slate-100 text-xs text-slate-700 transition hover:bg-slate-200"
                                     >
                                       <FaMinus />
                                     </button>
@@ -731,7 +727,7 @@ const Hero = () => {
                                       onClick={() =>
                                         updatePassenger(item.key, "plus")
                                       }
-                                      className="flex h-9 w-9 items-center justify-center rounded-full bg-[#00AEEF] text-xs text-white transition hover:bg-[#FF6B00]"
+                                      className="flex h-9 w-9 items-center justify-center rounded-[5px] bg-[#00AEEF] text-xs text-white transition hover:bg-[#FF6B00]"
                                     >
                                       <FaPlus />
                                     </button>
@@ -742,7 +738,7 @@ const Hero = () => {
                               <button
                                 type="button"
                                 onClick={() => setActiveDropdown(null)}
-                                className="mt-4 w-full rounded-full bg-[#FF6B00] py-3 text-sm font-medium text-white transition hover:bg-[#00AEEF]"
+                                className="mt-4 w-full rounded-[5px] bg-[#FF6B00] py-3 text-sm font-medium text-white transition hover:bg-[#00AEEF]"
                               >
                                 Done
                               </button>
@@ -751,7 +747,7 @@ const Hero = () => {
                         </>
                       )}
 
-                      <label className="search-label pointer-events-none absolute left-12 top-2 text-slate-400 transition-all duration-300 peer-focus:text-[#00AEEF]">
+                      <label className="search-label pointer-events-none absolute left-12 top-1.5 text-slate-400 transition-all duration-300 peer-focus:text-[#00AEEF]">
                         {field.label}
                       </label>
                     </div>
@@ -760,10 +756,10 @@ const Hero = () => {
               </div>
 
               {/* Search button outside input row */}
-              <div className="mt-4 flex justify-end">
+              <div className="mt-2 flex justify-end">
                 <Link
                   to={getSearchPath()}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#FF6B00] px-7 py-3.5 text-sm font-semibold uppercase text-white shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-7 py-2 text-sm font-semibold uppercase text-white shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] sm:w-auto"
                 >
                   <FaSearch />
                   Search

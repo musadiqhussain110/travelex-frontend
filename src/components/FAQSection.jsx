@@ -62,15 +62,15 @@ const FAQSection = () => {
     <section id="faq" className="bg-white py-12 sm:py-20">
       <div className="mx-auto max-w-4xl px-4 sm:px-6">
         <div className="mb-8 text-center sm:mb-12">
-          <p className="mb-3 text-xs font-black uppercase tracking-[0.25em] text-[#00AEEF] sm:text-sm">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-[#00AEEF] sm:text-sm">
             FAQ
           </p>
 
-          <h2 className="text-3xl font-black leading-tight text-slate-950 sm:text-4xl md:text-5xl">
+          <h2 className="text-3xl font-medium leading-tight text-slate-950 sm:text-4xl md:text-5xl">
             Frequently asked questions
           </h2>
 
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-600 md:text-base">
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 !text-slate-600 md:text-base">
             Got a question? We’ve got you covered, quick answers and full-on
             clarity.
           </p>
@@ -83,18 +83,18 @@ const FAQSection = () => {
             return (
               <div
                 key={faq.question}
-                className="overflow-hidden rounded-2xl border border-slate-100 bg-[#F8FAFC] shadow-sm transition-all duration-300 hover:shadow-md"
+                className="overflow-hidden rounded-[5px] border border-slate-100 bg-[#F8FAFC] shadow-sm transition-all duration-300 hover:shadow-md"
               >
                 <button
                   onClick={() => setOpenIndex(isOpen ? null : index)}
                   className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left"
                 >
-                  <span className="text-sm font-black text-slate-950 sm:text-base">
+                  <span className="text-sm font-semibold text-slate-950 sm:text-base">
                     {faq.question}
                   </span>
 
                   <span
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-xs text-[#00AEEF] shadow-sm transition-transform duration-300 ${
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[5px] bg-white text-xs text-[#00AEEF] shadow-sm transition-transform duration-300 ${
                       isOpen ? "rotate-180" : ""
                     }`}
                   >
@@ -108,7 +108,7 @@ const FAQSection = () => {
                   }`}
                 >
                   <div className="overflow-hidden">
-                    <p className="px-4 pb-4 text-sm leading-6 text-slate-600">
+                    <p className="px-4 pb-4 text-sm leading-6 !text-slate-600">
                       {faq.answer}
                     </p>
                   </div>
@@ -118,28 +118,28 @@ const FAQSection = () => {
           })}
         </div>
 
-        <div className="mt-8 rounded-[1.5rem] bg-[#F8FAFC] p-5 text-center shadow-sm sm:p-6">
-          <h3 className="text-xl font-black text-slate-950">
+        <div className="mt-8 rounded-[5px] bg-[#F8FAFC] p-5 text-center shadow-sm sm:p-6">
+          <h3 className="text-xl font-medium text-slate-950">
             Still have questions?
           </h3>
 
-          <p className="mx-auto mt-2 max-w-2xl text-sm leading-7 text-slate-600">
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-7 !text-slate-600">
             Contact TravelEx support at{" "}
-            <span className="font-black text-slate-950">03 111 444 192</span>{" "}
+            <span className="font-medium text-slate-950">03 111 444 192</span>{" "}
             or continue your inquiry on WhatsApp.
           </p>
 
           <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               to="/faq"
-              className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-black text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
+              className="inline-flex items-center justify-center rounded-[5px] border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
             >
               View All FAQs
             </Link>
 
             <Link
               to="/contact"
-              className="inline-flex items-center justify-center rounded-full bg-[#FF6B00] px-6 py-3 text-sm font-black text-white transition-colors duration-300 hover:bg-[#00AEEF]"
+              className="inline-flex items-center justify-center rounded-[5px] bg-[#FF6B00] px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#00AEEF]"
             >
               Contact Us
             </Link>

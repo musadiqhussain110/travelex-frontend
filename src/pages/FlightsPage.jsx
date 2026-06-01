@@ -220,27 +220,28 @@ const FlightsPage = () => {
 
   return (
     <main className="bg-[#F8FAFC]">
-<PageHero
-  eyebrow="Flight Booking"
-  title="Search flights for domestic and international travel"
-  mobileTitle="Find your next flight"
-  description="Compare available flight options, choose a seat type, and continue your booking inquiry with TravelEx support."
-  images={flightHeroImages}
-  variant="flight-mobile-tight"
->
-  <ServiceSearchBar defaultService="Flights" glass={false} />
-</PageHero>
-<section className="relative pt-60 pb-12 sm:pt-32 sm:pb-20">
+      <PageHero
+        eyebrow="Flight Booking"
+        title="Search flights for domestic and international travel"
+        mobileTitle="Find your next flight"
+        description="Compare available flight options, choose a seat type, and continue your booking inquiry with TravelEx support."
+        images={flightHeroImages}
+        variant="flight-mobile-tight"
+      >
+        <ServiceSearchBar defaultService="Flights" glass={false} />
+      </PageHero>
+
+      <section className="relative pt-60 pb-12 sm:pt-32 sm:pb-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
             <div className="lg:hidden">
               <button
                 type="button"
                 onClick={() => setFilterOpen(!filterOpen)}
-                className="mb-4 flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-950 shadow-md shadow-slate-200/70"
+                className="mb-4 flex w-full items-center justify-between rounded-[5px] border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-950 shadow-md shadow-slate-200/70"
               >
                 <span className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#00AEEF] text-white">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-[5px] bg-[#00AEEF] text-white">
                     <FaChevronDown
                       className={`text-xs transition-transform ${
                         filterOpen ? "rotate-180" : ""
@@ -253,7 +254,7 @@ const FlightsPage = () => {
                     {(selectedTypes.length > 0 ||
                       selectedExperiences.length > 0 ||
                       Number(maxPrice) < 15000) && (
-                      <span className="ml-2 rounded-full bg-[#FF6B00] px-2 py-0.5 text-[10px] font-semibold text-white">
+                      <span className="ml-2 rounded-[5px] bg-[#FF6B00] px-2 py-0.5 text-[10px] font-semibold text-white">
                         Active
                       </span>
                     )}
@@ -267,7 +268,7 @@ const FlightsPage = () => {
             </div>
 
             <aside
-              className={`h-fit overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-md shadow-slate-200/70 ${
+              className={`h-fit overflow-hidden rounded-[5px] border border-slate-200 bg-white shadow-md shadow-slate-200/70 ${
                 filterOpen ? "block" : "hidden"
               } lg:block`}
             >
@@ -288,11 +289,11 @@ const FlightsPage = () => {
 
                 <div className="relative pt-5">
                   <div className="mb-2 flex justify-between">
-                    <span className="rounded bg-blue-500 px-2 py-1 text-xs font-semibold text-white">
+                    <span className="rounded-[5px] bg-blue-500 px-2 py-1 text-xs font-semibold text-white">
                       Rs12 000
                     </span>
 
-                    <span className="rounded bg-blue-500 px-2 py-1 text-xs font-semibold text-white">
+                    <span className="rounded-[5px] bg-blue-500 px-2 py-1 text-xs font-semibold text-white">
                       Rs{Number(maxPrice).toLocaleString()}
                     </span>
                   </div>
@@ -343,7 +344,7 @@ const FlightsPage = () => {
                         type="checkbox"
                         checked={selectedTypes.includes(type)}
                         onChange={() => toggleType(type)}
-                        className="h-5 w-5 rounded border-slate-300 accent-[#00AEEF]"
+                        className="h-5 w-5 rounded-[5px] border-slate-300 accent-[#00AEEF]"
                       />
                       {type}
                     </label>
@@ -370,7 +371,7 @@ const FlightsPage = () => {
                         type="checkbox"
                         checked={selectedExperiences.includes(option)}
                         onChange={() => toggleExperience(option)}
-                        className="h-5 w-5 rounded border-slate-300 accent-[#00AEEF]"
+                        className="h-5 w-5 rounded-[5px] border-slate-300 accent-[#00AEEF]"
                       />
                       {option}
                     </label>
@@ -380,7 +381,7 @@ const FlightsPage = () => {
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="mt-6 w-full rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-[#00AEEF] hover:text-[#00AEEF]"
+                  className="mt-6 w-full rounded-[5px] border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-[#00AEEF] hover:text-[#00AEEF]"
                 >
                   Reset Filters
                 </button>
@@ -398,14 +399,14 @@ const FlightsPage = () => {
                   <button
                     type="button"
                     onClick={() => setSortOpen(!sortOpen)}
-                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-900 shadow-sm sm:min-w-52 sm:text-sm"
+                    className="flex w-full items-center justify-between gap-3 rounded-[5px] border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-900 shadow-sm sm:min-w-52 sm:text-sm"
                   >
                     Sort by: {sortBy}
                     <FaChevronDown className="text-xs" />
                   </button>
 
                   {sortOpen && (
-                    <div className="absolute right-0 top-12 z-30 w-56 overflow-hidden rounded-xl border border-slate-100 bg-white shadow-2xl">
+                    <div className="absolute right-0 top-12 z-30 w-56 overflow-hidden rounded-[5px] border border-slate-100 bg-white shadow-2xl">
                       {[
                         "Recommended",
                         "Price (Low to high)",
@@ -429,10 +430,10 @@ const FlightsPage = () => {
               </div>
 
               {filteredFlights.length === 0 ? (
-                <div className="rounded-[1.5rem] bg-white p-8 text-center shadow-md shadow-slate-200/70">
+                <div className="rounded-[5px] bg-white p-8 text-center shadow-md shadow-slate-200/70">
                   <h3 className="text-slate-950">No flights found</h3>
 
-                  <p className="mt-3 text-slate-600">
+                  <p className="mt-3 !text-slate-600">
                     Try changing your filters or contact TravelEx for a custom
                     flight inquiry.
                   </p>
@@ -440,7 +441,7 @@ const FlightsPage = () => {
                   <button
                     type="button"
                     onClick={resetFilters}
-                    className="mt-5 rounded-full bg-[#FF6B00] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
+                    className="mt-5 rounded-[5px] bg-[#FF6B00] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
                   >
                     Reset Filters
                   </button>
@@ -451,7 +452,7 @@ const FlightsPage = () => {
                     <button
                       type="button"
                       onClick={prevSlide}
-                      className="absolute -left-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-left-4 md:-left-5"
+                      className="absolute -left-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-left-4 md:-left-5"
                       aria-label="Previous flight"
                     >
                       ‹
@@ -462,7 +463,7 @@ const FlightsPage = () => {
                     <button
                       type="button"
                       onClick={nextSlide}
-                      className="absolute -right-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-right-4 md:-right-5"
+                      className="absolute -right-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-right-4 md:-right-5"
                       aria-label="Next flight"
                     >
                       ›
@@ -483,9 +484,9 @@ const FlightsPage = () => {
                           key={flight.id}
                           className="min-w-full px-1 md:min-w-[50%] md:px-3 xl:min-w-[33.333333%]"
                         >
-                          <article className="h-full overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-md shadow-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
+                          <article className="h-full overflow-hidden rounded-[5px] border border-slate-200 bg-white shadow-md shadow-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
                             <div className="p-4 sm:p-6">
-                              <div className="flex h-44 w-full items-center justify-center overflow-hidden rounded-2xl bg-slate-50 sm:h-36">
+                              <div className="flex h-44 w-full items-center justify-center overflow-hidden rounded-[5px] bg-slate-50 sm:h-36">
                                 <img
                                   src={flight.logo}
                                   alt={flight.airline}
@@ -498,7 +499,7 @@ const FlightsPage = () => {
                                   {flight.fromAirport}
                                 </h3>
 
-                                <p className="mt-2 text-sm font-semibold text-[#FF6B00]">
+                                <p className="mt-2 text-sm font-semibold !text-[#FF6B00]">
                                   Rs {flight.price.toLocaleString()}{" "}
                                   <span className="text-xs font-medium text-slate-500">
                                     / person
@@ -516,7 +517,7 @@ const FlightsPage = () => {
                                     Take off
                                   </p>
 
-                                  <p className="mt-1 text-xs font-medium text-slate-600 sm:text-sm">
+                                  <p className="mt-1 text-xs font-medium !text-slate-600 sm:text-sm">
                                     {flight.date} {flight.takeOff} PM
                                   </p>
                                 </div>
@@ -532,7 +533,7 @@ const FlightsPage = () => {
                                     Landing
                                   </p>
 
-                                  <p className="mt-1 text-xs font-medium text-slate-600 sm:text-sm">
+                                  <p className="mt-1 text-xs font-medium !text-slate-600 sm:text-sm">
                                     {flight.date} {flight.landing} PM
                                   </p>
                                 </div>
@@ -543,7 +544,7 @@ const FlightsPage = () => {
                               <button
                                 type="button"
                                 onClick={() => setSelectedFlight(flight)}
-                                className="w-full rounded-xl bg-[#FF6B00] px-5 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#00AEEF]"
+                                className="w-full rounded-[5px] bg-[#FF6B00] px-5 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#00AEEF]"
                               >
                                 Choose
                               </button>
@@ -562,7 +563,7 @@ const FlightsPage = () => {
                             type="button"
                             key={dotIndex}
                             onClick={() => setIndex(dotIndex)}
-                            className={`h-2 rounded-full transition-all ${
+                            className={`h-2 rounded-[5px] transition-all ${
                               index === dotIndex
                                 ? "w-8 bg-[#00AEEF]"
                                 : "w-2 bg-slate-300"
@@ -576,7 +577,7 @@ const FlightsPage = () => {
                 </div>
               )}
 
-              <p className="mt-10 text-center text-sm font-medium text-slate-400">
+              <p className="mt-10 text-center text-sm font-medium !text-slate-400">
                 Showing {filteredFlights.length} - {filteredFlights.length} of{" "}
                 {filteredFlights.length} Flights
               </p>
@@ -587,11 +588,11 @@ const FlightsPage = () => {
 
       {selectedFlight && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 px-4 py-6">
-          <div className="relative max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-[1.5rem] bg-white shadow-2xl">
+          <div className="relative max-h-[90vh] w-full max-w-5xl overflow-y-auto rounded-[5px] bg-white shadow-2xl">
             <button
               type="button"
               onClick={() => setSelectedFlight(null)}
-              className="absolute right-4 top-4 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-white transition hover:bg-[#FF6B00]"
+              className="absolute right-4 top-4 z-20 flex h-12 w-12 items-center justify-center rounded-[5px] bg-slate-900 text-white transition hover:bg-[#FF6B00]"
               aria-label="Close modal"
             >
               <FaTimes />
@@ -605,7 +606,7 @@ const FlightsPage = () => {
                   className="h-20 w-28 object-contain"
                 />
 
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium !text-slate-700">
                   {selectedFlight.route} | {selectedFlight.fromCode}-
                   {selectedFlight.toCode}
                 </p>
@@ -615,15 +616,15 @@ const FlightsPage = () => {
                 <FaPlaneDeparture className="mt-1 text-3xl text-[#00AEEF]" />
 
                 <div>
-                  <p className="text-xl font-semibold text-slate-950">
+                  <p className="text-xl font-semibold !text-slate-950">
                     {selectedFlight.takeOff}
                   </p>
 
-                  <p className="text-sm font-medium text-slate-600">
+                  <p className="text-sm font-medium !text-slate-600">
                     {selectedFlight.date}
                   </p>
 
-                  <p className="mt-1 text-sm font-medium text-slate-700">
+                  <p className="mt-1 text-sm font-medium !text-slate-700">
                     {selectedFlight.fromAirport}
                   </p>
                 </div>
@@ -633,15 +634,15 @@ const FlightsPage = () => {
                 <FaPlaneArrival className="mt-1 text-3xl text-[#00AEEF]" />
 
                 <div>
-                  <p className="text-xl font-semibold text-slate-950">
+                  <p className="text-xl font-semibold !text-slate-950">
                     {selectedFlight.landing}
                   </p>
 
-                  <p className="text-sm font-medium text-slate-600">
+                  <p className="text-sm font-medium !text-slate-600">
                     {selectedFlight.date}
                   </p>
 
-                  <p className="mt-1 text-sm font-medium text-slate-700">
+                  <p className="mt-1 text-sm font-medium !text-slate-700">
                     {selectedFlight.toAirport}
                   </p>
                 </div>
@@ -662,43 +663,43 @@ const FlightsPage = () => {
                     className="grid grid-cols-6 items-center border-b border-slate-100 py-5 last:border-b-0"
                   >
                     <div>
-                      <p className="font-semibold text-slate-950">Seat type</p>
-                      <p className="mt-1 text-sm font-medium text-slate-600">
+                      <p className="font-semibold !text-slate-950">Seat type</p>
+                      <p className="mt-1 text-sm font-medium !text-slate-600">
                         {seat.type}
                       </p>
                     </div>
 
                     <div>
-                      <p className="font-semibold text-slate-950">Baggage</p>
-                      <p className="mt-1 text-sm font-medium text-slate-600">
+                      <p className="font-semibold !text-slate-950">Baggage</p>
+                      <p className="mt-1 text-sm font-medium !text-slate-600">
                         {seat.baggage}
                       </p>
                     </div>
 
                     <div>
-                      <p className="font-semibold text-slate-950">Check-in</p>
-                      <p className="mt-1 text-sm font-medium text-slate-600">
+                      <p className="font-semibold !text-slate-950">Check-in</p>
+                      <p className="mt-1 text-sm font-medium !text-slate-600">
                         {seat.checkIn}
                       </p>
                     </div>
 
                     <div>
-                      <p className="font-semibold text-slate-950">Cabin</p>
-                      <p className="mt-1 text-sm font-medium text-slate-600">
+                      <p className="font-semibold !text-slate-950">Cabin</p>
+                      <p className="mt-1 text-sm font-medium !text-slate-600">
                         {seat.cabin}
                       </p>
                     </div>
 
                     <div>
-                      <p className="font-semibold text-slate-950">Price</p>
-                      <p className="mt-1 text-sm font-medium text-slate-600">
+                      <p className="font-semibold !text-slate-950">Price</p>
+                      <p className="mt-1 text-sm font-medium !text-slate-600">
                         Rs{seat.price.toLocaleString()}
                       </p>
                     </div>
 
                     <div>
-                      <p className="font-semibold text-slate-950">Number</p>
-                      <p className="mt-1 flex items-center gap-4 text-sm font-medium text-slate-600">
+                      <p className="font-semibold !text-slate-950">Number</p>
+                      <p className="mt-1 flex items-center gap-4 text-sm font-medium !text-slate-600">
                         <FaChevronDown />
                         <span>{seat.number}</span>
                         <FaChevronDown className="rotate-180" />
@@ -713,11 +714,11 @@ const FlightsPage = () => {
               <div />
 
               <div>
-                <p className="text-sm font-medium text-slate-600">
+                <p className="text-sm font-medium !text-slate-600">
                   Pay Amount
                 </p>
 
-                <p className="text-xl font-semibold text-slate-950">
+                <p className="text-xl font-semibold !text-slate-950">
                   Rs{selectedFlight.price.toLocaleString()}
                 </p>
               </div>
@@ -726,7 +727,7 @@ const FlightsPage = () => {
                 <button
                   type="button"
                   onClick={handleBookNow}
-                  className="rounded-xl bg-[#FF6B00] px-7 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
+                  className="rounded-[5px] bg-[#FF6B00] px-7 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
                 >
                   Book Now
                 </button>

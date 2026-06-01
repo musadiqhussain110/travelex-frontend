@@ -348,12 +348,12 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
     }
 
     return (
-      <div className="absolute left-1/2 top-[4.8rem] z-[999] w-[min(20rem,calc(100vw-2rem))] -translate-x-1/2 rounded-[1.5rem] border border-slate-100 bg-white p-4 shadow-2xl sm:left-0 sm:w-96 sm:translate-x-0">
+      <div className="absolute left-1/2 top-[3.8rem] z-[999] w-[min(20rem,calc(100vw-2rem))] -translate-x-1/2 rounded-[5px] border border-slate-100 bg-white p-4 shadow-2xl sm:left-0 sm:w-96 sm:translate-x-0">
         <div className="mb-4 flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => setCalendarMonth(new Date(year, month - 1, 1))}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition hover:bg-[#00AEEF] hover:text-white"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[5px] bg-slate-100 text-slate-700 transition hover:bg-[#00AEEF] hover:text-white"
             aria-label="Previous month"
           >
             <FaChevronLeft />
@@ -365,7 +365,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
               onChange={(event) =>
                 setCalendarMonth(new Date(year, Number(event.target.value), 1))
               }
-              className="h-10 min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-900 outline-none focus:border-[#00AEEF]"
+              className="h-10 min-w-0 rounded-[5px] border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-900 outline-none focus:border-[#00AEEF]"
             >
               {monthNames.map((monthName, index) => (
                 <option key={monthName} value={index}>
@@ -379,7 +379,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
               onChange={(event) =>
                 setCalendarMonth(new Date(Number(event.target.value), month, 1))
               }
-              className="h-10 min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-900 outline-none focus:border-[#00AEEF]"
+              className="h-10 min-w-0 rounded-[5px] border border-slate-200 bg-slate-50 px-2 text-xs font-medium text-slate-900 outline-none focus:border-[#00AEEF]"
             >
               {years.map((yearOption) => (
                 <option key={yearOption} value={yearOption}>
@@ -392,7 +392,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
           <button
             type="button"
             onClick={() => setCalendarMonth(new Date(year, month + 1, 1))}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition hover:bg-[#00AEEF] hover:text-white"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[5px] bg-slate-100 text-slate-700 transition hover:bg-[#00AEEF] hover:text-white"
             aria-label="Next month"
           >
             <FaChevronRight />
@@ -424,7 +424,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
                   }))
                   setCalendarOpen(false)
                 }}
-                className={`h-9 rounded-xl text-sm font-medium transition ${
+                className={`h-9 rounded-[5px] text-sm font-medium transition ${
                   disabled
                     ? "cursor-not-allowed text-slate-300"
                     : selected
@@ -444,19 +444,19 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
   return (
     <div
       ref={searchRef}
-      className={`w-full min-w-0 max-w-6xl rounded-[1.5rem] border p-3 shadow-2xl backdrop-blur-2xl sm:rounded-[2rem] ${
+      className={`w-full min-w-0 max-w-5xl rounded-[5px] border p-2.5 shadow-2xl backdrop-blur-2xl ${
         glass
           ? "border-white/20 bg-white/10 shadow-black/20"
           : "border-white/30 bg-white/15 shadow-black/20"
       }`}
     >
       {/* Service tabs */}
-      <div className="relative mb-3 min-w-0">
+      <div className="relative mb-2 min-w-0">
         {canScrollLeft && (
           <button
             type="button"
             onClick={() => scrollServices("left")}
-            className="absolute left-0 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white text-sm font-medium text-slate-900 shadow-md md:hidden"
+            className="absolute left-0 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-sm font-medium text-slate-900 shadow-md md:hidden"
             aria-label="Scroll services left"
           >
             ‹
@@ -478,7 +478,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
                 setActiveDropdown(null)
                 setCalendarOpen(false)
               }}
-              className={`min-w-fit shrink-0 rounded-full px-5 py-2 text-sm font-medium transition-colors duration-300 ${
+              className={`min-w-fit shrink-0 rounded-[5px] px-5 py-1.5 text-sm font-medium transition-colors duration-300 ${
                 service === item
                   ? "bg-[#00AEEF] text-white"
                   : "bg-white/90 text-slate-800 hover:bg-white"
@@ -493,7 +493,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
           <button
             type="button"
             onClick={() => scrollServices("right")}
-            className="absolute right-0 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white text-sm font-medium text-slate-900 shadow-md md:hidden"
+            className="absolute right-0 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-sm font-medium text-slate-900 shadow-md md:hidden"
             aria-label="Scroll services right"
           >
             ›
@@ -502,7 +502,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
       </div>
 
       {/* Fields */}
-      <div className="min-w-0 rounded-[1.25rem] bg-white/95 p-3 text-slate-900 shadow-sm backdrop-blur-xl sm:rounded-[1.5rem]">
+      <div className="min-w-0 rounded-[5px] bg-white/95 p-2.5 text-slate-900 shadow-sm backdrop-blur-xl">
         <div
           className={`grid min-w-0 gap-3 ${
             getFields().length === 4
@@ -533,11 +533,11 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
                       setActiveDropdown(field.label)
                     }}
                     placeholder={field.placeholder}
-                    className="peer h-16 w-full min-w-0 rounded-2xl border border-slate-200 bg-slate-50 px-4 pl-12 pt-5 text-sm font-medium text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-500 focus:border-[#00AEEF] focus:bg-white"
+                    className="peer h-12 w-full min-w-0 rounded-[5px] border border-slate-200 bg-slate-50 px-4 pl-12 pt-5 text-sm font-medium text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-500 focus:border-[#00AEEF] focus:bg-white"
                   />
 
                   {activeDropdown === field.label && (
-                    <div className="absolute left-1/2 top-[4.8rem] z-[999] w-[min(20rem,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white shadow-2xl sm:left-0 sm:w-80 sm:translate-x-0">
+                    <div className="absolute left-1/2 top-[3.8rem] z-[999] w-[min(20rem,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-[5px] border border-slate-100 bg-white shadow-2xl sm:left-0 sm:w-80 sm:translate-x-0">
                       <div className="max-h-60 overflow-y-auto p-2">
                         {getFilteredOptions(field).map((option) => (
                           <button
@@ -550,7 +550,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
                               }))
                               setActiveDropdown(null)
                             }}
-                            className="flex w-full min-w-0 items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-sky-50 hover:text-[#00AEEF]"
+                            className="flex w-full min-w-0 items-center gap-3 rounded-[5px] px-3 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-sky-50 hover:text-[#00AEEF]"
                           >
                             <span className="shrink-0 text-[#00AEEF]">
                               {field.icon}
@@ -580,7 +580,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
                       )
                       setActiveDropdown(null)
                     }}
-                    className="peer h-16 w-full min-w-0 rounded-2xl border border-slate-200 bg-slate-50 px-4 pl-12 pt-5 text-left text-sm font-medium text-slate-900 outline-none transition-all duration-300 hover:border-[#00AEEF] hover:bg-white"
+                    className="peer h-12 w-full min-w-0 rounded-[5px] border border-slate-200 bg-slate-50 px-4 pl-12 pt-5 text-left text-sm font-medium text-slate-900 outline-none transition-all duration-300 hover:border-[#00AEEF] hover:bg-white"
                   >
                     <span className="block truncate">
                       {formValues[field.label] || field.placeholder}
@@ -601,7 +601,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
                       )
                       setCalendarOpen(false)
                     }}
-                    className="peer flex h-16 w-full min-w-0 items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 pl-12 pt-5 text-left text-sm font-medium text-slate-900 outline-none transition-all duration-300 hover:border-[#00AEEF] hover:bg-white"
+                    className="peer flex h-12 w-full min-w-0 items-center justify-between rounded-[5px] border border-slate-200 bg-slate-50 px-4 pl-12 pt-5 text-left text-sm font-medium text-slate-900 outline-none transition-all duration-300 hover:border-[#00AEEF] hover:bg-white"
                   >
                     <span className="min-w-0 truncate">
                       {field.placeholder}
@@ -610,7 +610,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
                   </button>
 
                   {activeDropdown === field.label && (
-                    <div className="absolute left-1/2 top-[4.8rem] z-[999] w-[min(20rem,calc(100vw-2rem))] -translate-x-1/2 rounded-[1.5rem] border border-slate-100 bg-white p-4 shadow-2xl sm:left-0 sm:w-80 sm:translate-x-0">
+                    <div className="absolute left-1/2 top-[3.8rem] z-[999] w-[min(20rem,calc(100vw-2rem))] -translate-x-1/2 rounded-[5px] border border-slate-100 bg-white p-4 shadow-2xl sm:left-0 sm:w-80 sm:translate-x-0">
                       {[
                         {
                           key: "adults",
@@ -644,7 +644,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
                             <button
                               type="button"
                               onClick={() => updatePassenger(item.key, "minus")}
-                              className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-700 transition hover:bg-slate-200"
+                              className="flex h-9 w-9 items-center justify-center rounded-[5px] bg-slate-100 text-xs text-slate-700 transition hover:bg-slate-200"
                             >
                               <FaMinus />
                             </button>
@@ -656,7 +656,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
                             <button
                               type="button"
                               onClick={() => updatePassenger(item.key, "plus")}
-                              className="flex h-9 w-9 items-center justify-center rounded-full bg-[#00AEEF] text-xs text-white transition hover:bg-[#FF6B00]"
+                              className="flex h-9 w-9 items-center justify-center rounded-[5px] bg-[#00AEEF] text-xs text-white transition hover:bg-[#FF6B00]"
                             >
                               <FaPlus />
                             </button>
@@ -667,7 +667,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
                       <button
                         type="button"
                         onClick={() => setActiveDropdown(null)}
-                        className="mt-4 w-full rounded-full bg-[#FF6B00] py-3 text-sm font-medium text-white transition hover:bg-[#00AEEF]"
+                        className="mt-4 w-full rounded-[5px] bg-[#FF6B00] py-3 text-sm font-medium text-white transition hover:bg-[#00AEEF]"
                       >
                         Done
                       </button>
@@ -676,7 +676,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
                 </>
               )}
 
-              <label className="search-label pointer-events-none absolute left-12 top-2 text-slate-400 transition-all duration-300 peer-focus:text-[#00AEEF]">
+              <label className="search-label pointer-events-none absolute left-12 top-1.5 text-slate-400 transition-all duration-300 peer-focus:text-[#00AEEF]">
                 {field.label}
               </label>
             </div>
@@ -685,10 +685,10 @@ const ServiceSearchBar = ({ defaultService = "Umrah", glass = true }) => {
       </div>
 
       {/* Search Button */}
-      <div className="mt-4 flex justify-end">
+      <div className="mt-2 flex justify-end">
         <Link
           to={getSearchPath()}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#FF6B00] px-7 py-3.5 text-sm font-semibold uppercase text-white shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] sm:w-auto"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-7 py-2 text-sm font-semibold uppercase text-white shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] sm:w-auto"
         >
           <FaSearch />
           Search

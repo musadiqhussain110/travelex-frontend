@@ -206,7 +206,7 @@ const VisaPage = () => {
 
           <div className="mt-3 flex flex-col justify-between gap-5 md:flex-row md:items-end">
             <div>
-              <h1 className="text-3xl font-black text-slate-950 sm:text-4xl">
+              <h1 className="text-3xl font-medium text-slate-950 sm:text-4xl">
                 {selectedVisa.title}
               </h1>
 
@@ -311,7 +311,7 @@ const VisaPage = () => {
           </div>
 
           <div>
-            <h3 className="text-lg font-black text-slate-950">
+            <h3 className="text-lg font-medium text-slate-950">
               Requirements
             </h3>
 
@@ -334,7 +334,7 @@ const VisaPage = () => {
           </div>
 
           <div className="mt-8 border-t border-slate-200 pt-6">
-            <h3 className="text-2xl font-black text-slate-950">
+            <h3 className="text-2xl font-medium text-slate-950">
               How to Apply
             </h3>
 
@@ -365,7 +365,7 @@ const VisaPage = () => {
                 href="https://wa.me/923111444192"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-7 py-3 text-sm font-black text-slate-900 transition hover:border-[#25D366] hover:text-[#25D366]"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-6 py-2.5 text-sm font-black text-slate-900 transition hover:border-[#25D366] hover:text-[#25D366]"
               >
                 <FaWhatsapp />
                 Ask on WhatsApp

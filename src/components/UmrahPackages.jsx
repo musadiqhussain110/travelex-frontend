@@ -117,15 +117,15 @@ const UmrahPackages = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mb-8 flex flex-col justify-between gap-5 sm:mb-12 md:flex-row md:items-end">
           <div>
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:text-[13px]">
+            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#00AEEF] sm:text-[13px]">
               Umrah Packages
             </p>
 
-            <h2 className="max-w-3xl font-serif text-[34px] font-bold leading-[1.08] tracking-[-0.035em] text-slate-950 sm:text-5xl lg:text-[58px]">
+            <h2 className="max-w-3xl text-[34px] font-medium leading-[1.08] tracking-[-0.025em] text-slate-950 sm:text-5xl lg:text-[58px]">
               Choose your perfect Umrah plan
             </h2>
 
-            <p className="mt-4 max-w-3xl text-sm font-medium leading-7 text-slate-600 sm:text-base">
+            <p className="mt-4 max-w-3xl text-sm font-medium leading-7 !text-slate-600 sm:text-base">
               Select a package that matches your comfort and budget, or ask{" "}
               <BrandName /> to customize a plan according to your travel needs.
             </p>
@@ -133,7 +133,7 @@ const UmrahPackages = () => {
 
           <Link
             to="/umrah"
-            className="hidden rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF] md:inline-flex"
+            className="hidden rounded-[5px] border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF] md:inline-flex"
           >
             View All Packages
           </Link>
@@ -144,7 +144,7 @@ const UmrahPackages = () => {
             <button
               type="button"
               onClick={prevSlide}
-              className="absolute -left-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-left-4 md:-left-5"
+              className="absolute -left-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-left-4 md:-left-5"
               aria-label="Previous package"
             >
               ‹
@@ -155,7 +155,7 @@ const UmrahPackages = () => {
             <button
               type="button"
               onClick={nextSlide}
-              className="absolute -right-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-right-4 md:-right-5"
+              className="absolute -right-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-right-4 md:-right-5"
               aria-label="Next package"
             >
               ›
@@ -174,7 +174,7 @@ const UmrahPackages = () => {
                   key={pkg.id}
                   className="min-w-full px-1 md:min-w-[50%] md:px-3 lg:min-w-[25%]"
                 >
-                  <article className="group overflow-hidden rounded-[1.5rem] bg-white shadow-md shadow-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
+                  <article className="group overflow-hidden rounded-[5px] bg-white shadow-md shadow-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
                     <div className="relative h-48 overflow-hidden">
                       <img
                         src={pkg.image}
@@ -184,21 +184,21 @@ const UmrahPackages = () => {
 
                       <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
 
-                      <div className="absolute left-4 top-4 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#00AEEF] shadow-md">
+                      <div className="absolute left-4 top-4 rounded-[5px] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#00AEEF] shadow-md">
                         {pkg.type}
                       </div>
                     </div>
 
                     <div className="p-4">
-                      <h3 className="text-[17px] font-bold leading-snug text-slate-950">
+                      <h3 className="text-[17px] font-semibold leading-snug text-slate-950">
                         {pkg.title}
                       </h3>
 
-                      <p className="mt-1 text-xs font-medium text-slate-500">
+                      <p className="mt-1 text-xs font-medium !text-slate-500">
                         {pkg.from}
                       </p>
 
-                      <p className="mt-3 text-base font-semibold text-[#FF6B00]">
+                      <p className="mt-3 text-base font-semibold !text-[#FF6B00]">
                         {pkg.price}
                       </p>
 
@@ -206,7 +206,7 @@ const UmrahPackages = () => {
                         {pkg.highlights.map((item) => (
                           <p
                             key={item}
-                            className="rounded-xl bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600"
+                            className="rounded-[5px] bg-slate-50 px-3 py-2 text-xs font-medium !text-slate-600"
                           >
                             ✓ {item}
                           </p>
@@ -216,7 +216,7 @@ const UmrahPackages = () => {
                       <div className="mt-4 grid grid-cols-2 gap-2">
                         <Link
                           to={`/package/${pkg.id}`}
-                          className="rounded-full border border-slate-200 px-3 py-2.5 text-center text-xs font-medium text-slate-800 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
+                          className="rounded-[5px] border border-slate-200 px-3 py-2.5 text-center text-xs font-medium text-slate-800 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
                         >
                           View Details
                         </Link>
@@ -225,7 +225,7 @@ const UmrahPackages = () => {
                           href="https://wa.me/923111444192"
                           target="_blank"
                           rel="noreferrer"
-                          className="rounded-full bg-[#FF6B00] px-3 py-2.5 text-center text-xs font-medium text-white transition-colors duration-300 hover:bg-[#00AEEF]"
+                          className="rounded-[5px] bg-[#FF6B00] px-3 py-2.5 text-center text-xs font-medium text-white transition-colors duration-300 hover:bg-[#00AEEF]"
                         >
                           WhatsApp Us
                         </a>
@@ -245,7 +245,7 @@ const UmrahPackages = () => {
                 type="button"
                 key={dotIndex}
                 onClick={() => setIndex(dotIndex)}
-                className={`h-2 rounded-full transition-all ${
+                className={`h-2 rounded-[5px] transition-all ${
                   index === dotIndex ? "w-8 bg-[#00AEEF]" : "w-2 bg-slate-300"
                 }`}
                 aria-label={`Go to package slide ${dotIndex + 1}`}
@@ -257,7 +257,7 @@ const UmrahPackages = () => {
         <div className="mt-6 text-center md:hidden">
           <Link
             to="/umrah"
-            className="inline-flex rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
+            className="inline-flex rounded-[5px] border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
           >
             View All Packages
           </Link>

@@ -172,27 +172,27 @@ const CarRentalPage = () => {
   return (
     <main className="bg-[#F8FAFC]">
       <PageHero
-  eyebrow="Car Rental"
-  title="Rent a car for airport pickup, tours, and city travel"
-  mobileTitle="Rent a car for your trip"
-  description="Choose comfortable rental options for family trips, airport pickup, city travel, and customized tours with TravelEx support."
-  images={carHeroImages}
-  variant="car-mobile-tight"
->
-  <ServiceSearchBar defaultService="Car Rental" glass={false} />
-</PageHero>
+        eyebrow="Car Rental"
+        title="RENT A CAR FOR AIRPORT PICKUP, TOURS, AND CITY TRAVEL"
+        mobileTitle="Rent a car for your trip"
+        description="Choose comfortable rental options for family trips, airport pickup, city travel, and customized tours with TravelEx support."
+        images={carHeroImages}
+        variant="car-mobile-tight"
+      >
+        <ServiceSearchBar defaultService="Car Rental" glass={false} />
+      </PageHero>
 
-<section className="pt-36 pb-12 sm:pt-32 sm:pb-20">
+      <section className="pt-36 pb-12 sm:pt-32 sm:pb-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
             <div className="lg:hidden">
               <button
                 type="button"
                 onClick={() => setFilterOpen(!filterOpen)}
-                className="mb-4 flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-950 shadow-md shadow-slate-200/70"
+                className="mb-4 flex w-full items-center justify-between rounded-[5px] border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-950 shadow-md shadow-slate-200/70"
               >
                 <span className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#00AEEF] text-white">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-[5px] bg-[#00AEEF] text-white">
                     <FaCar className="text-sm" />
                   </span>
 
@@ -201,7 +201,7 @@ const CarRentalPage = () => {
                     {(selectedTypes.length > 0 ||
                       selectedFeatures.length > 0 ||
                       Number(maxPrice) < 12000) && (
-                      <span className="ml-2 rounded-full bg-[#FF6B00] px-2 py-0.5 text-[10px] font-semibold text-white">
+                      <span className="ml-2 rounded-[5px] bg-[#FF6B00] px-2 py-0.5 text-[10px] font-semibold text-white">
                         Active
                       </span>
                     )}
@@ -220,7 +220,7 @@ const CarRentalPage = () => {
             </div>
 
             <aside
-              className={`h-fit overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-md shadow-slate-200/70 ${
+              className={`h-fit overflow-hidden rounded-[5px] border border-slate-200 bg-white shadow-md shadow-slate-200/70 ${
                 filterOpen ? "block" : "hidden"
               } lg:block`}
             >
@@ -241,11 +241,11 @@ const CarRentalPage = () => {
 
                 <div className="relative pt-5">
                   <div className="mb-2 flex justify-between">
-                    <span className="rounded bg-blue-500 px-2 py-1 text-xs font-semibold text-white">
+                    <span className="rounded-[5px] bg-blue-500 px-2 py-1 text-xs font-semibold text-white">
                       Rs4 200
                     </span>
 
-                    <span className="rounded bg-blue-500 px-2 py-1 text-xs font-semibold text-white">
+                    <span className="rounded-[5px] bg-blue-500 px-2 py-1 text-xs font-semibold text-white">
                       Rs{Number(maxPrice).toLocaleString()}
                     </span>
                   </div>
@@ -295,7 +295,7 @@ const CarRentalPage = () => {
                         type="checkbox"
                         checked={selectedTypes.includes(type)}
                         onChange={() => toggleType(type)}
-                        className="h-5 w-5 rounded border-slate-300 accent-[#00AEEF]"
+                        className="h-5 w-5 rounded-[5px] border-slate-300 accent-[#00AEEF]"
                       />
                       {type}
                     </label>
@@ -322,7 +322,7 @@ const CarRentalPage = () => {
                         type="checkbox"
                         checked={selectedFeatures.includes(feature)}
                         onChange={() => toggleFeature(feature)}
-                        className="h-5 w-5 rounded border-slate-300 accent-[#00AEEF]"
+                        className="h-5 w-5 rounded-[5px] border-slate-300 accent-[#00AEEF]"
                       />
                       {feature}
                     </label>
@@ -332,7 +332,7 @@ const CarRentalPage = () => {
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="mt-6 w-full rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-[#00AEEF] hover:text-[#00AEEF]"
+                  className="mt-6 w-full rounded-[5px] border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-[#00AEEF] hover:text-[#00AEEF]"
                 >
                   Reset Filters
                 </button>
@@ -350,14 +350,14 @@ const CarRentalPage = () => {
                   <button
                     type="button"
                     onClick={() => setSortOpen(!sortOpen)}
-                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-900 shadow-sm sm:min-w-52 sm:text-sm"
+                    className="flex w-full items-center justify-between gap-3 rounded-[5px] border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-900 shadow-sm sm:min-w-52 sm:text-sm"
                   >
                     Sort by: {sortBy}
                     <FaChevronDown className="text-xs" />
                   </button>
 
                   {sortOpen && (
-                    <div className="absolute right-0 top-12 z-30 w-56 overflow-hidden rounded-xl border border-slate-100 bg-white shadow-2xl">
+                    <div className="absolute right-0 top-12 z-30 w-56 overflow-hidden rounded-[5px] border border-slate-100 bg-white shadow-2xl">
                       {[
                         "Recommended",
                         "Price (Low to high)",
@@ -381,10 +381,10 @@ const CarRentalPage = () => {
               </div>
 
               {filteredCars.length === 0 ? (
-                <div className="rounded-[1.5rem] bg-white p-8 text-center shadow-md shadow-slate-200/70">
+                <div className="rounded-[5px] bg-white p-8 text-center shadow-md shadow-slate-200/70">
                   <h3 className="text-slate-950">No cars found</h3>
 
-                  <p className="mt-3 text-slate-600">
+                  <p className="mt-3 !text-slate-600">
                     Try changing your filters or contact TravelEx for a custom
                     rental inquiry.
                   </p>
@@ -392,7 +392,7 @@ const CarRentalPage = () => {
                   <button
                     type="button"
                     onClick={resetFilters}
-                    className="mt-5 rounded-full bg-[#FF6B00] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
+                    className="mt-5 rounded-[5px] bg-[#FF6B00] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
                   >
                     Reset Filters
                   </button>
@@ -403,7 +403,7 @@ const CarRentalPage = () => {
                     <button
                       type="button"
                       onClick={prevSlide}
-                      className="absolute -left-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-left-4 md:-left-5"
+                      className="absolute -left-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-left-4 md:-left-5"
                       aria-label="Previous car"
                     >
                       ‹
@@ -414,7 +414,7 @@ const CarRentalPage = () => {
                     <button
                       type="button"
                       onClick={nextSlide}
-                      className="absolute -right-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-right-4 md:-right-5"
+                      className="absolute -right-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-right-4 md:-right-5"
                       aria-label="Next car"
                     >
                       ›
@@ -435,7 +435,7 @@ const CarRentalPage = () => {
                           key={car.id}
                           className="min-w-full px-1 md:min-w-[50%] md:px-3 xl:min-w-[33.333333%]"
                         >
-                          <article className="h-full overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white shadow-md shadow-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
+                          <article className="h-full overflow-hidden rounded-[5px] border border-slate-200 bg-white shadow-md shadow-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
                             <div className="relative h-52 overflow-hidden">
                               <img
                                 src={car.image}
@@ -443,7 +443,7 @@ const CarRentalPage = () => {
                                 className="h-full w-full object-cover"
                               />
 
-                              <div className="badge-label absolute left-4 top-4 rounded-full bg-white px-3 py-1.5 text-[#00AEEF] shadow-md">
+                              <div className="badge-label absolute left-4 top-4 rounded-[5px] bg-white px-3 py-1.5 text-[#00AEEF] shadow-md">
                                 {car.type}
                               </div>
                             </div>
@@ -451,34 +451,34 @@ const CarRentalPage = () => {
                             <div className="p-5">
                               <h3 className="text-slate-950">{car.name}</h3>
 
-                              <p className="mt-1 text-sm font-medium text-slate-500">
+                              <p className="mt-1 text-sm font-medium !text-slate-500">
                                 {car.location}
                               </p>
 
                               <div className="mt-4 grid grid-cols-3 gap-2">
-                                <div className="rounded-xl bg-slate-50 p-3 text-center">
+                                <div className="rounded-[5px] bg-slate-50 p-3 text-center">
                                   <FaUsers className="mx-auto text-[#00AEEF]" />
-                                  <p className="mt-1 text-xs font-medium text-slate-600">
+                                  <p className="mt-1 text-xs font-medium !text-slate-600">
                                     {car.seats} seats
                                   </p>
                                 </div>
 
-                                <div className="rounded-xl bg-slate-50 p-3 text-center">
+                                <div className="rounded-[5px] bg-slate-50 p-3 text-center">
                                   <FaSuitcaseRolling className="mx-auto text-[#00AEEF]" />
-                                  <p className="mt-1 text-xs font-medium text-slate-600">
+                                  <p className="mt-1 text-xs font-medium !text-slate-600">
                                     {car.bags} bags
                                   </p>
                                 </div>
 
-                                <div className="rounded-xl bg-slate-50 p-3 text-center">
+                                <div className="rounded-[5px] bg-slate-50 p-3 text-center">
                                   <FaGasPump className="mx-auto text-[#00AEEF]" />
-                                  <p className="mt-1 text-xs font-medium text-slate-600">
+                                  <p className="mt-1 text-xs font-medium !text-slate-600">
                                     {car.fuel}
                                   </p>
                                 </div>
                               </div>
 
-                              <p className="mt-4 text-lg font-semibold text-[#FF6B00]">
+                              <p className="mt-4 text-lg font-semibold !text-[#FF6B00]">
                                 Rs {car.price.toLocaleString()}{" "}
                                 <span className="text-xs font-medium text-slate-500">
                                   / day
@@ -488,7 +488,7 @@ const CarRentalPage = () => {
                               <button
                                 type="button"
                                 onClick={() => setSelectedCar(car)}
-                                className="mt-5 w-full rounded-xl bg-[#FF6B00] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
+                                className="mt-5 w-full rounded-[5px] bg-[#FF6B00] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
                               >
                                 Choose
                               </button>
@@ -507,7 +507,7 @@ const CarRentalPage = () => {
                             type="button"
                             key={dotIndex}
                             onClick={() => setIndex(dotIndex)}
-                            className={`h-2 rounded-full transition-all ${
+                            className={`h-2 rounded-[5px] transition-all ${
                               index === dotIndex
                                 ? "w-8 bg-[#00AEEF]"
                                 : "w-2 bg-slate-300"
@@ -521,7 +521,7 @@ const CarRentalPage = () => {
                 </div>
               )}
 
-              <p className="mt-10 text-center text-sm font-medium text-slate-400">
+              <p className="mt-10 text-center text-sm font-medium !text-slate-400">
                 Showing {filteredCars.length} - {filteredCars.length} of{" "}
                 {filteredCars.length} Cars
               </p>
@@ -532,11 +532,11 @@ const CarRentalPage = () => {
 
       {selectedCar && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 px-4 py-6">
-          <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[1.5rem] bg-white shadow-2xl">
+          <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[5px] bg-white shadow-2xl">
             <button
               type="button"
               onClick={() => setSelectedCar(null)}
-              className="absolute right-4 top-4 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-white transition hover:bg-[#FF6B00]"
+              className="absolute right-4 top-4 z-20 flex h-12 w-12 items-center justify-center rounded-[5px] bg-slate-900 text-white transition hover:bg-[#FF6B00]"
               aria-label="Close modal"
             >
               <FaTimes />
@@ -546,7 +546,7 @@ const CarRentalPage = () => {
               <img
                 src={selectedCar.image}
                 alt={selectedCar.name}
-                className="h-72 w-full rounded-[1.5rem] object-cover"
+                className="h-72 w-full rounded-[5px] object-cover"
               />
 
               <div>
@@ -556,11 +556,11 @@ const CarRentalPage = () => {
 
                 <h2 className="text-slate-950">{selectedCar.name}</h2>
 
-                <p className="mt-2 text-sm font-medium text-slate-500">
+                <p className="mt-2 text-sm font-medium !text-slate-500">
                   {selectedCar.location}
                 </p>
 
-                <p className="mt-5 text-2xl font-semibold text-[#FF6B00]">
+                <p className="mt-5 text-2xl font-semibold !text-[#FF6B00]">
                   Rs {selectedCar.price.toLocaleString()}{" "}
                   <span className="text-sm font-medium text-slate-500">
                     / day
@@ -571,7 +571,7 @@ const CarRentalPage = () => {
                   {selectedCar.features.map((feature) => (
                     <p
                       key={feature}
-                      className="rounded-xl bg-slate-50 px-4 py-3 text-sm font-medium text-slate-600"
+                      className="rounded-[5px] bg-slate-50 px-4 py-3 text-sm font-medium !text-slate-600"
                     >
                       ✓ {feature}
                     </p>
@@ -581,7 +581,7 @@ const CarRentalPage = () => {
                 <button
                   type="button"
                   onClick={handleBookNow}
-                  className="mt-6 w-full rounded-xl bg-[#FF6B00] px-7 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
+                  className="mt-6 w-full rounded-[5px] bg-[#FF6B00] px-7 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
                 >
                   Book Now
                 </button>
