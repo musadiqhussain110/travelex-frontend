@@ -127,3 +127,24 @@ section {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #ffffff;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    #00aeef,
+    #ff6b00
+  );
+  border-radius: 999px;
+  border: 2px solid #ffffff;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  opacity: 0.9;
+}

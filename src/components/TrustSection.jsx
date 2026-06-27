@@ -1,207 +1,109 @@
-import { useEffect, useState } from "react"
-import {
-  FaHeadset,
-  FaHotel,
-  FaPassport,
-  FaPhoneAlt,
-  FaRegCheckCircle,
-  FaUsers,
-  FaWhatsapp,
-} from "react-icons/fa"
+import sarhadChamber from "../assets/authorities/sarhad-chamber.jpeg"
+import fbr from "../assets/authorities/fbr.svg"
+import iata from "../assets/authorities/iata.svg"
+import kpkTourism from "../assets/authorities/kpk-tourism.png"
+import Reveal from "./Reveal"
 
-const trustCards = [
-  {
-    icon: <FaUsers />,
-    title: "17+ Years Serving Travelers",
-    text: "TravelEx has been helping travelers with Umrah, tours, visas, hotels, and travel package support for years.",
-  },
-  {
-    icon: <FaHeadset />,
-    title: "24/7 Customer Support",
-    text: "Get quick support for package details, travel guidance, booking questions, and customer assistance.",
-  },
-  {
-    icon: <FaRegCheckCircle />,
-    title: "Transparent Package Guidance",
-    text: "Hotel options, package details, room sharing choices, and travel plans are explained clearly before inquiry.",
-  },
-  {
-    icon: <FaHotel />,
-    title: "Hotels, Tickets & Packages",
-    text: "Explore hotel options, ticketing support, Umrah packages, local tours, and customized travel plans.",
-  },
-  {
-    icon: <FaPassport />,
-    title: "Reliable Visa & Travel Assistance",
-    text: "Get guidance for visa process, documents, travel requirements, and consultant support before your journey.",
-  },
+const authorities = [
+  { name: "Sarhad Chamber", logo: sarhadChamber },
+  { name: "FBR Pakistan", logo: fbr },
+  { name: "IATA", logo: iata },
+  { name: "KPK Tourism Department", logo: kpkTourism },
+]
+
+const baseLoop = [...authorities, ...authorities]
+const loopItems = [...baseLoop, ...baseLoop]
+
+const trustPoints = [
+  "Licensed Travel Support",
+  "Recognized Documentation Guidance",
+  "Trusted Umrah & Tour Planning",
 ]
 
 const TrustSection = () => {
-  const [index, setIndex] = useState(0)
-  const [visibleCards, setVisibleCards] = useState(1)
-
-  useEffect(() => {
-    const updateVisibleCards = () => {
-      if (window.innerWidth >= 1024) {
-        setVisibleCards(5)
-      } else if (window.innerWidth >= 768) {
-        setVisibleCards(2)
-      } else {
-        setVisibleCards(1)
-      }
-    }
-
-    updateVisibleCards()
-    window.addEventListener("resize", updateVisibleCards)
-
-    return () => window.removeEventListener("resize", updateVisibleCards)
-  }, [])
-
-  const maxIndex = Math.max(trustCards.length - visibleCards, 0)
-
-  useEffect(() => {
-    if (index > maxIndex) {
-      setIndex(maxIndex)
-    }
-  }, [index, maxIndex])
-
-  const canGoLeft = index > 0
-  const canGoRight = index < maxIndex
-
-  const nextSlide = () => {
-    if (canGoRight) {
-      setIndex((prev) => prev + 1)
-    }
-  }
-
-  const prevSlide = () => {
-    if (canGoLeft) {
-      setIndex((prev) => prev - 1)
-    }
-  }
-
   return (
-    <section id="trust" className="bg-[#F8FAFC] py-12 sm:py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mb-8 text-center sm:mb-12">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-[#00AEEF] sm:text-sm">
-            Why Choose TravelEx
-          </p>
+    <section
+      id="trust"
+      className="overflow-hidden bg-white pt-5 pb-9 sm:pt-8 sm:pb-14"
+    >
+      <style>{`
+        @keyframes authorityLoop {
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(-50%);
+          }
+        }
 
-          <h2 className="text-3xl font-medium leading-tight text-slate-950 sm:text-4xl md:text-5xl">
-            Trusted support for every journey
-          </h2>
+        .authority-track {
+          display: flex;
+          width: max-content;
+          animation: authorityLoop 20s linear infinite;
+          will-change: transform;
+        }
 
-          <p className="mx-auto mt-4 max-w-3xl text-sm leading-7 !text-slate-600 md:text-base">
-            From Umrah packages to customized tours, TravelEx makes travel
-            planning easier with clear guidance, direct support, and quick
-            WhatsApp communication.
-          </p>
-        </div>
+        .authority-wrapper:hover .authority-track {
+          animation-play-state: paused;
+        }
 
-        {/* Trust Cards Carousel */}
-        <div className="relative px-7 md:px-0">
-          {maxIndex > 0 && canGoLeft && (
-            <button
-              onClick={prevSlide}
-              className="absolute left-0 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-semibold text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white md:-left-5 md:h-10 md:w-10 md:text-2xl"
-              aria-label="Previous trust card"
-            >
-              ‹
-            </button>
-          )}
+        @media (prefers-reduced-motion: reduce) {
+          .authority-track {
+            animation: none !important;
+          }
+        }
+      `}</style>
 
-          {maxIndex > 0 && canGoRight && (
-            <button
-              onClick={nextSlide}
-              className="absolute right-0 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-semibold text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white md:-right-5 md:h-10 md:w-10 md:text-2xl"
-              aria-label="Next trust card"
-            >
-              ›
-            </button>
-          )}
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+        <Reveal>
+          <div className="mb-4 text-center sm:mb-5">
+            <p className="mb-2 font-poppins text-[11px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:text-[12px] sm:tracking-[0.18em]">
+              Certified & Recognized
+            </p>
 
-          <div className="overflow-hidden">
-            <div
-              className="flex transition-transform duration-500 ease-out"
-              style={{
-                transform: `translateX(-${index * (100 / visibleCards)}%)`,
-              }}
-            >
-              {trustCards.map((item) => (
-                <div
-                  key={item.title}
-                  className="min-w-full px-1 md:min-w-[50%] md:px-3 lg:min-w-[20%]"
-                >
-                  <article className="group h-full rounded-[5px] bg-white p-5 text-center shadow-md shadow-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
-                    <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-[5px] bg-sky-50 text-xl text-[#00AEEF] transition-colors duration-300 group-hover:bg-[#00AEEF] group-hover:text-white">
-                      {item.icon}
-                    </div>
+            <h2 className="font-fredoka text-[24px] font-semibold leading-[1.08] text-slate-950 sm:text-[42px]">
+              Trusted by Authorities
+            </h2>
 
-                    <h3 className="text-base font-medium leading-snug text-slate-950">
-                      {item.title}
-                    </h3>
+            <p className="mx-auto mt-2 max-w-2xl font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:text-base sm:leading-7">
+              TravelEx works with recognized travel, tax, tourism and commerce
+              authorities to provide reliable travel services with confidence.
+            </p>
+          </div>
+        </Reveal>
 
-                    <p className="mt-3 text-sm leading-6 !text-slate-600">
-                      {item.text}
-                    </p>
-                  </article>
-                </div>
-              ))}
+        <Reveal delay={0.12}>
+          <div className="authority-wrapper relative">
+            <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-12 bg-gradient-to-r from-white to-transparent sm:w-20" />
+            <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 bg-gradient-to-l from-white to-transparent sm:w-20" />
+
+            <div className="overflow-hidden rounded-[5px] border border-slate-100 bg-[#F8FAFC] px-3 py-4 shadow-[0_10px_28px_rgba(15,23,42,0.05)] sm:px-5 sm:py-5">
+              <div className="authority-track items-center gap-3 sm:gap-5">
+                {loopItems.map((item, index) => (
+                  <div
+                    key={`${item.name}-${index}`}
+                    className="flex h-[74px] min-w-[165px] items-center justify-center rounded-[5px] border border-slate-100 bg-white px-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#00AEEF]/30 hover:shadow-md sm:h-[92px] sm:min-w-[240px] sm:px-6"
+                  >
+                    <img
+                      src={item.logo}
+                      alt={item.name}
+                      className="max-h-[48px] max-w-[125px] object-contain opacity-100 transition-all duration-300 sm:max-h-[62px] sm:max-w-[170px]"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        </Reveal>
 
-        {maxIndex > 0 && (
-          <div className="mt-5 flex justify-center gap-2">
-            {Array.from({ length: maxIndex + 1 }).map((_, dotIndex) => (
-              <button
-                key={dotIndex}
-                onClick={() => setIndex(dotIndex)}
-                className={`h-2 rounded-[5px] transition-all ${
-                  index === dotIndex ? "w-8 bg-[#00AEEF]" : "w-2 bg-slate-300"
-                }`}
-                aria-label={`Go to trust slide ${dotIndex + 1}`}
-              />
-            ))}
-          </div>
-        )}
-
-        <div className="mt-8 rounded-[5px] bg-white p-5 shadow-md shadow-slate-200/70 sm:p-6">
-          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-            <div>
-              <h3 className="text-xl font-medium text-slate-950">
-                Need help choosing the right package?
-              </h3>
-
-              <p className="mt-2 max-w-2xl text-sm leading-7 !text-slate-600">
-                Call TravelEx at{" "}
-                <span className="font-semibold text-slate-950">
-                  03 111 444 192
-                </span>{" "}
-                or continue your inquiry on WhatsApp.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <a
-                href="tel:03111444192"
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-900 transition-colors duration-300 hover:bg-slate-950 hover:text-white"
-              >
-                <FaPhoneAlt />
-                Call Now
-              </a>
-
-              <a
-                href="#contact"
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#00AEEF]"
-              >
-                <FaWhatsapp />
-                WhatsApp Inquiry
-              </a>
-            </div>
-          </div>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-center sm:mt-6 sm:gap-3">
+          {trustPoints.map((item, index) => (
+            <Reveal key={item} delay={index * 0.12}>
+              <span className="inline-flex rounded-full bg-[#00AEEF]/5 px-3 py-1.5 font-poppins text-[10.5px] font-semibold text-slate-600 sm:px-4 sm:py-2 sm:text-xs">
+                {item}
+              </span>
+            </Reveal>
+          ))}
         </div>
       </div>
     </section>

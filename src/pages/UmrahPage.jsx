@@ -1,19 +1,22 @@
 import { Link } from "react-router-dom"
-import { FaWhatsapp, FaCheckCircle } from "react-icons/fa"
-import { packages } from "../data/packages"
-import PageHero from "../components/PageHero"
-import ServiceSearchBar from "../components/ServiceSearchBar"
+import {
+  FaWhatsapp,
+  FaArrowRight,
+  FaMapMarkerAlt,
+  FaStar,
+  FaTag,
+  FaCheckCircle,
+} from "react-icons/fa"
 
-import Umrah2 from "../assets/Umrah/Umrah11.webp"
-import Umrah3 from "../assets/Umrah/Umrah12.jpg"
-import Umrah4 from "../assets/Umrah/Umrah4.jpg"
-import Umrah5 from "../assets/Umrah/Umrah5.webp"
-import Umrah6 from "../assets/Umrah/Umrah6.webp"
-import Umrah7 from "../assets/Umrah/Umrah7.webp"
+import Footer from "../components/Footer"
+import heroImage from "../assets/Umrah/Umrah11.webp"
+import { umrahPackages } from "../data/umrahPackagesData"
 
-const umrahHeroImages = [Umrah2, Umrah3]
+const whatsappLink =
+  "https://wa.me/923111444192?text=Assalamualaikum%20TravelEx%2C%20I%20need%20guidance%20about%20Umrah%20packages."
 
-const packageImages = [Umrah4, Umrah5, Umrah6, Umrah7]
+const cardRowClass =
+  "-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 xl:grid-cols-4"
 
 const BrandName = () => (
   <span className="font-semibold">
@@ -25,124 +28,185 @@ const BrandName = () => (
 const UmrahPage = () => {
   return (
     <main className="bg-[#F8FAFC]">
-      <PageHero
-        eyebrow="Umrah Packages"
-        title="CHOOSE AN UMRAH PLAN ACCORDING TO YOUR COMFORT AND BUDGET"
-        mobileTitle="Choose your Umrah"
-        description="Explore TravelEx Umrah packages with hotel guidance, visa support, travel planning, and WhatsApp consultation for families, groups, and individual travelers."
-        images={umrahHeroImages}
-        variant="umrah-mobile-tight"
-      >
-        <ServiceSearchBar defaultService="Umrah" glass={false} />
-      </PageHero>
+      {/* Simple Hero */}
+      <section className="relative overflow-hidden bg-slate-950">
+        <img
+          src={heroImage}
+          alt="Umrah packages by TravelEx"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
 
-      {/* Packages */}
-      <section className="relative pt-56 pb-12 sm:pt-32 sm:pb-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="mb-8 sm:mb-12">
-            <p className="eyebrow mb-3 text-[#00AEEF]">Available Plans</p>
-
-            <h2 className="text-slate-950">
-              Umrah packages by <BrandName />
-            </h2>
-
-            <p className="mt-4 max-w-3xl !text-slate-600">
-              Select a ready package or request a customized Umrah plan based on
-              travel dates, hotel preference, number of passengers, and budget.
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/65 via-slate-950/45 to-slate-950/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
+<div className="relative z-10 mx-auto max-w-[1340px] px-4 py-7 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
+          <div className="max-w-4xl">
+            <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.22em] text-[#00AEEF] sm:text-[12px]">
+              Umrah Packages
             </p>
-          </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {packages.map((pkg, index) => (
-              <article
-                key={pkg.id}
-                className="group overflow-hidden rounded-[5px] bg-white shadow-md shadow-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
-              >
-                <div className="relative h-48 overflow-hidden">
-                  <img
-                    src={packageImages[index % packageImages.length]}
-                    alt={pkg.title}
-                    className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-                  />
+            <h1 className="mt-1 font-fredoka text-[17px] font-semibold leading-[1.08] text-white sm:mt-2 sm:text-[46px] sm:uppercase sm:leading-[1.1] lg:text-[54px]">
+              <span className="sm:hidden">Perfect Umrah Plans</span>
+              <span className="hidden sm:inline">
+                Find Your Perfect Umrah Package
+              </span>
+            </h1>
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+            <p className="mt-1 max-w-3xl font-poppins text-[9px] font-medium leading-4 text-white/85 sm:mt-3 sm:text-base sm:leading-7">
+              <span className="sm:hidden">
+                Visa, hotel and travel support.
+              </span>
 
-                  <div className="badge-label absolute left-4 top-4 rounded-[5px] bg-white px-3 py-1.5 text-[#00AEEF] shadow-md">
-                    {pkg.type}
-                  </div>
-                </div>
-
-                <div className="p-4">
-                  <h3 className="text-slate-950">{pkg.title}</h3>
-
-                  <p className="mt-1 text-xs font-medium !text-slate-500">
-                    {pkg.from}
-                  </p>
-
-                  <p className="mt-3 text-base font-semibold !text-[#FF6B00]">
-                    {pkg.price}
-                  </p>
-
-                  <div className="mt-4 grid gap-2">
-                    {pkg.highlights.map((item) => (
-                      <p
-                        key={item}
-                        className="rounded-[5px] bg-slate-50 px-3 py-2 text-xs font-medium !text-slate-600"
-                      >
-                        ✓ {item}
-                      </p>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-2 gap-2">
-                    <Link
-                      to={`/package/${pkg.id}`}
-                      className="rounded-[5px] border border-slate-200 px-3 py-2.5 text-center text-xs font-medium text-slate-800 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
-                    >
-                      View Details
-                    </Link>
-
-                    <a
-                      href="https://wa.me/923111444192"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="rounded-[5px] bg-[#FF6B00] px-3 py-2.5 text-center text-xs font-medium text-white transition-colors duration-300 hover:bg-[#00AEEF]"
-                    >
-                      WhatsApp
-                    </a>
-                  </div>
-                </div>
-              </article>
-            ))}
+              <span className="hidden sm:inline">
+                Explore trusted Umrah plans with hotel, visa, and travel support
+                by <BrandName />
+              </span>
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Trust CTA */}
-      <section className="pb-6 sm:pb-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="rounded-[5px] bg-white p-6 shadow-md shadow-slate-200/70 sm:p-8">
-            <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
+      {/* Umrah Packages */}
+      <section
+        id="packages"
+        className="bg-[#F8FAFC] pb-5 pt-4 sm:pb-16 sm:pt-10"
+      >
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+         <div className="mb-2 flex flex-col gap-2 md:mb-10 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
+                Available Umrah Plans
+              </p>
+
+              <h2 className="max-w-3xl font-fredoka text-[18px] font-semibold leading-[1.08] text-slate-950 sm:text-[44px]">
+                <span className="sm:hidden">Choose Your Umrah Package</span>
+                <span className="hidden sm:inline">
+                  Select your suitable Umrah package
+                </span>
+              </h2>
+
+              <p className="mt-1 max-w-2xl font-poppins text-[10px] font-medium leading-4 text-slate-600 sm:mt-1.5 sm:text-base sm:leading-7">
+                <span className="sm:hidden">
+                  Ready plans with visa and hotel support.
+                </span>
+
+                <span className="hidden sm:inline">
+                  Choose from ready Umrah packages or ask our team for a custom
+                  plan based on your travel dates, hotel preference, passengers
+                  and budget.
+                </span>
+              </p>
+            </div>
+
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden items-center gap-2 rounded-[5px] border border-[#FF6B00]/40 bg-white px-5 py-3 font-poppins text-sm font-semibold text-[#FF6B00] transition hover:border-[#00AEEF] hover:text-[#00AEEF] md:inline-flex"
+            >
+              Ask for Custom Plan
+              <FaWhatsapp className="text-sm" />
+            </a>
+          </div>
+
+          <div className={cardRowClass}>
+            {umrahPackages.map((pkg) => (
+              <Link
+                key={pkg.id}
+                to={`/package/${pkg.id}`}
+                className={`group block min-w-[76%] overflow-hidden rounded-[16px] bg-slate-950 shadow-[0_18px_42px_rgba(15,23,42,0.16)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_28px_70px_rgba(0,174,239,0.18)] sm:min-w-0 sm:rounded-[18px] sm:shadow-[0_22px_55px_rgba(15,23,42,0.18)] ${
+                  pkg.premium ? "ring-1 ring-[#FF6B00]/25" : ""
+                }`}
+                aria-label={`View ${pkg.title}`}
+              >
+                <div className="relative h-[305px] overflow-hidden sm:h-[360px]">
+                  <img
+                    src={pkg.image}
+                    alt={`${pkg.badge} Umrah Package`}
+                    className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                  />
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-slate-950 to-transparent sm:h-32" />
+
+                  <div className="absolute left-4 top-4 inline-flex h-[29px] items-center gap-1.5 rounded-full border border-white/25 bg-slate-950/30 px-3 font-poppins text-[8px] font-bold uppercase tracking-[0.14em] text-white backdrop-blur-md sm:left-5 sm:top-5 sm:h-[36px] sm:gap-2 sm:px-4 sm:text-[10px] sm:tracking-[0.16em]">
+                    <FaTag className="text-[8.5px] text-[#00AEEF] sm:text-[10px]" />
+                    {pkg.badge}
+                  </div>
+
+                  <div className="absolute right-4 top-4 inline-flex h-[29px] items-center gap-1.5 rounded-full border border-white/20 bg-slate-950/25 px-2.5 backdrop-blur-md sm:right-5 sm:top-5 sm:h-[36px] sm:px-3">
+                    <FaStar className="text-[9.5px] text-[#FF6B00] sm:text-[11px]" />
+
+                    <span className="font-poppins text-[10px] font-bold leading-none text-white sm:text-[12px]">
+                      {pkg.rating}
+                    </span>
+                  </div>
+
+                  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
+                    <p className="flex items-center gap-2 font-fredoka text-[17px] font-semibold leading-tight text-white sm:text-[22px]">
+                      <FaMapMarkerAlt className="text-[10.5px] text-[#00AEEF] sm:text-[13px]" />
+                      {pkg.location}
+                    </p>
+
+                    <div className="mt-1 flex items-end justify-between gap-3 sm:gap-4">
+                      <div>
+                        <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.16em] text-white/45 sm:text-[9px]">
+                          {pkg.price === "Custom Quote" ? "Get a" : "From"}
+                        </p>
+
+                        <p className="mt-1 font-poppins text-[17px] font-medium leading-none tracking-[-0.03em] !text-[#FF6B00] sm:text-[20px]">
+                          {pkg.price}
+                        </p>
+                      </div>
+
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#00AEEF]/15 bg-[#00AEEF]/15 text-sm text-white backdrop-blur-md transition-all duration-300 group-hover:border-[#FF6B00]/40 group-hover:bg-[#FF6B00] group-hover:shadow-[0_12px_30px_rgba(255,107,0,0.35)] sm:h-11 sm:w-11 sm:text-base">
+                        <FaArrowRight />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-2 text-center md:hidden">
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-[5px] border border-slate-200 bg-white px-4 py-2.5 font-poppins text-[10.5px] font-semibold text-slate-800 shadow-sm"
+            >
+              Ask for Custom Plan
+              <FaWhatsapp className="text-[12px] text-[#25D366]" />
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Simple Bottom CTA */}
+      <section className="bg-[#F8FAFC] pb-8 pt-2 sm:pb-14">
+        <div className="mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8">
+          <div className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
+            <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
               <div>
-                <h3 className="text-slate-950">
-                  Not sure which Umrah package is right for you?
+                <h3 className="font-fredoka text-[21px] font-semibold leading-tight text-slate-950 sm:text-[32px]">
+                  Need help choosing the right Umrah package?
                 </h3>
 
-                <p className="mt-3 max-w-3xl !text-slate-600">
-                  Share your departure city, travel date, number of adults and
-                  children, and hotel preference. <BrandName /> can guide you
-                  with a suitable package through WhatsApp or phone support.
+                <p className="mt-1.5 max-w-3xl font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:text-sm sm:leading-7">
+                  Share your travel date, number of travelers, hotel preference
+                  and budget. TravelEx will guide you with a suitable Umrah
+                  package.
                 </p>
 
-                <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                <div className="mt-3 grid gap-2 sm:grid-cols-3">
                   {[
-                    "17+ years serving travelers",
-                    "24/7 support",
-                    "Transparent package guidance",
+                    "Package guidance",
+                    "Hotel support",
+                    "WhatsApp consultation",
                   ].map((item) => (
                     <p
                       key={item}
-                      className="flex items-center gap-2 text-sm font-medium !text-slate-700"
+                      className="flex items-center gap-2 font-poppins text-[11.5px] font-semibold text-slate-700 sm:text-sm"
                     >
                       <FaCheckCircle className="shrink-0 text-[#00AEEF]" />
                       {item}
@@ -152,10 +216,10 @@ const UmrahPage = () => {
               </div>
 
               <a
-                href="https://wa.me/923111444192"
+                href={whatsappLink}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-6 py-3 text-sm font-medium text-white transition-colors duration-300 hover:bg-[#00AEEF]"
+                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
               >
                 <FaWhatsapp />
                 Get Guidance
@@ -164,6 +228,8 @@ const UmrahPage = () => {
           </div>
         </div>
       </section>
+
+      <Footer />
     </main>
   )
 }

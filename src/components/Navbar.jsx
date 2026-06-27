@@ -1,201 +1,270 @@
 import { useEffect, useState } from "react"
-import { HiMenu, HiX } from "react-icons/hi"
-import { FaChevronDown } from "react-icons/fa"
-import { Link } from "react-router-dom"
+import { HiX } from "react-icons/hi"
+import {
+  FaChevronDown,
+  FaWhatsapp,
+  FaKaaba,
+  FaPassport,
+  FaGlobeAsia,
+  FaHotel,
+  FaCar,
+  FaArrowRight,
+  FaSearch,
+} from "react-icons/fa"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import logo from "../assets/logo.webp"
+
+const services = [
+  {
+    label: "Umrah Packages",
+    link: "/umrah",
+    icon: <FaKaaba />,
+    desc: "Visa, hotel and travel support",
+  },
+  {
+    label: "International Tours",
+    link: "/tours",
+    icon: <FaGlobeAsia />,
+    desc: "Customized international trips",
+  },
+  {
+    label: "Visa Assistance",
+    link: "/visa",
+    icon: <FaPassport />,
+    desc: "Visa process and documents",
+  },
+  {
+    label: "Hotel Booking",
+    link: "/hotels",
+    icon: <FaHotel />,
+    desc: "Hotel options and stays",
+  },
+  {
+    label: "Transport Services",
+    link: "/car-rental",
+    icon: <FaCar />,
+    desc: "Cars, vans and transfers",
+  },
+]
 
 const navLinks = [
   ["Home", "/"],
   ["Umrah", "/umrah"],
   ["Tours", "/tours"],
+  ["Visa", "/visa"],
+  ["Contact", "/contact"],
+]
+
+const resourceLinks = [
   ["Blogs", "/blogs"],
   ["FAQ", "/faq"],
-  ["Contact Us", "/contact"],
 ]
 
-const mainServiceLinks = [
-  ["Umrah Packages", "/umrah"],
-  ["Hotels", "/hotels"],
-  ["Tours", "/tours"],
-  ["Flights", "/flights"],
-  ["Car Rental", "/car-rental"],
-]
-
-const stickerVisaLinks = [
-  ["Spain", "/visa?country=Spain&type=Sticker%20Visa#visa-details"],
-  ["Egypt", "/visa?country=Egypt&type=Sticker%20Visa#visa-details"],
-  ["Turkey", "/visa?country=Turkey&type=Sticker%20Visa#visa-details"],
-]
-
-const eVisaLinks = [
-  ["UAE / Dubai", "/visa?country=UAE&type=E-Visa#visa-details"],
-  ["Sri Lanka", "/visa?country=Sri%20Lanka&type=E-Visa#visa-details"],
-  ["Malaysia", "/visa?country=Malaysia&type=E-Visa#visa-details"],
-]
+const ProfessionalMenuIcon = () => {
+  return (
+    <span className="flex h-[15px] w-[19px] flex-col items-end justify-between">
+      <span className="block h-[2px] w-[19px] rounded-full bg-slate-800" />
+      <span className="block h-[2px] w-[14px] rounded-full bg-[#FF6B00]" />
+      <span className="block h-[2px] w-[17px] rounded-full bg-slate-800" />
+    </span>
+  )
+}
 
 const Navbar = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
+
   const [menuOpen, setMenuOpen] = useState(false)
-  const [mobileServicesOpen, setMobileServicesOpen] = useState(false)
-  const [mobileVisaOpen, setMobileVisaOpen] = useState(false)
-  const [desktopServicesOpen, setDesktopServicesOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
+  const [servicesOpen, setServicesOpen] = useState(false)
+  const [resourcesOpen, setResourcesOpen] = useState(false)
+  const [activeMobileDropdown, setActiveMobileDropdown] = useState(null)
+  const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
+    if (location.pathname === "/search") {
+      const params = new URLSearchParams(location.search)
+      const queryFromUrl = params.get("q") || ""
+      setSearchQuery(queryFromUrl)
+    }
+  }, [location.pathname, location.search])
+
+  useEffect(() => {
+    setMenuOpen(false)
+    setServicesOpen(false)
+    setResourcesOpen(false)
+    setActiveMobileDropdown(null)
+  }, [location.pathname])
+
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
     }
 
-    handleScroll()
-    window.addEventListener("scroll", handleScroll, { passive: true })
-
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [menuOpen])
 
   const closeMenus = () => {
     setMenuOpen(false)
-    setMobileServicesOpen(false)
-    setMobileVisaOpen(false)
-    setDesktopServicesOpen(false)
+    setServicesOpen(false)
+    setResourcesOpen(false)
+    setActiveMobileDropdown(null)
   }
 
+  const toggleMobileDropdown = (name) => {
+    setActiveMobileDropdown((current) => (current === name ? null : name))
+  }
+
+  const handleMobileSearch = (event) => {
+    event.preventDefault()
+
+    const query = searchQuery.trim()
+    if (!query) return
+
+    navigate(`/search?q=${encodeURIComponent(query)}`)
+    closeMenus()
+  }
+
+  const clearSearch = () => {
+    setSearchQuery("")
+  }
+
+  const navLinkClass =
+    "group relative py-1 transition-colors duration-300 hover:text-[#00AEEF]"
+
+  const underline =
+    "absolute -bottom-1 left-1/2 h-[2px] w-0 -translate-x-1/2 rounded-full bg-[#00AEEF] transition-all duration-300 group-hover:w-full"
+
   return (
-    <header
-      className={`fixed left-0 top-0 z-[1100] h-20 w-full transition-colors duration-300 ${
-        isScrolled
-          ? "bg-white shadow-lg"
-          : "bg-[#07111f]/95 backdrop-blur-xl"
-      }`}
-    >
-      <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6">
-        {/* Logo */}
-        <Link to="/" onClick={closeMenus} className="flex items-center">
+    <header className="fixed left-0 top-0 z-[1100] w-full bg-white/95 shadow-[0_10px_35px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+      <div className="mx-auto flex h-[64px] max-w-[1340px] items-center justify-between px-4 sm:h-[78px] sm:px-6 lg:px-8">
+        <Link
+          to="/"
+          onClick={closeMenus}
+          className="flex h-full shrink-0 items-center justify-center"
+        >
           <img
             src={logo}
             alt="TravelEx"
-            className="h-[72px] w-auto object-contain sm:h-24"
+            className="block h-[54px] w-auto object-contain sm:h-[78px]"
           />
         </Link>
 
-        {/* Desktop nav */}
-        <nav
-          className={`hidden items-center gap-7 rounded-[5px] px-8 py-3 transition-colors duration-300 md:flex ${
-            isScrolled
-              ? "bg-slate-100 text-slate-900"
-              : "border border-white/15 bg-white/10 text-white backdrop-blur-xl"
-          }`}
+        {/* Mobile Search */}
+        <form
+          onSubmit={handleMobileSearch}
+          className="mx-2 flex h-[34px] min-w-0 flex-1 items-center gap-2 rounded-full border border-slate-200 bg-[#F8FAFC] px-3 shadow-sm lg:hidden"
         >
-          <Link
-            to="/"
-            onClick={closeMenus}
-            className="transition-colors duration-300 hover:text-[#00AEEF]"
+          <button
+            type="submit"
+            className="shrink-0 text-[#FF6B00]"
+            aria-label="Search"
           >
+            <FaSearch className="text-[11px]" />
+          </button>
+
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search trips"
+            className="min-w-0 flex-1 bg-transparent font-poppins text-[11px] font-semibold text-slate-700 outline-none placeholder:text-slate-400"
+          />
+
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-600 transition active:scale-95"
+              aria-label="Clear search"
+            >
+              <HiX className="text-[12px]" />
+            </button>
+          )}
+        </form>
+
+        {/* Desktop Nav */}
+        <nav className="hidden items-center gap-7 font-poppins text-[14px] font-semibold text-slate-800 lg:flex">
+          <Link to="/" onClick={closeMenus} className={navLinkClass}>
             Home
+            <span className={underline} />
           </Link>
 
-          {/* Services Dropdown */}
+          {/* Desktop Services */}
           <div
             className="relative"
-            onMouseEnter={() => setDesktopServicesOpen(true)}
-            onMouseLeave={() => setDesktopServicesOpen(false)}
+            onMouseEnter={() => setServicesOpen(true)}
+            onMouseLeave={() => setServicesOpen(false)}
           >
             <button
               type="button"
-              onClick={() => setDesktopServicesOpen(!desktopServicesOpen)}
-              className="flex items-center gap-1 transition-colors duration-300 hover:text-[#00AEEF]"
-              aria-label="Open services menu"
+              onClick={() => setServicesOpen((prev) => !prev)}
+              className="group relative flex items-center gap-1.5 py-1 transition-colors duration-300 hover:text-[#00AEEF]"
             >
               Services
               <FaChevronDown
                 className={`text-[10px] transition-transform duration-300 ${
-                  desktopServicesOpen ? "rotate-180" : ""
+                  servicesOpen ? "rotate-180" : ""
                 }`}
               />
+              <span className={underline} />
             </button>
 
-            {/* Main dropdown */}
             <div
-              className={`absolute left-1/2 top-full z-[1200] w-64 -translate-x-1/2 pt-4 transition-all duration-200 ${
-                desktopServicesOpen
-                  ? "visible opacity-100"
-                  : "invisible opacity-0"
+              className={`absolute left-1/2 top-full z-[1200] w-[680px] -translate-x-1/2 pt-5 transition-all duration-200 ${
+                servicesOpen
+                  ? "visible translate-y-0 opacity-100"
+                  : "invisible translate-y-2 opacity-0"
               }`}
             >
-              <div className="rounded-[5px] border border-slate-100 bg-white p-2 text-slate-900 shadow-2xl">
-                {mainServiceLinks.map(([label, link]) => (
-                  <Link
-                    key={label}
-                    to={link}
-                    onClick={closeMenus}
-                    className="block rounded-[5px] px-4 py-3 transition-colors duration-300 hover:bg-sky-50 hover:text-[#00AEEF]"
-                  >
-                    {label}
-                  </Link>
-                ))}
+              <div className="rounded-[5px] border border-slate-100 bg-white p-5 text-slate-900 shadow-[0_24px_70px_rgba(15,23,42,0.16)]">
+                <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-4">
+                  <div>
+                    <p className="font-poppins text-[11px] font-bold uppercase tracking-[0.28em] text-[#00AEEF]">
+                      TravelEx Services
+                    </p>
 
-                {/* Visa nested dropdown */}
-                <div className="group/visa relative">
-                  <Link
-                    to="/visa"
-                    onClick={closeMenus}
-                    className="flex items-center justify-between rounded-[5px] px-4 py-3 transition-colors duration-300 hover:bg-sky-50 hover:text-[#00AEEF]"
-                  >
-                    Visa Assistance
-                    <FaChevronDown className="-rotate-90 text-[10px]" />
-                  </Link>
-
-                  <div className="invisible absolute left-full top-0 z-[1300] w-[30rem] pl-3 opacity-0 transition-all duration-200 group-hover/visa:visible group-hover/visa:opacity-100">
-                    <div className="grid grid-cols-2 gap-4 rounded-[5px] border border-slate-100 bg-white p-5 text-slate-950 shadow-2xl">
-                      {/* Sticker Visa */}
-                      <div>
-                        <Link
-                          to="/visa?type=Sticker%20Visa"
-                          onClick={closeMenus}
-                          className="eyebrow mb-3 flex items-center justify-between rounded-[5px] bg-orange-50 px-4 py-3 text-[#FF6B00]"
-                        >
-                          Visa
-                          <FaChevronDown className="text-[10px]" />
-                        </Link>
-
-                        <div className="grid gap-1">
-                          {stickerVisaLinks.map(([label, link]) => (
-                            <Link
-                              key={label}
-                              to={link}
-                              onClick={closeMenus}
-                              className="border-b border-slate-100 px-4 py-3 uppercase tracking-wide text-slate-800 transition hover:bg-orange-50 hover:text-[#FF6B00]"
-                            >
-                              {label}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* E-Visa */}
-                      <div>
-                        <Link
-                          to="/visa?type=E-Visa"
-                          onClick={closeMenus}
-                          className="eyebrow mb-3 flex items-center justify-between rounded-[5px] bg-sky-50 px-4 py-3 text-[#00AEEF]"
-                        >
-                          E-Visa
-                          <FaChevronDown className="text-[10px]" />
-                        </Link>
-
-                        <div className="grid gap-1">
-                          {eVisaLinks.map(([label, link]) => (
-                            <Link
-                              key={label}
-                              to={link}
-                              onClick={closeMenus}
-                              className="border-b border-slate-100 px-4 py-3 uppercase tracking-wide text-slate-800 transition hover:bg-sky-50 hover:text-[#00AEEF]"
-                            >
-                              {label}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                    <h3 className="mt-1 font-fredoka text-2xl font-semibold text-slate-950">
+                      Plan every part of your journey
+                    </h3>
                   </div>
+
+                  <Link
+                    to="/contact"
+                    onClick={closeMenus}
+                    className="inline-flex items-center gap-2 rounded-[5px] bg-[#FF6B00] px-4 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF]"
+                  >
+                    Talk to Expert
+                    <FaArrowRight className="text-[10px]" />
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {services.map((item) => (
+                    <Link
+                      key={item.label}
+                      to={item.link}
+                      onClick={closeMenus}
+                      className="group flex gap-4 rounded-[5px] border border-slate-100 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#00AEEF]/30 hover:bg-white hover:shadow-md"
+                    >
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[5px] bg-white text-lg text-[#00AEEF] shadow-sm transition group-hover:bg-[#FF6B00] group-hover:text-white">
+                        {item.icon}
+                      </span>
+
+                      <span>
+                        <span className="block font-poppins text-sm font-bold text-slate-950">
+                          {item.label}
+                        </span>
+
+                        <span className="mt-1 block font-poppins text-xs font-medium leading-5 text-slate-500">
+                          {item.desc}
+                        </span>
+                      </span>
+                    </Link>
+                  ))}
                 </div>
               </div>
             </div>
@@ -206,188 +275,276 @@ const Navbar = () => {
               key={label}
               to={link}
               onClick={closeMenus}
-              className="transition-colors duration-300 hover:text-[#00AEEF]"
+              className={navLinkClass}
             >
               {label}
+              <span className={underline} />
             </Link>
           ))}
-        </nav>
 
-        {/* Desktop auth */}
-        <div className="hidden items-center gap-3 md:flex">
-          <Link
-            to="/login"
-            className={`rounded-[5px] border px-5 py-2.5 transition-colors duration-300 ${
-              isScrolled
-                ? "border-slate-200 text-slate-900 hover:bg-slate-900 hover:text-white"
-                : "border-white/25 text-white hover:bg-white hover:text-slate-900"
-            }`}
+          {/* Desktop Resources */}
+          <div
+            className="relative"
+            onMouseEnter={() => setResourcesOpen(true)}
+            onMouseLeave={() => setResourcesOpen(false)}
           >
-            Login
-          </Link>
-
-          <Link
-            to="/signup"
-            className={`rounded-[5px] px-5 py-2.5 transition-colors duration-300 ${
-              isScrolled
-                ? "bg-[#00AEEF] text-white hover:bg-[#FF6B00]"
-                : "bg-white text-slate-900 hover:bg-[#00AEEF] hover:text-white"
-            }`}
-          >
-            Sign Up
-          </Link>
-        </div>
-
-        {/* Mobile menu button */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className={`flex h-11 w-11 items-center justify-center rounded-[5px] border text-2xl transition-colors duration-300 md:hidden ${
-            isScrolled
-              ? "border-slate-200 bg-slate-100 text-slate-900"
-              : "border-white/20 bg-white/10 text-white backdrop-blur-xl"
-          }`}
-          aria-label="Toggle menu"
-        >
-          {menuOpen ? <HiX /> : <HiMenu />}
-        </button>
-      </div>
-
-      {/* Mobile dropdown */}
-      {menuOpen && (
-        <div className="absolute left-4 right-4 top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-[5px] border border-slate-100 bg-white p-4 shadow-2xl backdrop-blur-xl md:hidden">
-          <div className="grid gap-2">
-            <Link
-              to="/"
-              onClick={closeMenus}
-              className="rounded-[5px] px-4 py-3 text-slate-900 hover:bg-sky-50 hover:text-[#00AEEF]"
-            >
-              Home
-            </Link>
-
-            {/* Mobile Services */}
             <button
               type="button"
-              onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
-              className="flex w-full items-center justify-between rounded-[5px] px-4 py-3 text-left text-slate-900 hover:bg-sky-50 hover:text-[#00AEEF]"
-              aria-label="Open services menu"
+              onClick={() => setResourcesOpen((prev) => !prev)}
+              className="group relative flex items-center gap-1.5 py-1 transition-colors duration-300 hover:text-[#00AEEF]"
             >
-              Services
+              Resources
               <FaChevronDown
-                className={`text-xs transition-transform duration-300 ${
-                  mobileServicesOpen ? "rotate-180" : ""
+                className={`text-[10px] transition-transform duration-300 ${
+                  resourcesOpen ? "rotate-180" : ""
                 }`}
               />
+              <span className={underline} />
             </button>
 
-            {mobileServicesOpen && (
-              <div className="grid gap-1 rounded-[5px] bg-slate-50 p-2">
-                {mainServiceLinks.map(([label, link]) => (
+            <div
+              className={`absolute left-1/2 top-full z-[1200] w-52 -translate-x-1/2 pt-5 transition-all duration-200 ${
+                resourcesOpen
+                  ? "visible translate-y-0 opacity-100"
+                  : "invisible translate-y-2 opacity-0"
+              }`}
+            >
+              <div className="rounded-[5px] border border-slate-100 bg-white p-2 text-slate-900 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
+                {resourceLinks.map(([label, link]) => (
                   <Link
                     key={label}
                     to={link}
                     onClick={closeMenus}
-                    className="rounded-[5px] px-4 py-3 text-slate-700 hover:bg-white hover:text-[#00AEEF]"
+                    className="block rounded-[5px] px-4 py-3 font-poppins text-sm font-semibold transition hover:bg-sky-50 hover:text-[#00AEEF]"
                   >
                     {label}
                   </Link>
                 ))}
+              </div>
+            </div>
+          </div>
+        </nav>
 
-                <div className="overflow-hidden rounded-[5px]">
-                  <div className="flex items-center hover:bg-white">
-                    <Link
-                      to="/visa"
-                      onClick={closeMenus}
-                      className="flex-1 px-4 py-3 text-[#00AEEF]"
-                    >
-                      Visa Assistance
-                    </Link>
+        {/* Desktop Actions */}
+        <div className="hidden items-center gap-2.5 lg:flex">
+          <a
+            href="https://wa.me/923111444192"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-[5px] border border-slate-200 px-3 py-2 font-poppins text-[13px] font-semibold text-slate-800 transition hover:border-[#00AEEF] hover:text-[#00AEEF]"
+          >
+            <FaWhatsapp className="text-[15px] text-[#25D366]" />
+            WhatsApp
+          </a>
 
-                    <button
-                      type="button"
-                      onClick={() => setMobileVisaOpen(!mobileVisaOpen)}
-                      className="px-4 py-3 text-[#00AEEF]"
-                      aria-label="Open visa menu"
-                    >
-                      <FaChevronDown
-                        className={`text-xs transition-transform duration-300 ${
-                          mobileVisaOpen ? "rotate-180" : ""
-                        }`}
-                      />
-                    </button>
+          <Link
+            to="/contact"
+            onClick={closeMenus}
+            className="rounded-[5px] bg-[#FF6B00] px-4 py-2 font-poppins text-[13px] font-semibold text-white shadow-[0_10px_26px_rgba(255,107,0,0.25)] transition hover:bg-[#00AEEF] hover:shadow-[0_10px_26px_rgba(0,174,239,0.25)]"
+          >
+            Plan My Trip
+          </Link>
+        </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          type="button"
+          onClick={() => setMenuOpen((prev) => !prev)}
+          className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[7px] border border-slate-200 bg-[#F8FAFC] text-slate-900 shadow-sm transition active:scale-95 lg:hidden"
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? (
+            <HiX className="text-[19px]" />
+          ) : (
+            <ProfessionalMenuIcon />
+          )}
+        </button>
+      </div>
+
+      {/* Mobile Overlay */}
+      <div
+        onClick={closeMenus}
+        className={`fixed inset-0 z-[1190] bg-slate-950/35 backdrop-blur-[2px] transition-opacity duration-300 lg:hidden ${
+          menuOpen
+            ? "pointer-events-auto opacity-100"
+            : "pointer-events-none opacity-0"
+        }`}
+      />
+
+      {/* Mobile Right Drawer */}
+      <aside
+        className={`fixed right-0 top-0 z-[1200] h-dvh w-[84%] max-w-[340px] bg-white shadow-[0_25px_80px_rgba(15,23,42,0.28)] transition-transform duration-300 ease-out lg:hidden ${
+          menuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex h-full flex-col">
+          {/* Drawer Header */}
+          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
+            <div>
+              <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.22em] text-[#00AEEF]">
+                TravelEx.pk
+              </p>
+
+              <p className="mt-0.5 font-poppins text-[11px] font-semibold text-slate-600">
+                Simple travel support
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={closeMenus}
+              className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-slate-200 bg-[#F8FAFC] text-slate-800"
+              aria-label="Close menu"
+            >
+              <HiX className="text-[18px]" />
+            </button>
+          </div>
+
+          {/* Drawer Body */}
+          <div className="flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div className="grid gap-2">
+              {navLinks.map(([label, link]) => {
+                const active = location.pathname === link
+
+                return (
+                  <Link
+                    key={label}
+                    to={link}
+                    onClick={closeMenus}
+                    className={`flex items-center justify-between rounded-[10px] px-4 py-3 font-poppins text-[13px] font-semibold transition ${
+                      active
+                        ? "bg-[#00AEEF] text-white"
+                        : "bg-[#F8FAFC] text-slate-800"
+                    }`}
+                  >
+                    {label}
+                    <FaArrowRight
+                      className={`text-[10px] ${
+                        active ? "text-white" : "text-slate-300"
+                      }`}
+                    />
+                  </Link>
+                )
+              })}
+            </div>
+
+            {/* Services Dropdown */}
+            <div className="mt-3 rounded-[12px] border border-slate-100 bg-white">
+              <button
+                type="button"
+                onClick={() => toggleMobileDropdown("services")}
+                className="flex w-full items-center justify-between px-4 py-3 font-poppins text-[13px] font-semibold text-slate-900"
+              >
+                Services
+                <FaChevronDown
+                  className={`text-[11px] text-slate-400 transition-transform duration-300 ${
+                    activeMobileDropdown === "services" ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              <div
+                className={`grid overflow-hidden transition-all duration-300 ${
+                  activeMobileDropdown === "services"
+                    ? "grid-rows-[1fr]"
+                    : "grid-rows-[0fr]"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="grid gap-1.5 border-t border-slate-100 p-2">
+                    {services.map((item) => (
+                      <Link
+                        key={item.label}
+                        to={item.link}
+                        onClick={closeMenus}
+                        className="flex items-center gap-3 rounded-[8px] bg-[#F8FAFC] px-3 py-2.5"
+                      >
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[5px] bg-white text-[13px] text-[#00AEEF] shadow-sm">
+                          {item.icon}
+                        </span>
+
+                        <span className="min-w-0">
+                          <span className="block font-poppins text-[12px] font-semibold leading-4 text-slate-900">
+                            {item.label}
+                          </span>
+
+                          <span className="mt-0.5 block truncate font-poppins text-[10px] font-medium text-slate-500">
+                            {item.desc}
+                          </span>
+                        </span>
+                      </Link>
+                    ))}
                   </div>
-
-                  {mobileVisaOpen && (
-                    <div className="rounded-[5px] bg-white p-3">
-                      <p className="eyebrow mb-2 text-[#FF6B00]">
-                        Visa Countries
-                      </p>
-
-                      <div className="grid grid-cols-2 gap-1">
-                        {stickerVisaLinks.map(([label, link]) => (
-                          <Link
-                            key={label}
-                            to={link}
-                            onClick={closeMenus}
-                            className="rounded-[5px] px-3 py-2 text-slate-700 hover:bg-orange-50 hover:text-[#FF6B00]"
-                          >
-                            {label}
-                          </Link>
-                        ))}
-                      </div>
-
-                      <p className="eyebrow mb-2 mt-4 text-[#00AEEF]">
-                        E-Visa Countries
-                      </p>
-
-                      <div className="grid grid-cols-2 gap-1">
-                        {eVisaLinks.map(([label, link]) => (
-                          <Link
-                            key={label}
-                            to={link}
-                            onClick={closeMenus}
-                            className="rounded-[5px] px-3 py-2 text-slate-700 hover:bg-sky-50 hover:text-[#00AEEF]"
-                          >
-                            {label}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
-            )}
+            </div>
 
-            {navLinks.slice(1).map(([label, link]) => (
-              <Link
-                key={label}
-                to={link}
-                onClick={closeMenus}
-                className="rounded-[5px] px-4 py-3 text-slate-900 hover:bg-sky-50 hover:text-[#00AEEF]"
+            {/* Resources Dropdown */}
+            <div className="mt-3 rounded-[12px] border border-slate-100 bg-white">
+              <button
+                type="button"
+                onClick={() => toggleMobileDropdown("resources")}
+                className="flex w-full items-center justify-between px-4 py-3 font-poppins text-[13px] font-semibold text-slate-900"
               >
-                {label}
-              </Link>
-            ))}
+                Resources
+                <FaChevronDown
+                  className={`text-[11px] text-slate-400 transition-transform duration-300 ${
+                    activeMobileDropdown === "resources" ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              <div
+                className={`grid overflow-hidden transition-all duration-300 ${
+                  activeMobileDropdown === "resources"
+                    ? "grid-rows-[1fr]"
+                    : "grid-rows-[0fr]"
+                }`}
+              >
+                <div className="overflow-hidden">
+                  <div className="grid gap-1.5 border-t border-slate-100 p-2">
+                    {resourceLinks.map(([label, link]) => (
+                      <Link
+                        key={label}
+                        to={link}
+                        onClick={closeMenus}
+                        className="flex items-center justify-between rounded-[8px] bg-[#F8FAFC] px-3 py-2.5 font-poppins text-[12px] font-semibold text-slate-900"
+                      >
+                        {label}
+                        <FaArrowRight className="text-[10px] text-slate-300" />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <Link
-              to="/login"
-              onClick={closeMenus}
-              className="rounded-[5px] border border-slate-200 px-4 py-3 text-center text-slate-900"
-            >
-              Login
-            </Link>
+          {/* Drawer Footer */}
+          <div className="border-t border-slate-100 p-4">
+            <div className="grid grid-cols-2 gap-2">
+              <a
+                href="https://wa.me/923111444192"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 bg-white px-4 py-2.5 font-poppins text-[11px] font-semibold text-slate-900"
+              >
+                <FaWhatsapp className="text-[14px] text-[#25D366]" />
+                WhatsApp
+              </a>
 
-            <Link
-              to="/signup"
-              onClick={closeMenus}
-              className="rounded-[5px] bg-[#00AEEF] px-4 py-3 text-center text-white"
-            >
-              Sign Up
-            </Link>
+              <Link
+                to="/contact"
+                onClick={closeMenus}
+                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-4 py-2.5 font-poppins text-[11px] font-semibold text-white"
+              >
+                Plan Trip
+                <FaArrowRight className="text-[9px]" />
+              </Link>
+            </div>
           </div>
         </div>
-      )}
+      </aside>
     </header>
   )
 }

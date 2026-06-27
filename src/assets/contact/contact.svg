@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 640" width="1600" height="640" role="img" aria-label="TravelEx Contact Us illustration">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b2a4a"/>
+      <stop offset="0.55" stop-color="#0c3357"/>
+      <stop offset="1" stop-color="#0e4570"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#00AEEF" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#00AEEF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="blueChip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#21bdf6"/>
+      <stop offset="1" stop-color="#00AEEF"/>
+    </linearGradient>
+    <linearGradient id="orangeChip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff8a33"/>
+      <stop offset="1" stop-color="#FF6B00"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="26" flood-color="#03101f" flood-opacity="0.45"/>
+    </filter>
+    <filter id="softsm" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#03101f" flood-opacity="0.40"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1600" height="640" fill="url(#bg)"/>
+  <ellipse cx="1140" cy="300" rx="520" ry="430" fill="url(#glow)"/>
+
+  <!-- Subtle world-map dot field (brand flight-language texture) -->
+  <g fill="#9fd9f5" opacity="0.16">
+    <circle cx="880" cy="120" r="3"/><circle cx="930" cy="150" r="3"/><circle cx="980" cy="120" r="3"/>
+    <circle cx="1010" cy="170" r="3"/><circle cx="900" cy="200" r="3"/><circle cx="850" cy="250" r="3"/>
+    <circle cx="1300" cy="120" r="3"/><circle cx="1350" cy="160" r="3"/><circle cx="1400" cy="130" r="3"/>
+    <circle cx="1440" cy="180" r="3"/><circle cx="1380" cy="220" r="3"/><circle cx="1480" cy="220" r="3"/>
+    <circle cx="1260" cy="500" r="3"/><circle cx="1320" cy="530" r="3"/><circle cx="1380" cy="500" r="3"/>
+    <circle cx="1180" cy="540" r="3"/><circle cx="1440" cy="540" r="3"/><circle cx="820" cy="470" r="3"/>
+    <circle cx="870" cy="510" r="3"/><circle cx="780" cy="380" r="3"/>
+  </g>
+
+  <!-- Dotted flight arc -->
+  <path d="M 760 470 C 980 280, 1180 250, 1430 170" fill="none" stroke="#00AEEF" stroke-width="3" stroke-dasharray="2 14" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Paper plane (brand orange) at the arc tip -->
+  <g transform="translate(1430 170) rotate(-22)" filter="url(#softsm)">
+    <path d="M -26 -16 L 30 0 L -26 16 L -14 0 Z" fill="url(#orangeChip)"/>
+    <path d="M -26 -16 L -14 0 L -26 16 L -8 4 Z" fill="#e85f00"/>
+  </g>
+
+  <!-- ===== Main phone / chat card ===== -->
+  <g transform="rotate(-5 1170 350)">
+    <!-- device body -->
+    <rect x="1020" y="110" width="300" height="500" rx="40" fill="#ffffff" filter="url(#soft)"/>
+    <!-- screen -->
+    <rect x="1038" y="150" width="264" height="420" rx="20" fill="#f4f7fb"/>
+
+    <!-- header bar -->
+    <path d="M 1038 170 a 20 20 0 0 1 20 -20 h 224 a 20 20 0 0 1 20 20 v 52 h -264 Z" fill="#0b2a4a"/>
+    <!-- plane mark -->
+    <g transform="translate(1062 196)">
+      <path d="M -12 -7 L 14 0 L -12 7 L -6 0 Z" fill="#00AEEF"/>
+      <path d="M -12 -7 L -6 0 L -12 7 L -2 2 Z" fill="#FF6B00"/>
+    </g>
+    <text x="1086" y="201" font-family="Poppins, 'Segoe UI', Arial, sans-serif" font-size="17" font-weight="700" fill="#ffffff">TravelEx</text>
+    <!-- online dot -->
+    <circle cx="1288" cy="196" r="6" fill="#25D366"/>
+
+    <!-- chat bubbles -->
+    <!-- incoming -->
+    <rect x="1058" y="250" width="150" height="46" rx="14" fill="#e7edf3"/>
+    <rect x="1074" y="266" width="92" height="7" rx="3.5" fill="#9aa9b8"/>
+    <rect x="1074" y="280" width="60" height="7" rx="3.5" fill="#bccad6"/>
+
+    <!-- outgoing (blue) -->
+    <rect x="1136" y="312" width="146" height="46" rx="14" fill="url(#blueChip)"/>
+    <rect x="1152" y="328" width="100" height="7" rx="3.5" fill="#ffffff" opacity="0.95"/>
+    <rect x="1152" y="342" width="66" height="7" rx="3.5" fill="#ffffff" opacity="0.75"/>
+
+    <!-- incoming -->
+    <rect x="1058" y="374" width="166" height="46" rx="14" fill="#e7edf3"/>
+    <rect x="1074" y="390" width="110" height="7" rx="3.5" fill="#9aa9b8"/>
+    <rect x="1074" y="404" width="74" height="7" rx="3.5" fill="#bccad6"/>
+
+    <!-- outgoing (orange) -->
+    <rect x="1146" y="436" width="136" height="46" rx="14" fill="url(#orangeChip)"/>
+    <rect x="1162" y="452" width="92" height="7" rx="3.5" fill="#ffffff" opacity="0.95"/>
+    <rect x="1162" y="466" width="58" height="7" rx="3.5" fill="#ffffff" opacity="0.78"/>
+
+    <!-- input bar -->
+    <rect x="1058" y="506" width="190" height="40" rx="20" fill="#ffffff" stroke="#dde6ef" stroke-width="2"/>
+    <rect x="1074" y="522" width="120" height="8" rx="4" fill="#c4d0dc"/>
+    <circle cx="1272" cy="526" r="20" fill="#00AEEF"/>
+    <path d="M 1264 526 h 14 M 1272 519 v 14" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- ===== Floating communication chips ===== -->
+  <!-- Chat / WhatsApp-style (green) -->
+  <g transform="translate(940 168)" filter="url(#softsm)">
+    <rect x="-34" y="-34" width="68" height="68" rx="20" fill="#25D366"/>
+    <path d="M 0 -16 a 16 16 0 1 0 -14 24 l -4 9 l 10 -3 a 16 16 0 0 0 8 2 a 16 16 0 0 0 0 -32 Z" fill="#ffffff"/>
+    <circle cx="-7" cy="0" r="2.6" fill="#25D366"/><circle cx="0" cy="0" r="2.6" fill="#25D366"/><circle cx="7" cy="0" r="2.6" fill="#25D366"/>
+  </g>
+
+  <!-- Mail (orange) -->
+  <g transform="translate(872 360)" filter="url(#softsm)">
+    <rect x="-34" y="-34" width="68" height="68" rx="20" fill="url(#orangeChip)"/>
+    <rect x="-18" y="-12" width="36" height="24" rx="4" fill="#ffffff"/>
+    <path d="M -18 -8 L 0 5 L 18 -8" fill="none" stroke="#FF6B00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Phone (blue) -->
+  <g transform="translate(948 500)" filter="url(#softsm)">
+    <rect x="-34" y="-34" width="68" height="68" rx="20" fill="url(#blueChip)"/>
+    <path d="M -10 -12 c -3 0 -5 2 -5 5 c 0 14 12 26 26 26 c 3 0 5 -2 5 -5 v -7 c 0 -2 -2 -4 -4 -4 l -6 -1 c -2 0 -3 1 -4 2 c -4 -2 -7 -5 -9 -9 c 1 -1 2 -2 2 -4 l -1 -6 c 0 -2 -2 -4 -4 -4 Z" fill="#ffffff"/>
+  </g>
+
+  <!-- Location pin accent -->
+  <g transform="translate(1380 430)" opacity="0.95" filter="url(#softsm)">
+    <path d="M 0 -26 a 18 18 0 0 1 18 18 c 0 13 -18 30 -18 30 c 0 0 -18 -17 -18 -30 a 18 18 0 0 1 18 -18 Z" fill="#FF6B00"/>
+    <circle cx="0" cy="-8" r="7" fill="#ffffff"/>
+  </g>
+</svg>

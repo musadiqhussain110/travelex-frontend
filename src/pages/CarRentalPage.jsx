@@ -1,601 +1,893 @@
-import { useEffect, useMemo, useState } from "react"
+import { useRef, useState } from "react"
+import { Link } from "react-router-dom"
 import {
+  FaArrowRight,
+  FaCalendarAlt,
   FaCar,
-  FaUsers,
-  FaGasPump,
+  FaCheckCircle,
+  FaClock,
+  FaEnvelope,
+  FaGlobeAsia,
+  FaMapMarkerAlt,
+  FaPhoneAlt,
+  FaPlaneArrival,
+  FaRoute,
+  FaShieldAlt,
   FaSuitcaseRolling,
-  FaChevronDown,
-  FaTimes,
+  FaUserTie,
+  FaUsers,
+  FaWhatsapp,
 } from "react-icons/fa"
-import PageHero from "../components/PageHero"
-import ServiceSearchBar from "../components/ServiceSearchBar"
-import AuthModal from "../components/AuthModal"
+
+import Footer from "../components/Footer"
+import AppSelect from "../components/common/AppSelect"
 
 import carHero1 from "../assets/Cars/Car5.avif"
-import carHero2 from "../assets/Cars/Car4.webp"
-import carHero3 from "../assets/Cars/Car3.jpg"
 import carHero4 from "../assets/Cars/Car5.webp"
 import carHero5 from "../assets/Cars/Car6.webp"
 
-const carHeroImages = [carHero1, carHero2, carHero3]
-
-const carOptions = [
+const vehicleCategories = [
   {
-    id: 1,
-    name: "Toyota Corolla VVTi 1.3",
-    location: "Islamabad",
-    type: "Economy",
-    seats: 5,
-    bags: 2,
-    fuel: "Petrol",
-    price: 4200,
-    rating: 5,
+    title: "Economy Car",
+    subtitle: "Budget-friendly international rental",
+    description:
+      "Suitable for city travel, solo travelers, couples, and short international trips.",
+    icon: FaCar,
     image: carHero4,
-    features: ["AC", "Automatic", "Airport pickup", "Daily rental"],
+    bestFor: ["City travel", "Budget trips", "Couples"],
   },
   {
-    id: 2,
-    name: "Honda City 1.2LS",
-    location: "Islamabad / Lahore",
-    type: "Comfort",
-    seats: 4,
-    bags: 2,
-    fuel: "Petrol",
-    price: 6500,
-    rating: 5,
+    title: "SUV / Family Car",
+    subtitle: "Comfortable option for families",
+    description:
+      "A better option for families, luggage, long routes, and comfortable travel abroad.",
+    icon: FaUsers,
     image: carHero5,
-    features: ["AC", "Comfort drive", "City travel", "Family friendly"],
+    bestFor: ["Families", "Luggage", "Long routes"],
+  },
+  {
+    title: "Luxury / Business Car",
+    subtitle: "Premium travel experience",
+    description:
+      "Ideal for business travel, VIP guests, premium airport pickup, and executive trips.",
+    icon: FaUserTie,
+    image: carHero1,
+    bestFor: ["Business", "VIP pickup", "Premium travel"],
+  },
+  {
+    title: "Van / Group Transport",
+    subtitle: "For groups and large families",
+    description:
+      "Best for group tours, families with luggage, airport transfers, and multi-city routes.",
+    icon: FaSuitcaseRolling,
+    image: carHero5,
+    bestFor: ["Groups", "Families", "Tours"],
+  },
+  {
+    title: "Airport Transfer",
+    subtitle: "Private airport pickup and drop-off",
+    description:
+      "Book airport-to-hotel, hotel-to-airport, and private transfer services in major cities.",
+    icon: FaPlaneArrival,
+    image: carHero4,
+    bestFor: ["Airport pickup", "Hotel transfer", "Easy arrival"],
+  },
+  {
+    title: "Chauffeur Service",
+    subtitle: "Driver-included international service",
+    description:
+      "A guided driver-included option for business, family trips, city tours, and safe travel.",
+    icon: FaShieldAlt,
+    image: carHero1,
+    bestFor: ["With driver", "Safe travel", "Business trips"],
   },
 ]
 
-const carTypes = ["Economy", "Comfort", "Group"]
+const popularDestinations = [
+  {
+    country: "UAE",
+    cities: "Dubai, Abu Dhabi, Sharjah",
+    use: "Airport transfers, family cars, chauffeur service",
+  },
+  {
+    country: "Saudi Arabia",
+    cities: "Jeddah, Makkah, Madinah, Riyadh",
+    use: "Umrah transport, city transfers, group vans",
+  },
+  {
+    country: "Turkey",
+    cities: "Istanbul, Antalya, Cappadocia",
+    use: "Airport pickup, family rentals, tour transport",
+  },
+  {
+    country: "Malaysia",
+    cities: "Kuala Lumpur, Langkawi, Penang",
+    use: "City travel, airport transfer, family cars",
+  },
+  {
+    country: "Azerbaijan",
+    cities: "Baku, Gabala, Shahdag",
+    use: "Tour transport, private driver, SUV options",
+  },
+  {
+    country: "Qatar",
+    cities: "Doha",
+    use: "Business travel, airport pickup, chauffeur service",
+  },
+]
 
-const carFeatures = ["AC", "Automatic", "Airport pickup", "Driver included"]
+const processSteps = [
+  {
+    title: "Share destination details",
+    description:
+      "Tell us your country, city, pickup location, travel dates, car type, and passenger count.",
+  },
+  {
+    title: "TravelEx checks availability",
+    description:
+      "Our team verifies international supplier availability, route details, and suitable options.",
+  },
+  {
+    title: "Get final quote",
+    description:
+      "You receive a confirmed quote based on destination, dates, car category, driver option, and supplier policy.",
+  },
+  {
+    title: "Confirm your rental",
+    description:
+      "After confirmation, TravelEx guides you with documents, payment method, and pickup instructions.",
+  },
+]
+
+const trustPoints = [
+  "International car rental quote support",
+  "Airport and hotel pickup guidance",
+  "Self-drive or driver-included options",
+  "Family, business and group transport support",
+]
+
+const destinationOptions = [
+  "UAE",
+  "Saudi Arabia",
+  "Turkey",
+  "Malaysia",
+  "Azerbaijan",
+  "Qatar",
+  "Thailand",
+  "Other Destination",
+]
+
+const driverOptions = [
+  "Self-drive",
+  "With driver / chauffeur",
+  "Airport transfer only",
+  "Not sure, need guidance",
+]
+
+const timeOptions = [
+  ...Array.from({ length: 48 }, (_, index) => {
+    const hour = Math.floor(index / 2)
+    const minute = index % 2 === 0 ? "00" : "30"
+    const hour12 = hour % 12 || 12
+    const period = hour < 12 ? "AM" : "PM"
+
+    return `${String(hour12).padStart(2, "0")}:${minute} ${period}`
+  }),
+  "Not sure yet",
+]
+
+const whatsappLink =
+  "https://wa.me/923111444192?text=Assalamualaikum%20TravelEx%2C%20I%20need%20guidance%20about%20international%20car%20rental."
 
 const CarRentalPage = () => {
-  const [selectedCar, setSelectedCar] = useState(null)
-  const [sortBy, setSortBy] = useState("Recommended")
-  const [sortOpen, setSortOpen] = useState(false)
-  const [filterOpen, setFilterOpen] = useState(false)
+  const [selectedCountry, setSelectedCountry] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("")
+  const [selectedDriverOption, setSelectedDriverOption] = useState("")
+  const [pickupTime, setPickupTime] = useState("")
+  const [returnTime, setReturnTime] = useState("")
+  const [quoteSent, setQuoteSent] = useState(false)
+  const [formError, setFormError] = useState("")
 
-  const [maxPrice, setMaxPrice] = useState(12000)
-  const [selectedTypes, setSelectedTypes] = useState([])
-  const [selectedFeatures, setSelectedFeatures] = useState([])
+  const quoteFormRef = useRef(null)
 
-  const [index, setIndex] = useState(0)
-  const [visibleCards, setVisibleCards] = useState(1)
+  const openQuoteForm = (category = "") => {
+    setSelectedCategory(category)
+    setQuoteSent(false)
+    setFormError("")
 
-  const [authOpen, setAuthOpen] = useState(false)
-  const [pendingBookingPath, setPendingBookingPath] = useState("")
-
-  useEffect(() => {
-    const updateVisibleCards = () => {
-      if (window.innerWidth >= 1280) {
-        setVisibleCards(3)
-      } else if (window.innerWidth >= 768) {
-        setVisibleCards(2)
-      } else {
-        setVisibleCards(1)
-      }
-    }
-
-    updateVisibleCards()
-    window.addEventListener("resize", updateVisibleCards)
-
-    return () => window.removeEventListener("resize", updateVisibleCards)
-  }, [])
-
-  const toggleType = (type) => {
-    setSelectedTypes((prev) =>
-      prev.includes(type)
-        ? prev.filter((item) => item !== type)
-        : [...prev, type]
-    )
+    setTimeout(() => {
+      quoteFormRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    }, 80)
   }
 
-  const toggleFeature = (feature) => {
-    setSelectedFeatures((prev) =>
-      prev.includes(feature)
-        ? prev.filter((item) => item !== feature)
-        : [...prev, feature]
-    )
+  const resetFormState = () => {
+    setSelectedCountry("")
+    setSelectedCategory("")
+    setSelectedDriverOption("")
+    setPickupTime("")
+    setReturnTime("")
+    setFormError("")
   }
 
-  const filteredCars = useMemo(() => {
-    let results = [...carOptions]
+  const handleSubmit = (event) => {
+    event.preventDefault()
 
-    results = results.filter((car) => car.price <= Number(maxPrice))
-
-    if (selectedTypes.length > 0) {
-      results = results.filter((car) => selectedTypes.includes(car.type))
-    }
-
-    if (selectedFeatures.length > 0) {
-      results = results.filter((car) =>
-        selectedFeatures.some((feature) => car.features.includes(feature))
+    if (
+      !selectedCountry ||
+      !selectedCategory ||
+      !selectedDriverOption ||
+      !pickupTime
+    ) {
+      setFormError(
+        "Please select destination country, pickup time, rental type and driver option."
       )
+      return
     }
 
-    if (sortBy === "Price (Low to high)") {
-      results.sort((a, b) => a.price - b.price)
-    }
-
-    if (sortBy === "Price (High to low)") {
-      results.sort((a, b) => b.price - a.price)
-    }
-
-    return results
-  }, [maxPrice, selectedTypes, selectedFeatures, sortBy])
-
-  const maxIndex = Math.max(filteredCars.length - visibleCards, 0)
-  const canGoLeft = index > 0
-  const canGoRight = index < maxIndex
-
-  useEffect(() => {
-    if (index > maxIndex) {
-      setIndex(maxIndex)
-    }
-  }, [index, maxIndex])
-
-  useEffect(() => {
-    setIndex(0)
-  }, [maxPrice, selectedTypes, selectedFeatures, sortBy])
-
-  const nextSlide = () => {
-    if (canGoRight) {
-      setIndex((prev) => prev + 1)
-    }
-  }
-
-  const prevSlide = () => {
-    if (canGoLeft) {
-      setIndex((prev) => prev - 1)
-    }
-  }
-
-  const resetFilters = () => {
-    setMaxPrice(12000)
-    setSelectedTypes([])
-    setSelectedFeatures([])
-    setSortBy("Recommended")
-    setIndex(0)
-  }
-
-  const handleBookNow = () => {
-    if (!selectedCar) return
-
-    setPendingBookingPath(`/booking/car-rental/${selectedCar.id}`)
-    setSelectedCar(null)
-    setAuthOpen(true)
+    setFormError("")
+    setQuoteSent(true)
   }
 
   return (
     <main className="bg-[#F8FAFC]">
-      <PageHero
-        eyebrow="Car Rental"
-        title="RENT A CAR FOR AIRPORT PICKUP, TOURS, AND CITY TRAVEL"
-        mobileTitle="Rent a car for your trip"
-        description="Choose comfortable rental options for family trips, airport pickup, city travel, and customized tours with TravelEx support."
-        images={carHeroImages}
-        variant="car-mobile-tight"
-      >
-        <ServiceSearchBar defaultService="Car Rental" glass={false} />
-      </PageHero>
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-slate-950">
+        <img
+          src={carHero1}
+          alt="International car rental by TravelEx"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
 
-      <section className="pt-36 pb-12 sm:pt-32 sm:pb-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-            <div className="lg:hidden">
-              <button
-                type="button"
-                onClick={() => setFilterOpen(!filterOpen)}
-                className="mb-4 flex w-full items-center justify-between rounded-[5px] border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-950 shadow-md shadow-slate-200/70"
-              >
-                <span className="flex items-center gap-3">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-[5px] bg-[#00AEEF] text-white">
-                    <FaCar className="text-sm" />
-                  </span>
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/65 via-slate-950/45 to-slate-950/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
 
-                  <span>
-                    Filters & Sort
-                    {(selectedTypes.length > 0 ||
-                      selectedFeatures.length > 0 ||
-                      Number(maxPrice) < 12000) && (
-                      <span className="ml-2 rounded-[5px] bg-[#FF6B00] px-2 py-0.5 text-[10px] font-semibold text-white">
-                        Active
-                      </span>
-                    )}
-                  </span>
+        <div className="relative z-10 mx-auto max-w-[1340px] px-4 py-7 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
+          <div className="grid gap-8 lg:grid-cols-[1fr_390px] lg:items-center">
+            <div className="max-w-4xl">
+              <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.22em] text-[#00AEEF] sm:text-[12px]">
+                International Car Rentals
+              </p>
+
+              <h1 className="mt-1 font-fredoka text-[17px] font-semibold leading-[1.08] text-white sm:mt-2 sm:text-[46px] sm:uppercase sm:leading-[1.08] lg:text-[54px]">
+                <span className="sm:hidden">Car Rental Support</span>
+                <span className="hidden sm:inline">
+                  Rent cars and transfers worldwide
+                </span>
+              </h1>
+
+              <p className="mt-1 max-w-3xl font-poppins text-[9px] font-medium leading-4 text-white/85 sm:mt-3 sm:text-base sm:leading-7">
+                <span className="sm:hidden">
+                  Airport, hotel and driver options.
                 </span>
 
-                <span className="flex items-center gap-2 text-xs font-semibold text-[#00AEEF]">
-                  {filterOpen ? "Hide" : "Open"}
-                  <FaChevronDown
-                    className={`text-xs transition-transform ${
-                      filterOpen ? "rotate-180" : ""
-                    }`}
-                  />
+                <span className="hidden sm:inline">
+                  Get international car rental, airport transfer, private driver,
+                  family transport, and business travel options through TravelEx
+                  quote support.
                 </span>
-              </button>
-            </div>
+              </p>
 
-            <aside
-              className={`h-fit overflow-hidden rounded-[5px] border border-slate-200 bg-white shadow-md shadow-slate-200/70 ${
-                filterOpen ? "block" : "hidden"
-              } lg:block`}
-            >
-              <div className="border-l-4 border-[#00AEEF] px-5 py-4">
-                <h3 className="text-slate-950 uppercase tracking-wide">
-                  Filter By
-                </h3>
-              </div>
-
-              <div className="border-t border-slate-100 p-4 sm:p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-slate-950">
-                    Filter Price
-                  </h4>
-
-                  <FaChevronDown className="text-xs text-slate-900" />
-                </div>
-
-                <div className="relative pt-5">
-                  <div className="mb-2 flex justify-between">
-                    <span className="rounded-[5px] bg-blue-500 px-2 py-1 text-xs font-semibold text-white">
-                      Rs4 200
-                    </span>
-
-                    <span className="rounded-[5px] bg-blue-500 px-2 py-1 text-xs font-semibold text-white">
-                      Rs{Number(maxPrice).toLocaleString()}
-                    </span>
-                  </div>
-
-                  <input
-                    type="range"
-                    min="4200"
-                    max="12000"
-                    step="500"
-                    value={maxPrice}
-                    onChange={(event) => setMaxPrice(event.target.value)}
-                    className="w-full accent-blue-500"
-                  />
-
-                  <div className="mt-2 flex justify-between text-[11px] font-semibold text-slate-400">
-                    <span>4 200</span>
-                    <span>6 500</span>
-                    <span>9 000</span>
-                    <span>12 000</span>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="mt-5 text-sm font-semibold uppercase tracking-wider text-blue-500"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
-
-              <div className="border-t border-slate-100 p-4 sm:p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-slate-950">
-                    Car Type
-                  </h4>
-
-                  <FaChevronDown className="text-xs text-slate-900" />
-                </div>
-
-                <div className="grid gap-4">
-                  {carTypes.map((type) => (
-                    <label
-                      key={type}
-                      className="flex cursor-pointer items-center gap-3 text-sm font-medium text-slate-500"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedTypes.includes(type)}
-                        onChange={() => toggleType(type)}
-                        className="h-5 w-5 rounded-[5px] border-slate-300 accent-[#00AEEF]"
-                      />
-                      {type}
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="border-t border-slate-100 p-4 sm:p-5">
-                <div className="mb-4 flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-slate-950">
-                    Features
-                  </h4>
-
-                  <FaChevronDown className="text-xs text-slate-900" />
-                </div>
-
-                <div className="grid gap-4">
-                  {carFeatures.map((feature) => (
-                    <label
-                      key={feature}
-                      className="flex cursor-pointer items-center gap-3 text-sm font-medium text-slate-500"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedFeatures.includes(feature)}
-                        onChange={() => toggleFeature(feature)}
-                        className="h-5 w-5 rounded-[5px] border-slate-300 accent-[#00AEEF]"
-                      />
-                      {feature}
-                    </label>
-                  ))}
-                </div>
-
+              <div className="mt-3 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:gap-3">
                 <button
                   type="button"
-                  onClick={resetFilters}
-                  className="mt-6 w-full rounded-[5px] border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-[#00AEEF] hover:text-[#00AEEF]"
+                  onClick={() => openQuoteForm()}
+                  className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
                 >
-                  Reset Filters
+                  Get Rental Quote
+                  <FaArrowRight className="text-[10px] sm:text-xs" />
                 </button>
+
+                <a
+                  href={whatsappLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-white/15 bg-white/10 px-5 py-2.5 font-poppins text-xs font-semibold text-white backdrop-blur transition hover:bg-[#25D366] sm:px-6 sm:py-3 sm:text-sm"
+                >
+                  <FaWhatsapp />
+                  WhatsApp Inquiry
+                </a>
               </div>
-            </aside>
+            </div>
 
-            <div>
-              <div className="mb-5 flex flex-col justify-between gap-3 sm:mb-6 sm:flex-row sm:items-center">
-                <h2 className="text-slate-950">
-                  {filteredCars.length} car
-                  {filteredCars.length === 1 ? "" : "s"} found
-                </h2>
+            <div className="hidden lg:block">
+              <div className="rounded-[16px] border border-white/15 bg-white/10 p-5 shadow-[0_22px_60px_rgba(0,0,0,0.28)] backdrop-blur-md">
+                <div className="flex h-12 w-12 items-center justify-center rounded-[5px] bg-[#00AEEF]/15 text-[#00AEEF]">
+                  <FaGlobeAsia />
+                </div>
 
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setSortOpen(!sortOpen)}
-                    className="flex w-full items-center justify-between gap-3 rounded-[5px] border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-900 shadow-sm sm:min-w-52 sm:text-sm"
-                  >
-                    Sort by: {sortBy}
-                    <FaChevronDown className="text-xs" />
-                  </button>
+                <h3 className="mt-4 font-fredoka text-[28px] font-semibold leading-tight text-white">
+                  Quote-based international rental
+                </h3>
 
-                  {sortOpen && (
-                    <div className="absolute right-0 top-12 z-30 w-56 overflow-hidden rounded-[5px] border border-slate-100 bg-white shadow-2xl">
-                      {[
-                        "Recommended",
-                        "Price (Low to high)",
-                        "Price (High to low)",
-                      ].map((item) => (
-                        <button
-                          type="button"
-                          key={item}
-                          onClick={() => {
-                            setSortBy(item)
-                            setSortOpen(false)
-                          }}
-                          className="block w-full px-5 py-3 text-left text-sm font-medium text-slate-700 hover:bg-sky-50 hover:text-[#00AEEF]"
-                        >
-                          {item}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                <p className="mt-2 font-poppins text-sm font-medium leading-7 text-white/70">
+                  Prices vary by country, city, date, supplier, car category,
+                  insurance, and pickup location.
+                </p>
+
+                <div className="mt-5 grid gap-3">
+                  {[
+                    "Country and city based quote",
+                    "Airport or hotel pickup",
+                    "Self-drive or chauffeur service",
+                    "Final price after availability check",
+                  ].map((item) => (
+                    <p
+                      key={item}
+                      className="flex items-center gap-2 rounded-[5px] bg-white/10 px-3 py-2 font-poppins text-xs font-semibold text-white/85"
+                    >
+                      <FaCheckCircle className="shrink-0 text-[#00AEEF]" />
+                      {item}
+                    </p>
+                  ))}
                 </div>
               </div>
-
-              {filteredCars.length === 0 ? (
-                <div className="rounded-[5px] bg-white p-8 text-center shadow-md shadow-slate-200/70">
-                  <h3 className="text-slate-950">No cars found</h3>
-
-                  <p className="mt-3 !text-slate-600">
-                    Try changing your filters or contact TravelEx for a custom
-                    rental inquiry.
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={resetFilters}
-                    className="mt-5 rounded-[5px] bg-[#FF6B00] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
-                  >
-                    Reset Filters
-                  </button>
-                </div>
-              ) : (
-                <div className="relative px-3 sm:px-0">
-                  {maxIndex > 0 && canGoLeft && (
-                    <button
-                      type="button"
-                      onClick={prevSlide}
-                      className="absolute -left-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-left-4 md:-left-5"
-                      aria-label="Previous car"
-                    >
-                      ‹
-                    </button>
-                  )}
-
-                  {maxIndex > 0 && canGoRight && (
-                    <button
-                      type="button"
-                      onClick={nextSlide}
-                      className="absolute -right-3 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white sm:-right-4 md:-right-5"
-                      aria-label="Next car"
-                    >
-                      ›
-                    </button>
-                  )}
-
-                  <div className="overflow-hidden">
-                    <div
-                      className="flex transition-transform duration-500 ease-out"
-                      style={{
-                        transform: `translateX(-${
-                          index * (100 / visibleCards)
-                        }%)`,
-                      }}
-                    >
-                      {filteredCars.map((car) => (
-                        <div
-                          key={car.id}
-                          className="min-w-full px-1 md:min-w-[50%] md:px-3 xl:min-w-[33.333333%]"
-                        >
-                          <article className="h-full overflow-hidden rounded-[5px] border border-slate-200 bg-white shadow-md shadow-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
-                            <div className="relative h-52 overflow-hidden">
-                              <img
-                                src={car.image}
-                                alt={car.name}
-                                className="h-full w-full object-cover"
-                              />
-
-                              <div className="badge-label absolute left-4 top-4 rounded-[5px] bg-white px-3 py-1.5 text-[#00AEEF] shadow-md">
-                                {car.type}
-                              </div>
-                            </div>
-
-                            <div className="p-5">
-                              <h3 className="text-slate-950">{car.name}</h3>
-
-                              <p className="mt-1 text-sm font-medium !text-slate-500">
-                                {car.location}
-                              </p>
-
-                              <div className="mt-4 grid grid-cols-3 gap-2">
-                                <div className="rounded-[5px] bg-slate-50 p-3 text-center">
-                                  <FaUsers className="mx-auto text-[#00AEEF]" />
-                                  <p className="mt-1 text-xs font-medium !text-slate-600">
-                                    {car.seats} seats
-                                  </p>
-                                </div>
-
-                                <div className="rounded-[5px] bg-slate-50 p-3 text-center">
-                                  <FaSuitcaseRolling className="mx-auto text-[#00AEEF]" />
-                                  <p className="mt-1 text-xs font-medium !text-slate-600">
-                                    {car.bags} bags
-                                  </p>
-                                </div>
-
-                                <div className="rounded-[5px] bg-slate-50 p-3 text-center">
-                                  <FaGasPump className="mx-auto text-[#00AEEF]" />
-                                  <p className="mt-1 text-xs font-medium !text-slate-600">
-                                    {car.fuel}
-                                  </p>
-                                </div>
-                              </div>
-
-                              <p className="mt-4 text-lg font-semibold !text-[#FF6B00]">
-                                Rs {car.price.toLocaleString()}{" "}
-                                <span className="text-xs font-medium text-slate-500">
-                                  / day
-                                </span>
-                              </p>
-
-                              <button
-                                type="button"
-                                onClick={() => setSelectedCar(car)}
-                                className="mt-5 w-full rounded-[5px] bg-[#FF6B00] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
-                              >
-                                Choose
-                              </button>
-                            </div>
-                          </article>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {maxIndex > 0 && (
-                    <div className="mt-5 flex justify-center gap-2">
-                      {Array.from({ length: maxIndex + 1 }).map(
-                        (_, dotIndex) => (
-                          <button
-                            type="button"
-                            key={dotIndex}
-                            onClick={() => setIndex(dotIndex)}
-                            className={`h-2 rounded-[5px] transition-all ${
-                              index === dotIndex
-                                ? "w-8 bg-[#00AEEF]"
-                                : "w-2 bg-slate-300"
-                            }`}
-                            aria-label={`Go to car slide ${dotIndex + 1}`}
-                          />
-                        )
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <p className="mt-10 text-center text-sm font-medium !text-slate-400">
-                Showing {filteredCars.length} - {filteredCars.length} of{" "}
-                {filteredCars.length} Cars
-              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {selectedCar && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 px-4 py-6">
-          <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[5px] bg-white shadow-2xl">
-            <button
-              type="button"
-              onClick={() => setSelectedCar(null)}
-              className="absolute right-4 top-4 z-20 flex h-12 w-12 items-center justify-center rounded-[5px] bg-slate-900 text-white transition hover:bg-[#FF6B00]"
-              aria-label="Close modal"
-            >
-              <FaTimes />
-            </button>
+      {/* Service Intro */}
+      <section className="relative z-20 -mt-5 bg-transparent sm:-mt-8">
+        <div className="mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 gap-2 rounded-[12px] border border-slate-100 bg-white p-3 shadow-[0_14px_36px_rgba(15,23,42,0.09)] sm:grid-cols-2 sm:gap-3 sm:p-4 lg:grid-cols-4">
+            {[
+              {
+                title: "Global",
+                desktopTitle: "Global Destinations",
+                text: "City based support",
+                desktopText: "Country and city based support",
+                icon: FaGlobeAsia,
+              },
+              {
+                title: "Airport",
+                desktopTitle: "Airport Pickup",
+                text: "Pickup and transfer",
+                desktopText: "Airport, hotel and route transfers",
+                icon: FaPlaneArrival,
+              },
+              {
+                title: "Flexible",
+                desktopTitle: "Flexible Options",
+                text: "Self-drive or driver",
+                desktopText: "Self-drive or driver-included",
+                icon: FaRoute,
+              },
+              {
+                title: "Quote",
+                desktopTitle: "Quote Based",
+                text: "After availability",
+                desktopText: "Final quote after availability check",
+                icon: FaClock,
+              },
+            ].map((item) => {
+              const Icon = item.icon
 
-            <div className="grid gap-6 p-6 md:grid-cols-[1fr_1fr]">
-              <img
-                src={selectedCar.image}
-                alt={selectedCar.name}
-                className="h-72 w-full rounded-[5px] object-cover"
-              />
+              return (
+                <div
+                  key={item.desktopTitle}
+                  className="rounded-[5px] bg-[#F8FAFC] p-3 sm:p-4"
+                >
+                  <Icon className="text-base text-[#00AEEF] sm:text-xl" />
 
+                  <p className="mt-2 font-poppins text-[8px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mt-3 sm:text-[10px] sm:tracking-[0.16em]">
+                    <span className="sm:hidden">{item.title}</span>
+                    <span className="hidden sm:inline">
+                      {item.desktopTitle}
+                    </span>
+                  </p>
+
+                  <p className="mt-1 font-poppins text-[10px] font-semibold leading-4 text-slate-950 sm:text-sm sm:leading-6">
+                    <span className="sm:hidden">{item.text}</span>
+                    <span className="hidden sm:inline">
+                      {item.desktopText}
+                    </span>
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Quote Form */}
+      <section
+        ref={quoteFormRef}
+        id="quote-form"
+        className="scroll-mt-24 bg-white py-8 sm:py-16"
+      >
+        <div className="mx-auto grid max-w-[1440px] gap-5 px-4 sm:px-6 lg:grid-cols-[1fr_380px] lg:gap-6 lg:px-8">
+          <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
+            <div className="mb-4 sm:mb-6">
+              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
+                Rental Quote Form
+              </p>
+
+              <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[40px]">
+                <span className="sm:hidden">Request Rental Quote</span>
+                <span className="hidden sm:inline">
+                  Request international car rental quote
+                </span>
+              </h2>
+
+              <p className="mt-1.5 max-w-3xl font-poppins text-[10.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-base sm:leading-7">
+                <span className="sm:hidden">
+                  Add destination, date and car type.
+                </span>
+
+                <span className="hidden sm:inline">
+                  Fill in your destination, pickup details, dates, and car type.
+                  TravelEx will confirm final pricing after supplier
+                  availability check.
+                </span>
+              </p>
+            </div>
+
+            {quoteSent ? (
+              <div className="rounded-[8px] border border-green-100 bg-green-50 p-5 sm:p-6">
+                <h3 className="font-fredoka text-[22px] font-semibold text-green-700 sm:text-[28px]">
+                  Rental quote request received
+                </h3>
+
+                <p className="mt-2 font-poppins text-[11.5px] font-medium leading-5 text-green-700 sm:text-sm sm:leading-7">
+                  Your request has been prepared successfully. Backend
+                  connection will later send this request to the admin dashboard.
+                </p>
+
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                  <a
+                    href={whatsappLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
+                  >
+                    <FaWhatsapp />
+                    Continue on WhatsApp
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuoteSent(false)
+                      resetFormState()
+                    }}
+                    className="inline-flex items-center justify-center rounded-[5px] border border-slate-200 bg-white px-5 py-2.5 font-poppins text-xs font-semibold text-slate-800 transition hover:border-[#00AEEF] hover:text-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
+                  >
+                    Submit Another Request
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="grid gap-4">
+                <input
+                  type="hidden"
+                  name="destinationCountry"
+                  value={selectedCountry}
+                  readOnly
+                />
+                <input
+                  type="hidden"
+                  name="rentalType"
+                  value={selectedCategory}
+                  readOnly
+                />
+                <input
+                  type="hidden"
+                  name="driverOption"
+                  value={selectedDriverOption}
+                  readOnly
+                />
+                <input
+                  type="hidden"
+                  name="pickupTime"
+                  value={pickupTime}
+                  readOnly
+                />
+                <input
+                  type="hidden"
+                  name="returnTime"
+                  value={returnTime}
+                  readOnly
+                />
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <AppSelect
+                    label="Destination Country"
+                    value={selectedCountry}
+                    onChange={setSelectedCountry}
+                    placeholder="Select country"
+                    options={destinationOptions}
+                  />
+
+                  <div>
+                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mb-2 sm:text-xs">
+                      City
+                    </label>
+
+                    <input
+                      type="text"
+                      required
+                      placeholder="Dubai, Istanbul, Baku..."
+                      className="h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:px-4 sm:text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mb-2 sm:text-xs">
+                      Pickup Location
+                    </label>
+
+                    <input
+                      type="text"
+                      required
+                      placeholder="Airport, hotel, city area..."
+                      className="h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:px-4 sm:text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mb-2 sm:text-xs">
+                      Drop-off Location
+                    </label>
+
+                    <input
+                      type="text"
+                      placeholder="Same as pickup or different location"
+                      className="h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:px-4 sm:text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div>
+                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mb-2 sm:text-xs">
+                      Pickup Date
+                    </label>
+
+                    <div className="relative">
+                      <FaCalendarAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="date"
+                        required
+                        className="h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <AppSelect
+                    label="Pickup Time"
+                    value={pickupTime}
+                    onChange={setPickupTime}
+                    placeholder="Select pickup time"
+                    options={timeOptions}
+                  />
+
+                  <div>
+                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mb-2 sm:text-xs">
+                      Return Date
+                    </label>
+
+                    <input
+                      type="date"
+                      className="h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:px-4 sm:text-sm"
+                    />
+                  </div>
+
+                  <AppSelect
+                    label="Return Time"
+                    value={returnTime}
+                    onChange={setReturnTime}
+                    placeholder="Select return time"
+                    options={timeOptions}
+                  />
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <AppSelect
+                    label="Rental Type"
+                    value={selectedCategory}
+                    onChange={setSelectedCategory}
+                    placeholder="Select rental type"
+                    options={vehicleCategories.map((category) => category.title)}
+                  />
+
+                  <AppSelect
+                    label="Driver Option"
+                    value={selectedDriverOption}
+                    onChange={setSelectedDriverOption}
+                    placeholder="Select option"
+                    options={driverOptions}
+                  />
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mb-2 sm:text-xs">
+                      Passengers
+                    </label>
+
+                    <div className="relative">
+                      <FaUsers className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="number"
+                        min="1"
+                        required
+                        placeholder="Number of passengers"
+                        className="h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mb-2 sm:text-xs">
+                      Luggage
+                    </label>
+
+                    <div className="relative">
+                      <FaSuitcaseRolling className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="text"
+                        placeholder="Example: 2 bags, 4 bags..."
+                        className="h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mb-2 sm:text-xs">
+                      Full Name
+                    </label>
+
+                    <input
+                      type="text"
+                      required
+                      placeholder="Enter your name"
+                      className="h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:px-4 sm:text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mb-2 sm:text-xs">
+                      Phone / WhatsApp
+                    </label>
+
+                    <div className="relative">
+                      <FaPhoneAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="tel"
+                        required
+                        placeholder="03XXXXXXXXX"
+                        className="h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mb-2 sm:text-xs">
+                      Email
+                    </label>
+
+                    <div className="relative">
+                      <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="email"
+                        placeholder="Enter email"
+                        className="h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mb-2 sm:text-xs">
+                    Special Request
+                  </label>
+
+                  <textarea
+                    rows="4"
+                    placeholder="Write flight number, hotel name, route, car preference, budget, or any special requirement..."
+                    className="w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:px-4 sm:text-sm"
+                  />
+                </div>
+
+                {formError && (
+                  <p className="rounded-[5px] bg-red-50 px-4 py-3 font-poppins text-xs font-semibold leading-5 text-red-600">
+                    {formError}
+                  </p>
+                )}
+
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <button
+                    type="submit"
+                    className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
+                  >
+                    Submit Rental Quote
+                    <FaArrowRight className="text-[10px] sm:text-xs" />
+                  </button>
+
+                  <a
+                    href={whatsappLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 bg-white px-5 py-2.5 font-poppins text-xs font-semibold text-slate-800 transition hover:border-[#25D366] hover:text-[#25D366] sm:px-6 sm:py-3 sm:text-sm"
+                  >
+                    <FaWhatsapp />
+                    WhatsApp Instead
+                  </a>
+                </div>
+              </form>
+            )}
+          </div>
+
+          {/* Sticky Info Sidebar */}
+          <aside className="h-fit lg:sticky lg:top-24 lg:self-start">
+            <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_16px_45px_rgba(15,23,42,0.08)] sm:p-5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-[5px] bg-[#00AEEF]/10 text-[#00AEEF] sm:h-12 sm:w-12">
+                <FaGlobeAsia />
+              </div>
+
+              <h3 className="mt-3 font-fredoka text-[22px] font-semibold leading-tight text-slate-950 sm:mt-4 sm:text-[28px]">
+                How international rental works
+              </h3>
+
+              <p className="mt-1.5 font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
+                International car rental prices are confirmed after supplier
+                availability check. TravelEx will guide you before final booking.
+              </p>
+
+              <div className="mt-4 grid gap-2 sm:mt-5 sm:gap-3">
+                {processSteps.map((step, index) => (
+                  <div
+                    key={step.title}
+                    className="rounded-[5px] bg-[#F8FAFC] p-3.5 sm:p-4"
+                  >
+                    <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.16em] text-[#00AEEF] sm:text-[10px]">
+                      Step {index + 1}
+                    </p>
+
+                    <h4 className="mt-1 font-poppins text-xs font-bold text-slate-950 sm:text-sm">
+                      {step.title}
+                    </h4>
+
+                    <p className="mt-1 font-poppins text-[10.5px] font-medium leading-5 text-slate-600 sm:text-xs sm:leading-6">
+                      {step.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 rounded-[5px] border border-orange-100 bg-orange-50 p-3.5 sm:mt-5 sm:p-4">
+                <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.16em] text-[#FF6B00] sm:text-[11px]">
+                  Important Note
+                </p>
+
+                <p className="mt-1.5 font-poppins text-[11px] font-semibold leading-5 text-orange-800 sm:mt-2 sm:text-sm sm:leading-7">
+                  Final rental price may vary by country, supplier, dates,
+                  insurance, deposit, pickup location, and driver option.
+                </p>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      {/* Popular Destinations */}
+      <section className="bg-[#F8FAFC] py-8 sm:py-16">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+          <div className="mb-4 text-center sm:mb-8">
+            <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
+              Popular Destinations
+            </p>
+
+            <h2 className="font-fredoka text-[18px] font-semibold leading-[1.08] text-slate-950 sm:text-[44px]">
+              <span className="sm:hidden">Popular Cities</span>
+              <span className="hidden sm:inline">
+                International cities we can help with
+              </span>
+            </h2>
+
+            <p className="mx-auto mt-1 max-w-2xl font-poppins text-[10px] font-medium leading-4 text-slate-600 sm:mt-2 sm:text-base sm:leading-7">
+              <span className="sm:hidden">
+                Rental support in major destinations.
+              </span>
+
+              <span className="hidden sm:inline">
+                TravelEx can guide you with international rental options in major
+                travel destinations based on availability and supplier response.
+              </span>
+            </p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+            {popularDestinations.map((destination) => (
+              <div
+                key={destination.country}
+                className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)] transition hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(15,23,42,0.08)] sm:p-5"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-[5px] bg-[#00AEEF]/10 text-[#00AEEF] sm:h-11 sm:w-11">
+                  <FaMapMarkerAlt />
+                </div>
+
+                <h3 className="mt-3 font-fredoka text-[22px] font-semibold text-slate-950 sm:mt-4 sm:text-[26px]">
+                  {destination.country}
+                </h3>
+
+                <p className="mt-1 font-poppins text-xs font-bold text-[#FF6B00] sm:text-sm">
+                  {destination.cities}
+                </p>
+
+                <p className="mt-1.5 font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
+                  {destination.use}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Bottom CTA */}
+      <section className="bg-[#F8FAFC] pb-8 sm:pb-14">
+        <div className="mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8">
+          <div className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
+            <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
               <div>
-                <p className="eyebrow mb-3 text-[#00AEEF]">
-                  Car Rental Details
+                <h3 className="font-fredoka text-[21px] font-semibold leading-tight text-slate-950 sm:text-[32px]">
+                  Need a custom international transport plan?
+                </h3>
+
+                <p className="mt-1.5 max-w-3xl font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:text-sm sm:leading-7">
+                  Share your country, pickup city, travel dates, route, and
+                  passenger count. TravelEx can guide you with a suitable
+                  international rental or transfer option.
                 </p>
 
-                <h2 className="text-slate-950">{selectedCar.name}</h2>
-
-                <p className="mt-2 text-sm font-medium !text-slate-500">
-                  {selectedCar.location}
-                </p>
-
-                <p className="mt-5 text-2xl font-semibold !text-[#FF6B00]">
-                  Rs {selectedCar.price.toLocaleString()}{" "}
-                  <span className="text-sm font-medium text-slate-500">
-                    / day
-                  </span>
-                </p>
-
-                <div className="mt-5 grid gap-2">
-                  {selectedCar.features.map((feature) => (
+                <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                  {trustPoints.map((item) => (
                     <p
-                      key={feature}
-                      className="rounded-[5px] bg-slate-50 px-4 py-3 text-sm font-medium !text-slate-600"
+                      key={item}
+                      className="flex items-center gap-2 font-poppins text-[11.5px] font-semibold text-slate-700 sm:text-sm"
                     >
-                      ✓ {feature}
+                      <FaCheckCircle className="shrink-0 text-[#00AEEF]" />
+                      {item}
                     </p>
                   ))}
                 </div>
+              </div>
 
+              <div className="flex flex-col gap-3 sm:flex-row md:flex-col">
                 <button
                   type="button"
-                  onClick={handleBookNow}
-                  className="mt-6 w-full rounded-[5px] bg-[#FF6B00] px-7 py-3 text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
+                  onClick={() => openQuoteForm()}
+                  className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
                 >
-                  Book Now
+                  Get Quote
+                  <FaArrowRight className="text-[10px] sm:text-xs" />
                 </button>
+
+                <Link
+                  to="/contact"
+                  className="inline-flex items-center justify-center rounded-[5px] border border-slate-200 bg-white px-5 py-2.5 font-poppins text-xs font-semibold text-slate-800 transition hover:border-[#00AEEF] hover:text-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
+                >
+                  Contact TravelEx
+                </Link>
               </div>
             </div>
           </div>
         </div>
-      )}
+      </section>
 
-      <AuthModal
-        isOpen={authOpen}
-        onClose={() => setAuthOpen(false)}
-        bookingPath={pendingBookingPath}
-      />
+      <Footer />
     </main>
   )
 }

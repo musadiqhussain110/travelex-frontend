@@ -1,385 +1,402 @@
-import { useEffect, useMemo, useState } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
-import { FaWhatsapp, FaChevronDown } from "react-icons/fa"
-import AuthModal from "../components/AuthModal"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { Link, useSearchParams } from "react-router-dom"
+import {
+  FaArrowRight,
+  FaCheckCircle,
+  FaClock,
+  FaFileAlt,
+  FaInfoCircle,
+  FaMoneyBillWave,
+  FaPassport,
+  FaSearch,
+  FaWhatsapp,
+} from "react-icons/fa"
 
-const visaData = [
-  {
-    id: "uae-e-visa",
-    country: "UAE",
-    displayCountry: "UAE / Dubai",
-    title: "UAE E-Visa",
-    type: "E-Visa",
-    requirements: [
-      "Passport size picture",
-      "Passport scan copy with 6 months validity, 1st and 2nd page",
-      "NIC scan copy",
-    ],
-    steps: [
-      "Fill out the form.",
-      "Pay online with easy payment methods.",
-      "Provide all necessary documents.",
-      "Enjoy your trip.",
-    ],
-  },
-  {
-    id: "sri-lanka-e-visa",
-    country: "Sri Lanka",
-    displayCountry: "Sri Lanka",
-    title: "Sri Lanka E-Visa",
-    type: "E-Visa",
-    requirements: ["Passport with 6 months validity", "Hotel reservation"],
-    steps: [
-      "Fill out the form.",
-      "Pay online with easy payment methods.",
-      "Provide all necessary documents.",
-      "Enjoy your trip.",
-    ],
-  },
-  {
-    id: "malaysia-e-visa",
-    country: "Malaysia",
-    displayCountry: "Malaysia",
-    title: "Malaysia E-Visa",
-    type: "E-Visa",
-    requirements: [
-      "Passport",
-      "Passport-size picture with white background",
-      "NIC",
-      "3 months personal bank statement with account maintenance letter signed and stamped by bank, closing balance 3 lac",
-    ],
-    steps: [
-      "Fill out the form.",
-      "Pay online with easy payment methods.",
-      "Provide all necessary documents.",
-      "Enjoy your trip.",
-    ],
-  },
-  {
-    id: "spain-visa",
-    country: "Spain",
-    displayCountry: "Spain",
-    title: "Spain Visa Requirements",
-    type: "Visa",
-    fee: "Spain Tourist Visa fee is PKR 18,518",
-    requirements: [
-      "Schengen visa application form duly filled and signed by applicant",
-      "2 recent colour passport-size photos with white background",
-      "Original and photocopy of passport or official travel document",
-      "Visa fee",
-      "Medical insurance covering €30,000 including repatriation",
-      "Copy of Pakistani identity card CNIC",
-      "Return flight reservation",
-      "Accommodation reservation for entire stay",
-      "Family Registration Certificate FRC issued in English by NADRA",
-      "Bank statements for last six months, signed and stamped by bank",
-      "NTN certificate or proof of exemption and FBR tax returns",
-      "Employment, business, student, retired, or sponsorship documents if applicable",
-    ],
-    steps: [
-      "Prepare all required documents.",
-      "Submit complete application with supporting documents.",
-      "Pay visa fee where required.",
-      "Wait for embassy or consulate decision.",
-    ],
-  },
-  {
-    id: "egypt-visa",
-    country: "Egypt",
-    displayCountry: "Egypt",
-    title: "Egypt Visa",
-    type: "Visa",
-    fee: "Egypt visa fee PKR 18,000*",
-    processing: "Processing time: 35 to 40 days",
-    requirements: [
-      "8 months valid original passport with signature page signed",
-      "CNIC copy",
-      "2 photographs white background 2x2 size",
-      "Updated 3 months bank statement with minimum PKR 300,000 closing balance",
-      "Account maintenance certificate from bank",
-      "Employment letter for working applicants",
-      "Polio certificate from government hospital with sign and IPV stamp",
-      "NTN",
-      "Dengue report",
-      "Confirmed hotel reservation and invitation intimation to Egypt Embassy Islamabad",
-    ],
-    note: "Approval is subject to Egypt Embassy / Consulate.",
-    steps: [
-      "Prepare all required documents.",
-      "Submit documents for embassy or consulate processing.",
-      "Wait for approval decision.",
-      "Collect passport after processing.",
-    ],
-  },
-  {
-    id: "turkey-visa",
-    country: "Turkey",
-    displayCountry: "Turkey",
-    title: "Turkey Visa",
-    type: "Visa",
-    requirements: [
-      "Visa application form duly filled and printed with two coloured biometric photos",
-      "Passport valid for at least 6 months from travel date",
-      "Copies of bio data and used pages of old passports on A4 size",
-      "Income documents such as salary checks, FBR, NTN, Active Tax Payer Certificate",
-      "Family registration certificate or marriage registration certificate from NADRA",
-      "Cover letter explaining planned visit, purpose, places to visit, expenses, and travel details",
-      "Bank statements of last 3 months signed and stamped by bank",
-      "Bank account maintenance certificate where applicable",
-      "Return ticket reservation or proof of onward journey",
-      "Hotel reservation or invitation letter",
-      "Travel health insurance covering Euro 30,000 / USD 50,000",
-    ],
-    note: "Submitting documents does not guarantee visa issuance. Embassy decision is final.",
-    steps: [
-      "Prepare mandatory and conditional documents.",
-      "Ensure documents are in English, readable, scannable, and A4 format.",
-      "Submit complete application.",
-      "Wait for embassy decision.",
-    ],
-  },
-]
+import Footer from "../components/Footer"
+import { visaServices } from "../data/visaData"
+import visaHero from "../assets/visa/visa.png"
+
+const getVisaWhatsappLink = (visa) =>
+  `https://wa.me/923111444192?text=${encodeURIComponent(
+    `Assalamualaikum TravelEx, I need guidance about ${visa.title}. Please share details and process.`
+  )}`
+
+const getVisaApplyLink = (visa) =>
+  `/visa/apply?country=${encodeURIComponent(
+    visa.country
+  )}&visa=${encodeURIComponent(visa.title)}&type=${encodeURIComponent(
+    visa.type
+  )}`
+
+const findVisaByQuery = (query) => {
+  if (!query) return null
+
+  const normalizedQuery = query.toLowerCase().trim()
+
+  return visaServices.find((visa) => {
+    const title = visa.title.toLowerCase()
+    const country = visa.country.toLowerCase()
+    const type = visa.type.toLowerCase()
+
+    return (
+      title.includes(normalizedQuery) ||
+      country.includes(normalizedQuery) ||
+      type.includes(normalizedQuery)
+    )
+  })
+}
 
 const VisaPage = () => {
-  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const countryFromUrl = searchParams.get("country") || ""
 
-  const [selectedCountry, setSelectedCountry] = useState(
-    searchParams.get("country") || "UAE"
-  )
-  const [selectedType, setSelectedType] = useState(
-    searchParams.get("type") || "E-Visa"
-  )
+  const matchedVisa = findVisaByQuery(countryFromUrl) || visaServices[0]
 
-  const [countryOpen, setCountryOpen] = useState(false)
-  const [authOpen, setAuthOpen] = useState(false)
-  const [pendingBookingPath, setPendingBookingPath] = useState("")
+  const [selectedVisaId, setSelectedVisaId] = useState(matchedVisa.id)
+  const [searchTerm, setSearchTerm] = useState(countryFromUrl)
+
+  const countryListRef = useRef(null)
+
+  const filteredVisas = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase()
+
+    if (!query) return visaServices
+
+    return visaServices.filter((visa) => {
+      return (
+        visa.title.toLowerCase().includes(query) ||
+        visa.country.toLowerCase().includes(query) ||
+        visa.type.toLowerCase().includes(query)
+      )
+    })
+  }, [searchTerm])
+
+  const selectedVisa =
+    visaServices.find((visa) => visa.id === selectedVisaId) || visaServices[0]
 
   useEffect(() => {
-    setSelectedCountry(searchParams.get("country") || "UAE")
-    setSelectedType(searchParams.get("type") || "E-Visa")
-  }, [searchParams])
+    if (!countryFromUrl) return
 
-  const selectedVisa = useMemo(() => {
-    return (
-      visaData.find((visa) => {
-        const typeFromUrl =
-          selectedType === "Sticker Visa" ? "Visa" : selectedType
+    const matched = findVisaByQuery(countryFromUrl)
 
-        return visa.country === selectedCountry && visa.type === typeFromUrl
-      }) || visaData[0]
-    )
-  }, [selectedCountry, selectedType])
+    setSearchTerm(countryFromUrl)
 
-  const eVisaOptions = visaData.filter((visa) => visa.type === "E-Visa")
-  const visaOptions = visaData.filter((visa) => visa.type === "Visa")
+    if (matched) {
+      setSelectedVisaId(matched.id)
+    }
+  }, [countryFromUrl])
 
-  const handleCountrySelect = (visa) => {
-    if (!visa) return
+  useEffect(() => {
+    const list = countryListRef.current
 
-    const urlType = visa.type === "Visa" ? "Sticker Visa" : visa.type
+    if (!list) return
 
-    setSelectedCountry(visa.country)
-    setSelectedType(urlType)
-    setCountryOpen(false)
+    const handleWheel = (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+      list.scrollTop += event.deltaY
+    }
 
-    navigate(
-      `/visa?country=${encodeURIComponent(
-        visa.country
-      )}&type=${encodeURIComponent(urlType)}`
-    )
-  }
+    list.addEventListener("wheel", handleWheel, { passive: false })
 
-  const handleApplyNow = () => {
-    setPendingBookingPath(`/booking/visa/${selectedVisa.id}`)
-    setAuthOpen(true)
-  }
+    return () => {
+      list.removeEventListener("wheel", handleWheel)
+    }
+  }, [])
 
   return (
-    <main className="bg-white">
-      {/* Top Header */}
-      <section className="border-b border-slate-100 bg-white py-6 sm:py-8">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#00AEEF] sm:text-sm">
-            Visa Assistance
-          </p>
+    <main className="bg-[#F8FAFC]">
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-slate-950">
+        <img
+          src={visaHero}
+          alt="Visa assistance by TravelEx"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
 
-          <div className="mt-3 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/65 via-slate-950/45 to-slate-950/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
+
+        <div className="relative z-10 mx-auto max-w-[1340px] px-4 py-7 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
+          <div className="max-w-4xl">
+            <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.22em] text-[#00AEEF] sm:text-[12px]">
+              Visa Assistance
+            </p>
+
+            <h1 className="mt-1 font-fredoka text-[17px] font-semibold leading-[1.08] text-white sm:mt-2 sm:text-[46px] sm:uppercase sm:leading-[1.1] lg:text-[54px]">
+              <span className="sm:hidden">Visa Requirements</span>
+              <span className="hidden sm:inline">
+                Visa checklist and requirements
+              </span>
+            </h1>
+
+            <p className="mt-1 max-w-3xl font-poppins text-[9px] font-medium leading-4 text-white/85 sm:mt-3 sm:text-base sm:leading-7">
+              <span className="sm:hidden">
+                Country-wise checklist and process.
+              </span>
+
+              <span className="hidden sm:inline">
+                Select a destination and view visa fee, processing time, required
+                documents, and application details based on TravelEx visa
+                checklist.
+              </span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Visa Content */}
+      <section className="bg-[#F8FAFC] pb-8 pt-4 sm:py-14">
+        <div className="mx-auto grid max-w-[1440px] gap-4 px-4 sm:px-6 lg:grid-cols-[330px_1fr] lg:gap-6 lg:px-8">
+          {/* Left Country List */}
+          <aside className="h-fit rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-5 lg:sticky lg:top-24">
             <div>
-              <h1 className="text-3xl font-medium text-slate-950 sm:text-4xl">
-                {selectedVisa.title}
-              </h1>
+              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
+                Destinations
+              </p>
 
-              <p className="mt-2 text-sm font-semibold text-slate-500">
-                Check requirements and apply with TravelEx support.
+              <h2 className="font-fredoka text-[18px] font-semibold leading-[1.08] text-slate-950 sm:text-[28px]">
+                Select Visa
+              </h2>
+
+              <p className="mt-1 max-w-2xl font-poppins text-[10px] font-medium leading-4 text-slate-600 sm:mt-1.5 sm:text-sm sm:leading-7">
+                <span className="sm:hidden">
+                  Search destination and view details.
+                </span>
+
+                <span className="hidden sm:inline">
+                  Only countries included in the checklist PDF are shown here.
+                </span>
               </p>
             </div>
 
-            <div className="relative w-full md:w-72">
-              <label className="mb-2 block text-xs font-black uppercase tracking-wider text-slate-400">
-                Change Country
-              </label>
+            <div className="relative mt-3 sm:mt-5">
+              <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
 
-              <button
-                type="button"
-                onClick={() => setCountryOpen(!countryOpen)}
-                className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-black text-slate-900 outline-none transition focus:border-[#00AEEF]"
-              >
-                <span>{selectedVisa.displayCountry}</span>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search country..."
+                className="h-10 w-full rounded-[5px] border border-slate-200 bg-[#F8FAFC] pl-10 pr-4 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] focus:bg-white sm:h-12 sm:pl-11 sm:text-sm"
+              />
+            </div>
 
-                <FaChevronDown
-                  className={`text-xs text-slate-500 transition-transform ${
-                    countryOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
+            <div
+              ref={countryListRef}
+              className="mt-3 grid max-h-[260px] gap-2 overflow-y-auto overscroll-contain pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mt-5 sm:max-h-[360px] sm:pr-2 lg:max-h-[520px]"
+            >
+              {filteredVisas.length > 0 ? (
+                filteredVisas.map((visa) => {
+                  const isActive = selectedVisa.id === visa.id
 
-              {countryOpen && (
-                <div className="absolute left-0 right-0 top-[76px] z-50 max-h-72 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl">
-                  <div className="border-b border-slate-100 px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
-                    E-Visa
-                  </div>
-
-                  {eVisaOptions.map((visa) => (
+                  return (
                     <button
                       key={visa.id}
                       type="button"
-                      onClick={() => handleCountrySelect(visa)}
-                      className={`block w-full px-4 py-3 text-left text-sm font-bold transition ${
-                        selectedVisa.id === visa.id
-                          ? "bg-[#00AEEF] text-white"
-                          : "text-slate-700 hover:bg-sky-50 hover:text-[#00AEEF]"
+                      onClick={() => setSelectedVisaId(visa.id)}
+                      className={`rounded-[5px] px-3.5 py-2.5 text-left transition sm:px-4 sm:py-3 ${
+                        isActive
+                          ? "bg-[#00AEEF] text-white shadow-[0_10px_25px_rgba(0,174,239,0.18)]"
+                          : "bg-[#F8FAFC] text-slate-700 hover:bg-sky-50 hover:text-[#00AEEF]"
                       }`}
                     >
-                      {visa.displayCountry}
-                    </button>
-                  ))}
+                      <span className="block font-poppins text-xs font-bold sm:text-sm">
+                        {visa.country}
+                      </span>
 
-                  <div className="border-y border-slate-100 px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">
-                    Visa
-                  </div>
-
-                  {visaOptions.map((visa) => (
-                    <button
-                      key={visa.id}
-                      type="button"
-                      onClick={() => handleCountrySelect(visa)}
-                      className={`block w-full px-4 py-3 text-left text-sm font-bold transition ${
-                        selectedVisa.id === visa.id
-                          ? "bg-[#00AEEF] text-white"
-                          : "text-slate-700 hover:bg-sky-50 hover:text-[#00AEEF]"
-                      }`}
-                    >
-                      {visa.displayCountry}
+                      <span
+                        className={`mt-0.5 block font-poppins text-[10px] font-semibold sm:mt-1 sm:text-xs ${
+                          isActive ? "text-white/75" : "text-slate-400"
+                        }`}
+                      >
+                        {visa.type}
+                      </span>
                     </button>
-                  ))}
+                  )
+                })
+              ) : (
+                <div className="rounded-[5px] bg-[#F8FAFC] p-4 text-center">
+                  <p className="font-poppins text-sm font-semibold text-slate-600">
+                    No visa found.
+                  </p>
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      </section>
+          </aside>
 
-      {/* Requirements Content */}
-      <section className="py-6 sm:py-8">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          {/* Badges */}
-          <div className="mb-6 border-b border-slate-200 pb-5">
-            <div className="flex flex-wrap gap-3">
-              <span
-                className={`rounded-full px-4 py-2 text-xs font-black uppercase tracking-wider ${
-                  selectedVisa.type === "E-Visa"
-                    ? "bg-sky-50 text-[#00AEEF]"
-                    : "bg-orange-50 text-[#FF6B00]"
-                }`}
-              >
-                {selectedVisa.type}
-              </span>
+          {/* Visa Details */}
+          <div className="grid gap-4 sm:gap-6">
+            {/* Detail Header */}
+            <section className="overflow-hidden rounded-[12px] border border-slate-100 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+              <div className="border-b border-slate-100 p-4 sm:p-7">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div>
+                    <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
+                      {selectedVisa.type}
+                    </p>
 
-              {selectedVisa.fee && (
-                <span className="rounded-full bg-slate-50 px-4 py-2 text-xs font-black text-slate-600">
-                  {selectedVisa.fee}
-                </span>
-              )}
+                    <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[42px]">
+                      {selectedVisa.title}
+                    </h2>
 
-              {selectedVisa.processing && (
-                <span className="rounded-full bg-slate-50 px-4 py-2 text-xs font-black text-slate-600">
-                  {selectedVisa.processing}
-                </span>
-              )}
-            </div>
-          </div>
+                    <p className="mt-1.5 font-poppins text-[10.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
+                      View fee, processing time and document checklist for{" "}
+                      {selectedVisa.country}.
+                    </p>
+                  </div>
 
-          <div>
-            <h3 className="text-lg font-medium text-slate-950">
-              Requirements
-            </h3>
+                  <div className="grid gap-2 sm:flex sm:shrink-0">
+                    <Link
+                      to={getVisaApplyLink(selectedVisa)}
+                      className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:py-3 sm:text-sm"
+                    >
+                      Apply Now
+                      <FaArrowRight className="text-[10px] sm:text-xs" />
+                    </Link>
 
-            <div className="mt-5 space-y-4">
-              {selectedVisa.requirements.map((item, index) => (
-                <p
-                  key={item}
-                  className="text-sm font-semibold leading-7 text-slate-700"
-                >
-                  {index + 1}. {item}
-                </p>
-              ))}
-            </div>
+                    <a
+                      href={getVisaWhatsappLink(selectedVisa)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:py-3 sm:text-sm"
+                    >
+                      <FaWhatsapp />
+                      Ask on WhatsApp
+                    </a>
+                  </div>
+                </div>
+              </div>
 
-            {selectedVisa.note && (
-              <p className="mt-6 rounded-xl bg-orange-50 p-4 text-sm font-bold leading-7 text-orange-700">
-                Note: {selectedVisa.note}
+              <div className="grid gap-2 p-4 sm:grid-cols-3 sm:gap-3 sm:p-7">
+                <div className="rounded-[5px] bg-[#F8FAFC] p-3.5 sm:p-4">
+                  <FaMoneyBillWave className="text-lg text-[#00AEEF] sm:text-xl" />
+
+                  <p className="mt-2 font-poppins text-[8px] font-bold uppercase tracking-[0.16em] text-slate-400 sm:mt-3 sm:text-[10px]">
+                    {selectedVisa.feeTitle}
+                  </p>
+
+                  <p className="mt-1 font-poppins text-xs font-semibold leading-5 text-slate-950 sm:text-sm sm:leading-6">
+                    {selectedVisa.fee}
+                  </p>
+                </div>
+
+                <div className="rounded-[5px] bg-[#F8FAFC] p-3.5 sm:p-4">
+                  <FaClock className="text-lg text-[#00AEEF] sm:text-xl" />
+
+                  <p className="mt-2 font-poppins text-[8px] font-bold uppercase tracking-[0.16em] text-slate-400 sm:mt-3 sm:text-[10px]">
+                    Processing Time
+                  </p>
+
+                  <p className="mt-1 font-poppins text-xs font-semibold leading-5 text-slate-950 sm:text-sm sm:leading-6">
+                    {selectedVisa.processingTime}
+                  </p>
+                </div>
+
+                <div className="rounded-[5px] bg-[#F8FAFC] p-3.5 sm:p-4">
+                  <FaPassport className="text-lg text-[#00AEEF] sm:text-xl" />
+
+                  <p className="mt-2 font-poppins text-[8px] font-bold uppercase tracking-[0.16em] text-slate-400 sm:mt-3 sm:text-[10px]">
+                    Country
+                  </p>
+
+                  <p className="mt-1 font-poppins text-xs font-semibold leading-5 text-slate-950 sm:text-sm sm:leading-6">
+                    {selectedVisa.country}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            {/* Requirements */}
+            <section className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
+              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
+                Required Documents
               </p>
-            )}
-          </div>
 
-          <div className="mt-8 border-t border-slate-200 pt-6">
-            <h3 className="text-2xl font-medium text-slate-950">
-              How to Apply
-            </h3>
+              <h3 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[30px]">
+                Document checklist
+              </h3>
 
-            <div className="mt-5 space-y-4">
-              {selectedVisa.steps.map((step, index) => (
-                <p
-                  key={step}
-                  className="text-sm font-semibold leading-7 text-slate-700"
-                >
-                  <span className="font-black text-slate-950">
-                    Step {index + 1}:
-                  </span>{" "}
-                  {step}
+              <p className="mt-1.5 font-poppins text-[10.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
+                Prepare clear scanned copies of these documents.
+              </p>
+
+              <div className="mt-3 grid gap-2 sm:mt-5 sm:grid-cols-2 sm:gap-3">
+                {selectedVisa.documents.map((document) => (
+                  <div
+                    key={document}
+                    className="flex items-start gap-2.5 rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 sm:gap-3 sm:px-4 sm:py-3"
+                  >
+                    <FaCheckCircle className="mt-1 shrink-0 text-[12px] text-[#00AEEF] sm:text-base" />
+
+                    <p className="font-poppins text-[11px] font-semibold leading-5 text-slate-700 sm:text-sm sm:leading-6">
+                      {document}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Additional Details */}
+            {selectedVisa.details?.length > 0 && (
+              <section className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
+                <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
+                  Additional Details
                 </p>
-              ))}
-            </div>
 
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <button
-                type="button"
-                onClick={handleApplyNow}
-                className="rounded-xl bg-[#14213D] px-7 py-3 text-sm font-black text-white transition hover:bg-[#FF6B00]"
-              >
-                Apply Now
-              </button>
+                <h3 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[30px]">
+                  Important information
+                </h3>
 
-              <a
-                href="https://wa.me/923111444192"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-6 py-2.5 text-sm font-black text-slate-900 transition hover:border-[#25D366] hover:text-[#25D366]"
-              >
-                <FaWhatsapp />
-                Ask on WhatsApp
-              </a>
-            </div>
+                <div className="mt-3 grid gap-2 sm:mt-5 sm:gap-3">
+                  {selectedVisa.details.map((detail) => (
+                    <div
+                      key={detail}
+                      className="flex items-start gap-2.5 rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 sm:gap-3 sm:px-4 sm:py-3"
+                    >
+                      <FaFileAlt className="mt-1 shrink-0 text-[12px] text-[#FF6B00] sm:text-base" />
+
+                      <p className="font-poppins text-[11px] font-semibold leading-5 text-slate-700 sm:text-sm sm:leading-6">
+                        {detail}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Note CTA */}
+            <section className="rounded-[12px] border border-[#FF6B00]/15 bg-orange-50 p-4 sm:p-6">
+              <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
+                <div className="flex gap-2.5 sm:gap-3">
+                  <FaInfoCircle className="mt-1 shrink-0 text-sm text-[#FF6B00] sm:text-base" />
+
+                  <div>
+                    <h3 className="font-fredoka text-[20px] font-semibold leading-tight text-slate-950 sm:text-[24px]">
+                      Need help with this visa?
+                    </h3>
+
+                    <p className="mt-1.5 font-poppins text-[11px] font-semibold leading-5 text-orange-800 sm:mt-2 sm:text-sm sm:leading-7">
+                      Visa charges and requirements may change. Contact TravelEx
+                      before final submission.
+                    </p>
+                  </div>
+                </div>
+
+                <Link
+                  to={getVisaApplyLink(selectedVisa)}
+                  className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
+                >
+                  Apply Now
+                  <FaArrowRight className="text-[10px] sm:text-xs" />
+                </Link>
+              </div>
+            </section>
           </div>
         </div>
       </section>
 
-      <AuthModal
-        isOpen={authOpen}
-        onClose={() => setAuthOpen(false)}
-        bookingPath={pendingBookingPath}
-      />
+      <Footer />
     </main>
   )
 }

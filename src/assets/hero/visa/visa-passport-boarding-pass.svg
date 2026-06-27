@@ -1,0 +1,78 @@
+<svg viewBox="0 0 600 560" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="9" stdDeviation="11" flood-color="#0b2a4a" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- ===================== PASSPORT ===================== -->
+  <g transform="rotate(-7 225 305)">
+    <!-- inner pages (cream sliver) -->
+    <rect x="122" y="160" width="228" height="300" rx="14" fill="#FBF3E4"/>
+    <!-- cover -->
+    <rect x="110" y="152" width="228" height="300" rx="18" fill="#0b2a4a" filter="url(#soft)"/>
+    <!-- inner decorative frame -->
+    <rect x="128" y="170" width="192" height="264" rx="10" fill="none" stroke="#FF6B00" stroke-opacity="0.40" stroke-width="2"/>
+
+    <!-- globe emblem -->
+    <g stroke="#FF6B00" stroke-width="4" fill="none" stroke-linecap="round">
+      <circle cx="224" cy="234" r="44"/>
+      <ellipse cx="224" cy="234" rx="18" ry="44"/>
+      <line x1="182" y1="234" x2="266" y2="234"/>
+      <line x1="190" y1="206" x2="258" y2="206"/>
+      <line x1="190" y1="262" x2="258" y2="262"/>
+      <line x1="224" y1="190" x2="224" y2="278"/>
+    </g>
+
+    <!-- PASSPORT label -->
+    <text x="224" y="320" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="700" letter-spacing="3" fill="#FF6B00">PASSPORT</text>
+    <rect x="168" y="334" width="112" height="3" rx="1.5" fill="#00AEEF"/>
+    <text x="224" y="362" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="600" letter-spacing="5" fill="#FBF3E4" fill-opacity="0.85">TRAVELEX</text>
+  </g>
+
+  <!-- ===================== BOARDING PASS ===================== -->
+  <g transform="rotate(6 415 380)">
+    <!-- card -->
+    <rect x="300" y="308" width="246" height="150" rx="14" fill="#FFFFFF" filter="url(#soft)"/>
+
+    <!-- orange header band (rounded top corners only) -->
+    <path d="M314 308 H532 A14 14 0 0 1 546 322 V348 H300 V322 A14 14 0 0 1 314 308 Z" fill="#FF6B00"/>
+
+    <!-- plane icon in band -->
+    <g transform="translate(315,320) scale(0.8)">
+      <path d="M2 11 L22 2 L12.5 21 L10.5 12.5 Z" fill="#FFFFFF"/>
+      <path d="M10.5 12.5 L22 2 L12.5 21 Z" fill="#FFFFFF" fill-opacity="0.55"/>
+    </g>
+    <text x="345" y="333" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" letter-spacing="2" fill="#FFFFFF">BOARDING PASS</text>
+
+    <!-- FROM / TO -->
+    <text x="318" y="382" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" letter-spacing="1.5" fill="#94A3B8">FROM</text>
+    <text x="316" y="406" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="800" fill="#0b2a4a">KHI</text>
+
+    <g transform="translate(386,386) scale(0.85)">
+      <path d="M2 11 L22 2 L12.5 21 L10.5 12.5 Z" fill="#00AEEF"/>
+      <path d="M10.5 12.5 L22 2 L12.5 21 Z" fill="#00AEEF" fill-opacity="0.55"/>
+    </g>
+
+    <text x="430" y="382" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="700" letter-spacing="1.5" fill="#94A3B8">TO</text>
+    <text x="428" y="406" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="800" fill="#0b2a4a">JED</text>
+
+    <!-- faux info lines -->
+    <rect x="318" y="424" width="150" height="6" rx="3" fill="#E2E8F0"/>
+    <rect x="318" y="437" width="104" height="6" rx="3" fill="#E2E8F0"/>
+
+    <!-- perforation -->
+    <line x1="490" y1="316" x2="490" y2="450" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="4 5"/>
+
+    <!-- barcode stub -->
+    <g fill="#0b2a4a">
+      <rect x="502" y="362" width="3" height="74" rx="1"/>
+      <rect x="508" y="362" width="2" height="74" rx="1"/>
+      <rect x="513" y="362" width="4" height="74" rx="1"/>
+      <rect x="520" y="362" width="2" height="74" rx="1"/>
+      <rect x="525" y="362" width="3" height="74" rx="1"/>
+      <rect x="531" y="362" width="2" height="74" rx="1"/>
+      <rect x="536" y="362" width="4" height="74" rx="1"/>
+    </g>
+  </g>
+</svg>

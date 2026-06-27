@@ -1,171 +1,138 @@
-import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
-import { FaArrowRight, FaCalendarAlt } from "react-icons/fa"
+import {
+  FaArrowRight,
+  FaTag,
+  FaRegClock,
+  FaRegCalendarAlt,
+} from "react-icons/fa"
 import { blogs } from "../data/blogs"
+import Reveal from "./Reveal"
 
-const BrandName = () => (
-  <span className="font-semibold">
-    <span className="text-[#FF6B00]">Travel</span>
-    <span className="text-[#00AEEF]">Ex</span>
-  </span>
-)
+const homeBlogs = blogs.slice(0, 3)
 
-const BlogsSection = () => {
-  const [index, setIndex] = useState(0)
-  const [visibleCards, setVisibleCards] = useState(1)
+const cardRowClass =
+  "-mx-4 flex gap-4 overflow-x-auto px-4 pb-5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 lg:grid-cols-3 lg:gap-8"
 
-  useEffect(() => {
-    const updateVisibleCards = () => {
-      if (window.innerWidth >= 1024) setVisibleCards(4)
-      else if (window.innerWidth >= 768) setVisibleCards(2)
-      else setVisibleCards(1)
-    }
-
-    updateVisibleCards()
-    window.addEventListener("resize", updateVisibleCards)
-    return () => window.removeEventListener("resize", updateVisibleCards)
-  }, [])
-
-  const maxIndex = Math.max(blogs.length - visibleCards, 0)
-
-  useEffect(() => {
-    if (index > maxIndex) setIndex(maxIndex)
-  }, [index, maxIndex])
-
-  const canGoLeft = index > 0
-  const canGoRight = index < maxIndex
-
-  const nextSlide = () => {
-    if (canGoRight) setIndex((prev) => prev + 1)
-  }
-
-  const prevSlide = () => {
-    if (canGoLeft) setIndex((prev) => prev - 1)
-  }
+const Meta = ({ date, readTime }) => {
+  if (!date && !readTime) return null
 
   return (
-    <section id="blogs" className="bg-[#F8FAFC] py-12 sm:py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mb-8 flex flex-col justify-between gap-5 sm:mb-12 md:flex-row md:items-end">
-          <div>
-            <p className="eyebrow mb-3 text-[#00AEEF]">Travel Blogs</p>
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-poppins text-[12px] font-medium text-slate-400">
+      {date && (
+        <span className="inline-flex items-center gap-1.5">
+          <FaRegCalendarAlt className="text-[11px] text-[#00AEEF]" />
+          {date}
+        </span>
+      )}
 
-            <h2 className="text-slate-950">Travel tips before you plan</h2>
+      {readTime && (
+        <span className="inline-flex items-center gap-1.5">
+          <FaRegClock className="text-[11px] text-[#00AEEF]" />
+          {readTime}
+        </span>
+      )}
+    </div>
+  )
+}
 
-            <p className="mt-4 max-w-3xl !text-slate-600">
-              Helpful guides from <BrandName /> about international
-              destinations, Umrah packages, visa support, local tours, and
-              travel planning.
-            </p>
+const BlogsSection = () => {
+  return (
+<section id="blogs" className="bg-[#F8FAFC] pt-6 pb-3 sm:pt-8 sm:pb-16">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+        <Reveal>
+          <div className="mb-8 flex flex-col gap-5 md:mb-10 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="mb-2 font-poppins text-[11px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:text-[12px] sm:tracking-[0.18em]">
+                Travel Guides
+              </p>
+
+              <h2 className="max-w-3xl font-fredoka text-[24px] font-semibold leading-tight text-slate-950 sm:text-[44px]">
+                Helpful Travel Insights
+              </h2>
+
+              <p className="mt-2 max-w-2xl font-poppins text-[12px] font-medium leading-6 text-slate-600 sm:text-base sm:leading-7">
+                Read practical guides about Umrah planning, international tours,
+                visa support and travel preparation.
+              </p>
+            </div>
+
+            <Link
+              to="/blogs"
+              className="hidden items-center gap-2 rounded-[5px] border border-[#FF6B00]/40 bg-white px-5 py-3 font-poppins text-sm font-semibold text-[#FF6B00] transition hover:border-[#00AEEF] hover:text-[#00AEEF] md:inline-flex"
+            >
+              View All Blogs
+              <FaArrowRight className="text-xs" />
+            </Link>
           </div>
+        </Reveal>
 
-          <Link
-            to="/blogs"
-            className="hidden rounded-[5px] border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF] md:inline-flex"
-          >
-            View All Blogs
-          </Link>
-        </div>
-
-        <div className="relative px-7 md:px-0">
-          {maxIndex > 0 && canGoLeft && (
-            <button
-              type="button"
-              onClick={prevSlide}
-              className="absolute left-0 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white md:-left-5 md:h-10 md:w-10 md:text-2xl"
-              aria-label="Previous blog"
-            >
-              ‹
-            </button>
-          )}
-
-          {maxIndex > 0 && canGoRight && (
-            <button
-              type="button"
-              onClick={nextSlide}
-              className="absolute right-0 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-xl font-medium text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white md:-right-5 md:h-10 md:w-10 md:text-2xl"
-              aria-label="Next blog"
-            >
-              ›
-            </button>
-          )}
-
-          <div className="overflow-hidden">
-            <div
-              className="flex transition-transform duration-500 ease-out"
-              style={{
-                transform: `translateX(-${index * (100 / visibleCards)}%)`,
-              }}
-            >
-              {blogs.map((blog) => (
-                <div
-                  key={blog.id}
-                  className="min-w-full px-1 md:min-w-[50%] md:px-3 lg:min-w-[25%]"
+        <div className={cardRowClass}>
+          {homeBlogs.map((blog, index) => (
+            <div key={blog.id} className="min-w-[82%] sm:min-w-0">
+              <Reveal delay={index * 0.12} className="h-full">
+                <Link
+                  to={`/blogs/${blog.id}`}
+                  className="group flex h-full cursor-pointer flex-col transition-transform duration-500 hover:-translate-y-2"
+                  aria-label={`Read ${blog.title}`}
                 >
-                  <article className="group h-full overflow-hidden rounded-[5px] bg-white shadow-md shadow-slate-200/70 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
-                    <div className="relative h-44 overflow-hidden">
-                      <img
-                        src={blog.image}
-                        alt={blog.title}
-                        className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-                      />
+                  <article className="flex h-full flex-col">
+                    {/* Image window */}
+                    <div className="relative">
+                      <div className="h-[240px] overflow-hidden rounded-[20px] shadow-[0_18px_45px_rgba(15,23,42,0.12)]">
+                        <img
+                          src={blog.image}
+                          alt={blog.title}
+                          className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                        />
 
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-
-                      <div className="badge-label absolute left-4 top-4 rounded-[5px] bg-white px-3 py-1.5 text-[#00AEEF] shadow-md">
-                        {blog.tag}
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/30 to-transparent" />
                       </div>
+
+                      {/* Floating category pill */}
+                      <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3.5 py-1.5 font-poppins text-[10px] font-bold uppercase tracking-[0.16em] text-[#00AEEF] shadow-sm backdrop-blur">
+                        <FaTag className="text-[9px]" />
+                        {blog.tag}
+                      </span>
                     </div>
 
-                    <div className="p-4">
-                      <div className="mb-3 flex items-center gap-2 text-xs font-medium text-slate-400">
-                        <FaCalendarAlt className="text-[#FF6B00]" />
-                        <span>{blog.date || blog.category}</span>
+                    {/* Overlapping white panel */}
+                    <div className="relative z-10 mx-4 -mt-14 flex flex-1 flex-col rounded-[16px] border border-slate-100 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.08)] transition-all duration-500 group-hover:border-[#FF6B00]/30 group-hover:shadow-[0_20px_50px_rgba(255,107,0,0.16)]">
+                      <Meta date={blog.date} readTime={blog.readTime} />
+
+                      <h3 className="mt-2.5 line-clamp-2 font-fredoka text-[20px] font-semibold leading-snug text-slate-950 transition-colors duration-300 group-hover:text-[#00AEEF]">
+                        {blog.title}
+                      </h3>
+
+                      {blog.excerpt && (
+                        <p className="mt-2 line-clamp-2 font-poppins text-[13px] font-medium leading-6 text-slate-500">
+                          {blog.excerpt}
+                        </p>
+                      )}
+
+                      <div className="mt-auto flex items-center justify-between gap-4 pt-4">
+                        <span className="font-poppins text-sm font-bold text-[#FF6B00] transition-colors duration-300 group-hover:text-[#00AEEF]">
+                          Read More
+                        </span>
+
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#00AEEF]/15 bg-[#00AEEF]/10 text-[#00AEEF] transition-all duration-300 group-hover:translate-x-1 group-hover:border-[#FF6B00] group-hover:bg-[#FF6B00] group-hover:text-white group-hover:shadow-[0_12px_30px_rgba(255,107,0,0.35)]">
+                          <FaArrowRight className="text-xs" />
+                        </span>
                       </div>
-
-                      <h3 className="text-slate-950">{blog.title}</h3>
-
-                      <p className="mt-3 text-sm leading-6 !text-slate-600">
-                        {blog.excerpt}
-                      </p>
-
-                      <Link
-                        to={`/blogs/${blog.id}`}
-                        className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#FF6B00] transition-colors duration-300 hover:text-[#00AEEF]"
-                      >
-                        Read More
-                        <FaArrowRight className="text-xs" />
-                      </Link>
                     </div>
                   </article>
-                </div>
-              ))}
+                </Link>
+              </Reveal>
             </div>
-          </div>
+          ))}
         </div>
 
-        {maxIndex > 0 && (
-          <div className="mt-5 flex justify-center gap-2">
-            {Array.from({ length: maxIndex + 1 }).map((_, dotIndex) => (
-              <button
-                type="button"
-                key={dotIndex}
-                onClick={() => setIndex(dotIndex)}
-                className={`h-2 rounded-[5px] transition-all ${
-                  index === dotIndex ? "w-8 bg-[#00AEEF]" : "w-2 bg-slate-300"
-                }`}
-                aria-label={`Go to blog slide ${dotIndex + 1}`}
-              />
-            ))}
-          </div>
-        )}
-
-        <div className="mt-6 text-center md:hidden">
+        <div className="mt-1 text-center md:hidden">
           <Link
             to="/blogs"
-            className="inline-flex rounded-[5px] border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
+            className="inline-flex items-center gap-2 rounded-[5px] border border-slate-200 bg-white px-5 py-3 font-poppins text-sm font-semibold text-slate-800"
           >
             View All Blogs
+            <FaArrowRight className="text-xs" />
           </Link>
         </div>
       </div>

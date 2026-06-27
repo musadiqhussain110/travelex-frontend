@@ -1,255 +1,113 @@
-import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
+import { FaArrowRight, FaMapMarkerAlt, FaStar, FaTag } from "react-icons/fa"
 
-const tours = [
-  {
-    id: "pir-chinasi-tour",
-    title: "Pir Chinasi Tour Package",
-    duration: "1 Day",
-    price: "Starting from PKR 7,500",
-    type: "Featured Local Tour",
-    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-    points: [
-      "One day guided plan",
-      "Comfortable transport",
-      "Custom group options",
-    ],
-  },
-  {
-    id: "naran-kaghan-shogran-tour",
-    title: "Naran Kaghan Shogran Tour",
-    duration: "3 Days",
-    price: "Starting from PKR 14,500",
-    type: "Nature + Family Trip",
-    image: "https://images.unsplash.com/photo-1501785888041-af3ef285b470",
-    points: ["Hotel assistance", "Family-friendly plan", "Flexible itinerary"],
-  },
-  {
-    id: "nathiagali-ayubia-tour",
-    title: "Nathiagali Ayubia Tour",
-    duration: "1 Day",
-    price: "Starting from PKR 6,500",
-    type: "Hill Station Tour",
-    image:
-      "https://ramadaresortmurree.com/wp-content/uploads/2025/01/Nathia-Gali-1536x1024.jpeg",
-    points: ["Scenic day trip", "Transport guidance", "Group travel support"],
-  },
-  {
-    id: "islamabad-tour-package",
-    title: "Islamabad Tour Package",
-    duration: "1 Day",
-    price: "Starting from PKR 5,000",
-    type: "City Tour",
-    image:
-      "https://cdn.offtheatlas.com/wp-content/uploads/2021/10/01194801/DSCF8938.jpg",
-    points: ["City sightseeing", "Custom timing", "Budget-friendly option"],
-  },
-  {
-    id: "custom-family-tour",
-    title: "Custom Family Tour",
-    duration: "Flexible",
-    price: "Custom quote available",
-    type: "Customized Plan",
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-    points: ["Custom destination", "Hotel support", "WhatsApp planning"],
-  },
-]
+import { tours } from "../data/tours"
+import Reveal from "./Reveal"
+
+const cardRowClass =
+  "-mx-4 flex gap-4 overflow-x-auto px-4 pb-5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 xl:grid-cols-4"
 
 const CustomTours = () => {
-  const [index, setIndex] = useState(0)
-  const [visibleCards, setVisibleCards] = useState(1)
-
-  useEffect(() => {
-    const updateVisibleCards = () => {
-      if (window.innerWidth >= 1024) {
-        setVisibleCards(4)
-      } else if (window.innerWidth >= 768) {
-        setVisibleCards(2)
-      } else {
-        setVisibleCards(1)
-      }
-    }
-
-    updateVisibleCards()
-    window.addEventListener("resize", updateVisibleCards)
-
-    return () => window.removeEventListener("resize", updateVisibleCards)
-  }, [])
-
-  const maxIndex = Math.max(tours.length - visibleCards, 0)
-
-  useEffect(() => {
-    if (index > maxIndex) {
-      setIndex(maxIndex)
-    }
-  }, [index, maxIndex])
-
-  const canGoLeft = index > 0
-  const canGoRight = index < maxIndex
-
-  const nextSlide = () => {
-    if (canGoRight) {
-      setIndex((prev) => prev + 1)
-    }
-  }
-
-  const prevSlide = () => {
-    if (canGoLeft) {
-      setIndex((prev) => prev - 1)
-    }
-  }
-
   return (
-    <section id="tours" className="bg-white py-12 sm:py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mb-8 flex flex-col justify-between gap-5 sm:mb-12 md:flex-row md:items-end">
-          <div>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-[#00AEEF] sm:text-sm">
-              Customized Tours
-            </p>
+    <section id="tours" className="bg-white pt-2 pb-2 sm:pt-8 sm:pb-16">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+        <Reveal>
+          <div className="mb-5 flex flex-col gap-4 md:mb-10 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="mb-2 font-poppins text-[11px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:text-[12px] sm:tracking-[0.18em]">
+                Customized International Tours
+              </p>
 
-            <h2 className="text-3xl font-medium leading-tight text-slate-950 sm:text-4xl md:text-5xl">
-              Explore tours made for your travel style
-            </h2>
+              <h2 className="max-w-3xl font-fredoka text-[24px] font-semibold leading-tight text-slate-950 sm:text-[44px]">
+                Explore International Travel Experiences
+              </h2>
 
-            <p className="mt-4 max-w-3xl text-sm leading-7 !text-slate-600 md:text-base">
-              Choose from ready tour options or contact us to customize the
-              destination, hotel, transport, dates, and group plan according to
-              your comfort and budget.
-            </p>
+              <p className="mt-2 max-w-2xl font-poppins text-[12px] font-medium leading-6 text-slate-600 sm:text-base sm:leading-7">
+                Handpicked international tours with flexible planning, hotel
+                support and dedicated TravelEx consultation.
+              </p>
+            </div>
+
+            <Link
+              to="/tours"
+              className="hidden items-center gap-2 rounded-[5px] border border-[#FF6B00]/40 bg-white px-5 py-3 font-poppins text-sm font-semibold text-[#FF6B00] transition hover:border-[#00AEEF] hover:text-[#00AEEF] md:inline-flex"
+            >
+              View All Tours
+              <FaArrowRight className="text-xs" />
+            </Link>
           </div>
+        </Reveal>
 
-          <Link
-            to="/tours"
-            className="hidden rounded-[5px] border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF] md:inline-flex"
-          >
-            View All Tours
-          </Link>
-        </div>
-
-        <div className="relative">
-          {maxIndex > 0 && canGoLeft && (
-            <button
-              type="button"
-              onClick={prevSlide}
-              className="absolute left-2 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-2xl font-semibold text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white md:-left-5"
-              aria-label="Previous tour"
-            >
-              ‹
-            </button>
-          )}
-
-          {maxIndex > 0 && canGoRight && (
-            <button
-              type="button"
-              onClick={nextSlide}
-              className="absolute right-2 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-[5px] bg-white text-2xl font-semibold text-slate-900 shadow-lg transition-colors duration-300 hover:bg-[#00AEEF] hover:text-white md:-right-5"
-              aria-label="Next tour"
-            >
-              ›
-            </button>
-          )}
-
-          <div className="overflow-hidden">
-            <div
-              className="flex transition-transform duration-500 ease-out"
-              style={{
-                transform: `translateX(-${index * (100 / visibleCards)}%)`,
-              }}
-            >
-              {tours.map((tour) => (
-                <div
-                  key={tour.id}
-                  className="min-w-full px-1 md:min-w-[50%] md:px-3 lg:min-w-[25%]"
+        <div className={cardRowClass}>
+          {tours.map((tour, index) => (
+            <div key={tour.id} className="min-w-[82%] sm:min-w-0">
+              <Reveal delay={index * 0.3}>
+                <Link
+                  to={`/tours/${tour.id}`}
+                  className="group block cursor-pointer overflow-hidden rounded-[18px] bg-slate-950 shadow-[0_22px_55px_rgba(15,23,42,0.18)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_28px_70px_rgba(0,174,239,0.18)]"
+                  aria-label={`View ${tour.location} tour`}
                 >
-                  <article className="group overflow-hidden rounded-[5px] bg-[#F8FAFC] shadow-md shadow-slate-200/60 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
-                    <div className="relative h-44 overflow-hidden">
-                      <img
-                        src={tour.image}
-                        alt={tour.title}
-                        className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-                      />
+                  <div className="relative h-[360px] overflow-hidden">
+                    <img
+                      src={tour.image}
+                      alt={`${tour.badge} Tour Package`}
+                      className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                    />
 
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-950 to-transparent" />
 
-                      <div className="absolute left-4 top-4 rounded-[5px] bg-white px-3 py-1.5 text-[11px] font-semibold text-[#00AEEF] shadow-md">
-                        {tour.duration}
-                      </div>
-
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <h3 className="text-lg font-medium leading-tight text-white">
-                          {tour.title}
-                        </h3>
-
-                        <p className="mt-1 text-xs font-semibold !text-white/85">
-                          {tour.type}
-                        </p>
-                      </div>
+                    <div className="absolute left-5 top-5 inline-flex h-[36px] items-center gap-2 rounded-full border border-white/25 bg-slate-950/30 px-4 font-poppins text-[10px] font-bold uppercase tracking-[0.16em] text-white backdrop-blur-md">
+                      <FaTag className="text-[10px] text-[#00AEEF]" />
+                      {tour.badge}
                     </div>
 
-                    <div className="p-4">
-                      <p className="mb-4 text-base font-semibold !text-[#FF6B00]">
-                        {tour.price}
+                    <div className="absolute right-5 top-5 inline-flex h-[36px] items-center gap-1.5 rounded-full border border-white/20 bg-slate-950/25 px-3 backdrop-blur-md">
+                      <FaStar className="text-[11px] text-[#FF6B00]" />
+                      <span className="font-poppins text-[12px] font-bold leading-none text-white">
+                        {tour.rating}
+                      </span>
+                    </div>
+
+                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                      <p className="flex items-center gap-2 font-fredoka text-[22px] font-semibold leading-tight text-white">
+                        <FaMapMarkerAlt className="text-[13px] text-[#00AEEF]" />
+                        {tour.location}
                       </p>
 
-                      <div className="grid gap-2">
-                        {tour.points.map((point) => (
-                          <p
-                            key={point}
-                            className="rounded-[5px] bg-white px-3 py-2 text-xs font-semibold !text-slate-600"
-                          >
-                            ✓ {point}
+                      <div className="mt-1 flex items-end justify-between gap-4">
+                        <div>
+                          <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.16em] text-white/45">
+                            {tour.price === "Custom Quote" ? "Get a" : "From"}
                           </p>
-                        ))}
-                      </div>
 
-                      <div className="mt-4 grid grid-cols-2 gap-2">
-                        <Link
-                          to={`/tours/${tour.id}`}
-                          className="rounded-[5px] border border-slate-200 bg-white px-3 py-2.5 text-center text-xs font-semibold text-slate-800 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
-                        >
-                          View Details
-                        </Link>
+                          <p
+                            className="mt-1 font-poppins leading-none tracking-[-0.03em] !text-[#FF6B00]"
+                            style={{ fontSize: "20px", fontWeight: 500 }}
+                          >
+                            {tour.price}
+                          </p>
+                        </div>
 
-                        <a
-                          href="https://wa.me/923111444192"
-                          target="_blank"
-                          rel="noreferrer"
-                          className="rounded-[5px] bg-[#FF6B00] px-3 py-2.5 text-center text-xs font-semibold text-white transition-colors duration-300 hover:bg-[#00AEEF]"
-                        >
-                          WhatsApp Us
-                        </a>
+                        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#00AEEF]/15 bg-[#00AEEF]/15 text-white backdrop-blur-md transition-all duration-300 group-hover:border-[#FF6B00]/40 group-hover:bg-[#FF6B00] group-hover:shadow-[0_12px_30px_rgba(255,107,0,0.35)]">
+                          <FaArrowRight />
+                        </span>
                       </div>
                     </div>
-                  </article>
-                </div>
-              ))}
+                  </div>
+                </Link>
+              </Reveal>
             </div>
-          </div>
+          ))}
         </div>
 
-        {maxIndex > 0 && (
-          <div className="mt-5 flex justify-center gap-2">
-            {Array.from({ length: maxIndex + 1 }).map((_, dotIndex) => (
-              <button
-                type="button"
-                key={dotIndex}
-                onClick={() => setIndex(dotIndex)}
-                className={`h-2 rounded-[5px] transition-all ${
-                  index === dotIndex ? "w-8 bg-[#00AEEF]" : "w-2 bg-slate-300"
-                }`}
-                aria-label={`Go to tour slide ${dotIndex + 1}`}
-              />
-            ))}
-          </div>
-        )}
-
-        <div className="mt-6 text-center md:hidden">
+        <div className="mt-1 text-center md:hidden">
           <Link
             to="/tours"
-            className="inline-flex rounded-[5px] border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition-colors duration-300 hover:border-[#00AEEF] hover:text-[#00AEEF]"
+            className="inline-flex items-center gap-2 rounded-[5px] border border-slate-200 bg-white px-5 py-3 font-poppins text-sm font-semibold text-slate-800"
           >
             View All Tours
+            <FaArrowRight className="text-xs" />
           </Link>
         </div>
       </div>
