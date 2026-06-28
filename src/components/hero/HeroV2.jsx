@@ -115,9 +115,9 @@ const HeroV2 = () => {
               to={service.to}
               className="flex min-h-[72px] flex-col items-center justify-center rounded-[12px] border border-slate-100 bg-white px-2 py-2 text-center shadow-[0_8px_18px_rgba(11,42,74,0.07)] transition active:scale-[0.97]"
             >
-              <span className="flex h-[34px] w-[34px] items-center justify-center text-[28px] text-[#FF6B00]">
-                {service.icon}
-              </span>
+              <span className="flex h-[32px] w-[32px] items-center justify-center text-[25px] text-[#FF6B00]">
+  {service.icon}
+</span>
 
               <span className="mt-1.5 block font-poppins text-[10px] font-bold leading-tight text-slate-950">
                 {service.title}

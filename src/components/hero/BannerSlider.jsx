@@ -66,19 +66,19 @@ const mobileBannerText = {
 
 const mobileVectorStyles = {
   consultant:
-    "absolute bottom-[-10px] right-[-88px] h-[140px] w-auto max-w-none object-contain",
+    "absolute bottom-[0px] right-[-40px] h-[120px] w-auto max-w-none object-contain",
 
   umrah:
-    "absolute bottom-[-38px] right-[-40px] h-[178px] w-auto max-w-none object-contain",
+    "absolute bottom-[-25px] right-[-20px] h-[152px] w-auto max-w-none object-contain",
 
   visa:
-    "absolute bottom-[4px] right-[-34px] z-10 h-[158px] w-auto max-w-none object-contain",
+    "absolute bottom-[4px] right-[-4px] z-10 h-[158px] w-auto max-w-none object-contain",
 
   visaDocs:
     "absolute bottom-[22px] right-[70px] z-20 w-[44px] max-w-none object-contain drop-shadow-[0_8px_12px_rgba(15,23,42,0.20)]",
 
   tours:
-    "absolute bottom-[-36px] right-[-38px] h-[172px] w-auto max-w-none object-contain",
+    "absolute bottom-[-36px] right-[-18px] h-[182px] w-auto max-w-none object-contain",
 }
 
 const mobileVectorAssets = {
@@ -293,18 +293,17 @@ const BannerSlider = () => {
           key={`mobile-content-${activeIndex}`}
           className="banner-slide-item relative z-20 flex h-full max-w-[62%] flex-col justify-center px-4 pb-7 pt-4"
         >
-          <h3
-            data-stagger
-            style={stagger(1)}
-            className="whitespace-nowrap font-poppins text-[8px] font-bold uppercase tracking-[0.08em] text-[#00AEEF]"
-          >
-            {mobileText.eyebrow}
-          </h3>
-
+    <p
+  data-stagger
+  style={stagger(1)}
+  className="hero-banner-eyebrow mb-1.5 whitespace-nowrap font-poppins text-[7.5px] font-semibold uppercase text-[#00AEEF]"
+>
+  {mobileText.eyebrow}
+</p>
           <h2
             data-stagger
             style={stagger(2)}
-            className="mt-2 flex flex-nowrap items-center gap-1 font-fredoka text-[19px] font-semibold uppercase leading-none text-slate-950"
+            className="flex flex-nowrap items-center gap-1 font-fredoka text-[18px] font-semibold uppercase leading-none text-slate-950"
           >
             <span className="whitespace-nowrap">{mobileText.before}</span>
 
@@ -387,18 +386,18 @@ const BannerSlider = () => {
               </div>
             </div>
 
-            <h3
+            <p
               data-stagger
               style={stagger(1)}
-              className="font-poppins text-[12px] font-bold uppercase tracking-[0.14em] text-[#00AEEF] lg:text-[13px]"
+             className="hero-banner-eyebrow mb-2 font-poppins text-[11px] font-bold uppercase text-[#00AEEF] lg:text-[12px]"
             >
               {activeBanner.category}
-            </h3>
+            </p>
 
             <h2
               data-stagger
               style={stagger(2)}
-              className="mt-3 flex items-center gap-3 whitespace-nowrap font-fredoka text-[38px] font-semibold uppercase leading-none text-slate-950"
+              className="flex items-center gap-3 whitespace-nowrap font-fredoka text-[38px] font-semibold uppercase leading-none text-slate-950"
             >
               <span>{activeBanner.titleStart}</span>
 

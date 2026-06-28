@@ -98,7 +98,7 @@ label.search-label,
   font-family: "Poppins", sans-serif;
   font-weight: 700;
   font-size: 11px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
@@ -150,12 +150,26 @@ section {
 }
 /* Global eyebrow / uppercase label spacing fix */
 .uppercase[class*="tracking-"] {
-  letter-spacing: 0.12em !important;
+  letter-spacing: 0.07em !important;
 }
 
-/* Keep very small mobile labels readable */
+/* Keep mobile labels tighter and cleaner */
 @media (max-width: 640px) {
   .uppercase[class*="tracking-"] {
-    letter-spacing: 0.08em !important;
+    letter-spacing: 0.045em !important;
+  }
+}
+/* Hero banner eyebrow override */
+.hero-banner-eyebrow,
+.hero-banner-eyebrow.uppercase,
+.hero-banner-eyebrow[class*="tracking-"] {
+  letter-spacing: 0.045em !important;
+}
+
+@media (max-width: 640px) {
+  .hero-banner-eyebrow,
+  .hero-banner-eyebrow.uppercase,
+  .hero-banner-eyebrow[class*="tracking-"] {
+    letter-spacing: 0.025em !important;
   }
 }

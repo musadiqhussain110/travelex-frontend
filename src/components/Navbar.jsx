@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { HiX } from "react-icons/hi"
 import {
   FaArrowRight,
@@ -80,6 +80,10 @@ const Navbar = () => {
   const [resourcesOpen, setResourcesOpen] = useState(false)
   const [activeMobileDropdown, setActiveMobileDropdown] = useState(null)
   const [searchQuery, setSearchQuery] = useState("")
+  const [showNavbar, setShowNavbar] = useState(true)
+
+  const lastScrollY = useRef(0)
+  const ticking = useRef(false)
 
   useEffect(() => {
     if (location.pathname === "/search") {
@@ -94,7 +98,42 @@ const Navbar = () => {
     setServicesOpen(false)
     setResourcesOpen(false)
     setActiveMobileDropdown(null)
+    setShowNavbar(true)
   }, [location.pathname])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY
+
+      if (!ticking.current) {
+        window.requestAnimationFrame(() => {
+          if (currentScrollY <= 20) {
+            setShowNavbar(true)
+          } else if (
+            currentScrollY > lastScrollY.current &&
+            currentScrollY > 90
+          ) {
+            setShowNavbar(false)
+            setServicesOpen(false)
+            setResourcesOpen(false)
+          } else if (currentScrollY < lastScrollY.current) {
+            setShowNavbar(true)
+          }
+
+          lastScrollY.current = Math.max(currentScrollY, 0)
+          ticking.current = false
+        })
+
+        ticking.current = true
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+    }
+  }, [])
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : ""
@@ -136,7 +175,11 @@ const Navbar = () => {
     "absolute -bottom-1 left-1/2 h-[2px] w-0 -translate-x-1/2 rounded-full bg-[#00AEEF] transition-all duration-300 group-hover:w-full"
 
   return (
-    <header className="fixed left-0 top-0 z-[1100] w-full border-b border-slate-100 bg-white/95 shadow-[0_8px_26px_rgba(15,23,42,0.07)] backdrop-blur-xl">
+    <header
+      className={`fixed left-0 top-0 z-[1100] w-full border-b border-slate-100 bg-white/95 shadow-[0_8px_26px_rgba(15,23,42,0.07)] backdrop-blur-xl transition-transform duration-300 ease-out ${
+        showNavbar || menuOpen ? "translate-y-0" : "-translate-y-full"
+      }`}
+    >
       <div className="mx-auto flex h-[56px] max-w-[1340px] items-center justify-between px-3 sm:h-[72px] sm:px-6 lg:px-8">
         <Link
           to="/"
@@ -219,7 +262,7 @@ const Navbar = () => {
               <div className="rounded-[5px] border border-slate-100 bg-white p-5 text-slate-900 shadow-[0_24px_70px_rgba(15,23,42,0.16)]">
                 <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-4">
                   <div>
-                    <p className="font-poppins text-[11px] font-bold uppercase tracking-[0.28em] text-[#00AEEF]">
+                    <p className="font-poppins text-[11px] font-bold uppercase tracking-[0.12em] text-[#00AEEF]">
                       TravelEx Services
                     </p>
 
@@ -376,12 +419,8 @@ const Navbar = () => {
           {/* Drawer Header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
             <div>
-              <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.22em] text-[#00AEEF]">
+              <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.12em] text-[#00AEEF]">
                 TravelEx.pk
-              </p>
-
-              <p className="mt-0.5 font-poppins text-[10.5px] font-semibold text-slate-600">
-                Simple travel support
               </p>
             </div>
 
