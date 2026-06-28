@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar"
 import ScrollToTop from "./components/ScrollToTop"
 import StickyWhatsApp from "./components/StickyWhatsApp"
 import MobileBottomNav from "./components/MobileBottomNav"
-
+import SmoothScroll from "./components/SmoothScroll"
 
 import Home from "./pages/Home"
 import UmrahPage from "./pages/UmrahPage"
@@ -46,7 +46,7 @@ const AppContent = () => {
 
   return (
     <>
-
+      <SmoothScroll />
       <ScrollToTop />
 
       {!isAdminRoute && <Navbar />}
