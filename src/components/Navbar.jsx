@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react"
 import { HiX } from "react-icons/hi"
 import {
+  FaArrowRight,
+  FaCar,
   FaChevronDown,
-  FaWhatsapp,
-  FaKaaba,
-  FaPassport,
   FaGlobeAsia,
   FaHotel,
-  FaCar,
-  FaArrowRight,
+  FaKaaba,
+  FaPassport,
   FaSearch,
+  FaWhatsapp,
 } from "react-icons/fa"
 import { Link, useLocation, useNavigate } from "react-router-dom"
+
 import logo from "../assets/logo.webp"
 
 const services = [
@@ -62,10 +63,10 @@ const resourceLinks = [
 
 const ProfessionalMenuIcon = () => {
   return (
-    <span className="flex h-[15px] w-[19px] flex-col items-end justify-between">
-      <span className="block h-[2px] w-[19px] rounded-full bg-slate-800" />
-      <span className="block h-[2px] w-[14px] rounded-full bg-[#FF6B00]" />
-      <span className="block h-[2px] w-[17px] rounded-full bg-slate-800" />
+    <span className="flex h-[14px] w-[18px] flex-col items-end justify-between">
+      <span className="block h-[2px] w-[18px] rounded-full bg-slate-800" />
+      <span className="block h-[2px] w-[13px] rounded-full bg-[#FF6B00]" />
+      <span className="block h-[2px] w-[16px] rounded-full bg-slate-800" />
     </span>
   )
 }
@@ -96,11 +97,7 @@ const Navbar = () => {
   }, [location.pathname])
 
   useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = ""
-    }
+    document.body.style.overflow = menuOpen ? "hidden" : ""
 
     return () => {
       document.body.style.overflow = ""
@@ -139,8 +136,8 @@ const Navbar = () => {
     "absolute -bottom-1 left-1/2 h-[2px] w-0 -translate-x-1/2 rounded-full bg-[#00AEEF] transition-all duration-300 group-hover:w-full"
 
   return (
-    <header className="fixed left-0 top-0 z-[1100] w-full bg-white/95 shadow-[0_10px_35px_rgba(15,23,42,0.08)] backdrop-blur-xl">
-      <div className="mx-auto flex h-[64px] max-w-[1340px] items-center justify-between px-4 sm:h-[78px] sm:px-6 lg:px-8">
+    <header className="fixed left-0 top-0 z-[1100] w-full border-b border-slate-100 bg-white/95 shadow-[0_8px_26px_rgba(15,23,42,0.07)] backdrop-blur-xl">
+      <div className="mx-auto flex h-[56px] max-w-[1340px] items-center justify-between px-3 sm:h-[72px] sm:px-6 lg:px-8">
         <Link
           to="/"
           onClick={closeMenus}
@@ -149,14 +146,14 @@ const Navbar = () => {
           <img
             src={logo}
             alt="TravelEx"
-            className="block h-[54px] w-auto object-contain sm:h-[78px]"
+            className="block h-[42px] w-auto object-contain sm:h-[64px]"
           />
         </Link>
 
         {/* Mobile Search */}
         <form
           onSubmit={handleMobileSearch}
-          className="mx-2 flex h-[34px] min-w-0 flex-1 items-center gap-2 rounded-full border border-slate-200 bg-[#F8FAFC] px-3 shadow-sm lg:hidden"
+          className="mx-2 flex h-[32px] min-w-0 flex-1 items-center gap-2 rounded-full border border-slate-200 bg-[#F8FAFC] px-3 shadow-[0_4px_12px_rgba(15,23,42,0.05)] lg:hidden"
         >
           <button
             type="submit"
@@ -193,7 +190,6 @@ const Navbar = () => {
             <span className={underline} />
           </Link>
 
-          {/* Desktop Services */}
           <div
             className="relative"
             onMouseEnter={() => setServicesOpen(true)}
@@ -248,9 +244,9 @@ const Navbar = () => {
                       key={item.label}
                       to={item.link}
                       onClick={closeMenus}
-                      className="group flex gap-4 rounded-[5px] border border-slate-100 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#00AEEF]/30 hover:bg-white hover:shadow-md"
+                      className="group flex gap-4 rounded-[5px] border border-slate-100 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#00AEEF]/30 hover:shadow-md"
                     >
-                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[5px] bg-white text-lg text-[#00AEEF] shadow-sm transition group-hover:bg-[#FF6B00] group-hover:text-white">
+                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[5px] bg-sky-50 text-lg text-[#00AEEF] transition group-hover:bg-[#FF6B00] group-hover:text-white">
                         {item.icon}
                       </span>
 
@@ -282,7 +278,6 @@ const Navbar = () => {
             </Link>
           ))}
 
-          {/* Desktop Resources */}
           <div
             className="relative"
             onMouseEnter={() => setResourcesOpen(true)}
@@ -350,11 +345,11 @@ const Navbar = () => {
         <button
           type="button"
           onClick={() => setMenuOpen((prev) => !prev)}
-          className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[7px] border border-slate-200 bg-[#F8FAFC] text-slate-900 shadow-sm transition active:scale-95 lg:hidden"
+          className="flex h-[32px] w-[32px] shrink-0 items-center justify-center rounded-[7px] border border-slate-200 bg-[#F8FAFC] text-slate-900 shadow-[0_4px_12px_rgba(15,23,42,0.05)] transition active:scale-95 lg:hidden"
           aria-label="Toggle menu"
         >
           {menuOpen ? (
-            <HiX className="text-[19px]" />
+            <HiX className="text-[18px]" />
           ) : (
             <ProfessionalMenuIcon />
           )}
@@ -373,19 +368,19 @@ const Navbar = () => {
 
       {/* Mobile Right Drawer */}
       <aside
-        className={`fixed right-0 top-0 z-[1200] h-dvh w-[84%] max-w-[340px] bg-white shadow-[0_25px_80px_rgba(15,23,42,0.28)] transition-transform duration-300 ease-out lg:hidden ${
+        className={`fixed right-0 top-0 z-[1200] h-dvh w-[84%] max-w-[330px] bg-white shadow-[0_25px_80px_rgba(15,23,42,0.28)] transition-transform duration-300 ease-out lg:hidden ${
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex h-full flex-col">
           {/* Drawer Header */}
-          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
+          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
             <div>
-              <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.22em] text-[#00AEEF]">
+              <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.22em] text-[#00AEEF]">
                 TravelEx.pk
               </p>
 
-              <p className="mt-0.5 font-poppins text-[11px] font-semibold text-slate-600">
+              <p className="mt-0.5 font-poppins text-[10.5px] font-semibold text-slate-600">
                 Simple travel support
               </p>
             </div>
@@ -393,16 +388,16 @@ const Navbar = () => {
             <button
               type="button"
               onClick={closeMenus}
-              className="flex h-9 w-9 items-center justify-center rounded-[8px] border border-slate-200 bg-[#F8FAFC] text-slate-800"
+              className="flex h-8 w-8 items-center justify-center rounded-[7px] border border-slate-200 bg-[#F8FAFC] text-slate-800"
               aria-label="Close menu"
             >
-              <HiX className="text-[18px]" />
+              <HiX className="text-[17px]" />
             </button>
           </div>
 
           {/* Drawer Body */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-            <div className="grid gap-2">
+          <div className="flex-1 overflow-y-auto px-4 py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div className="grid gap-1.5">
               {navLinks.map(([label, link]) => {
                 const active = location.pathname === link
 
@@ -411,7 +406,7 @@ const Navbar = () => {
                     key={label}
                     to={link}
                     onClick={closeMenus}
-                    className={`flex items-center justify-between rounded-[10px] px-4 py-3 font-poppins text-[13px] font-semibold transition ${
+                    className={`flex items-center justify-between rounded-[8px] px-3.5 py-2.5 font-poppins text-[12px] font-semibold transition ${
                       active
                         ? "bg-[#00AEEF] text-white"
                         : "bg-[#F8FAFC] text-slate-800"
@@ -419,7 +414,7 @@ const Navbar = () => {
                   >
                     {label}
                     <FaArrowRight
-                      className={`text-[10px] ${
+                      className={`text-[9px] ${
                         active ? "text-white" : "text-slate-300"
                       }`}
                     />
@@ -429,15 +424,15 @@ const Navbar = () => {
             </div>
 
             {/* Services Dropdown */}
-            <div className="mt-3 rounded-[12px] border border-slate-100 bg-white">
+            <div className="mt-2.5 rounded-[10px] border border-slate-100 bg-white">
               <button
                 type="button"
                 onClick={() => toggleMobileDropdown("services")}
-                className="flex w-full items-center justify-between px-4 py-3 font-poppins text-[13px] font-semibold text-slate-900"
+                className="flex w-full items-center justify-between px-3.5 py-2.5 font-poppins text-[12px] font-semibold text-slate-900"
               >
                 Services
                 <FaChevronDown
-                  className={`text-[11px] text-slate-400 transition-transform duration-300 ${
+                  className={`text-[10px] text-slate-400 transition-transform duration-300 ${
                     activeMobileDropdown === "services" ? "rotate-180" : ""
                   }`}
                 />
@@ -457,18 +452,18 @@ const Navbar = () => {
                         key={item.label}
                         to={item.link}
                         onClick={closeMenus}
-                        className="flex items-center gap-3 rounded-[8px] bg-[#F8FAFC] px-3 py-2.5"
+                        className="flex items-center gap-2.5 rounded-[7px] bg-[#F8FAFC] px-2.5 py-2"
                       >
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[5px] bg-white text-[13px] text-[#00AEEF] shadow-sm">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px] bg-white text-[12px] text-[#00AEEF] shadow-sm">
                           {item.icon}
                         </span>
 
                         <span className="min-w-0">
-                          <span className="block font-poppins text-[12px] font-semibold leading-4 text-slate-900">
+                          <span className="block font-poppins text-[11.5px] font-semibold leading-4 text-slate-900">
                             {item.label}
                           </span>
 
-                          <span className="mt-0.5 block truncate font-poppins text-[10px] font-medium text-slate-500">
+                          <span className="mt-0.5 block truncate font-poppins text-[9.5px] font-medium text-slate-500">
                             {item.desc}
                           </span>
                         </span>
@@ -480,15 +475,15 @@ const Navbar = () => {
             </div>
 
             {/* Resources Dropdown */}
-            <div className="mt-3 rounded-[12px] border border-slate-100 bg-white">
+            <div className="mt-2.5 rounded-[10px] border border-slate-100 bg-white">
               <button
                 type="button"
                 onClick={() => toggleMobileDropdown("resources")}
-                className="flex w-full items-center justify-between px-4 py-3 font-poppins text-[13px] font-semibold text-slate-900"
+                className="flex w-full items-center justify-between px-3.5 py-2.5 font-poppins text-[12px] font-semibold text-slate-900"
               >
                 Resources
                 <FaChevronDown
-                  className={`text-[11px] text-slate-400 transition-transform duration-300 ${
+                  className={`text-[10px] text-slate-400 transition-transform duration-300 ${
                     activeMobileDropdown === "resources" ? "rotate-180" : ""
                   }`}
                 />
@@ -508,10 +503,10 @@ const Navbar = () => {
                         key={label}
                         to={link}
                         onClick={closeMenus}
-                        className="flex items-center justify-between rounded-[8px] bg-[#F8FAFC] px-3 py-2.5 font-poppins text-[12px] font-semibold text-slate-900"
+                        className="flex items-center justify-between rounded-[7px] bg-[#F8FAFC] px-2.5 py-2 font-poppins text-[11.5px] font-semibold text-slate-900"
                       >
                         {label}
-                        <FaArrowRight className="text-[10px] text-slate-300" />
+                        <FaArrowRight className="text-[9px] text-slate-300" />
                       </Link>
                     ))}
                   </div>
@@ -521,25 +516,25 @@ const Navbar = () => {
           </div>
 
           {/* Drawer Footer */}
-          <div className="border-t border-slate-100 p-4">
+          <div className="border-t border-slate-100 p-3">
             <div className="grid grid-cols-2 gap-2">
               <a
                 href="https://wa.me/923111444192"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 bg-white px-4 py-2.5 font-poppins text-[11px] font-semibold text-slate-900"
+                className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 bg-white px-3 py-2.5 font-poppins text-[10.5px] font-semibold text-slate-900"
               >
-                <FaWhatsapp className="text-[14px] text-[#25D366]" />
+                <FaWhatsapp className="text-[13px] text-[#25D366]" />
                 WhatsApp
               </a>
 
               <Link
                 to="/contact"
                 onClick={closeMenus}
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-4 py-2.5 font-poppins text-[11px] font-semibold text-white"
+                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-3 py-2.5 font-poppins text-[10.5px] font-semibold text-white"
               >
                 Plan Trip
-                <FaArrowRight className="text-[9px]" />
+                <FaArrowRight className="text-[8px]" />
               </Link>
             </div>
           </div>

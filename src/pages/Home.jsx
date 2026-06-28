@@ -51,7 +51,7 @@ const Home = () => {
 
   return (
     <>
-      <main className="pb-16 lg:pb-0">
+      <div className="bg-[#F8FAFC]">
         <HeroV2 onOpenLeadModal={openLeadModal} />
 
         <UmrahPackages onOpenLeadModal={openLeadModal} />
@@ -60,7 +60,7 @@ const Home = () => {
         <Blogs />
         <FAQ />
         <Footer />
-      </main>
+      </div>
 
       <LeadInquiryModal
         isOpen={leadModal.isOpen}

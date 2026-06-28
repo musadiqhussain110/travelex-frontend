@@ -40,7 +40,7 @@ function App() {
 
       <Navbar />
 
-      <main className="pt-[64px] pb-24 sm:pt-[78px] lg:pb-0">
+      <main className="pt-[56px] pb-[62px] sm:pt-[78px] lg:pb-0">
         <Routes>
           {/* Home */}
           <Route path="/" element={<Home />} />

@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom"
 import {
+  FaCar,
+  FaGlobeAsia,
+  FaHeadset,
+  FaHotel,
   FaKaaba,
   FaPassport,
-  FaGlobeAsia,
-  FaHotel,
-  FaCar,
-  FaHeadset,
 } from "react-icons/fa"
 
 import BannerSlider from "./BannerSlider"
@@ -48,7 +48,7 @@ const mobileServices = [
 const HeroV2 = () => {
   return (
     <section
-      className="relative w-full bg-[#F2F2F2] bg-cover bg-center"
+      className="relative w-full overflow-hidden bg-[#F2F2F2] bg-cover bg-center"
       style={{ backgroundImage: `url(${bannerBg})` }}
     >
       <style>{`
@@ -72,13 +72,15 @@ const HeroV2 = () => {
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .hero-plane { animation: none !important; }
+          .hero-plane {
+            animation: none !important;
+          }
         }
       `}</style>
 
       <div
         className="pointer-events-none absolute inset-0 z-0"
-        style={{ backgroundColor: "rgba(255,107,0,0.12)" }}
+        style={{ backgroundColor: "rgba(255,107,0,0.08)" }}
       />
 
       {/* Desktop only moving plane */}
@@ -88,7 +90,7 @@ const HeroV2 = () => {
         fill="none"
         preserveAspectRatio="none"
       >
-        <g className="hero-plane" opacity="0.8">
+        <g className="hero-plane" opacity="0.75">
           <g transform="translate(-52,-52)">
             <g transform="scale(4)">
               <g transform="rotate(90 13 13)">
@@ -102,22 +104,22 @@ const HeroV2 = () => {
         </g>
       </svg>
 
-      <div className="relative z-10 mx-auto w-full max-w-[1340px] px-3 pb-4 pt-0 sm:px-6 sm:pt-0 md:pb-12 md:pt-6 lg:px-8">
+      <div className="relative z-10 mx-auto w-full max-w-[1340px] px-3 pb-5 pt-3 sm:px-6 sm:pt-4 md:pb-12 md:pt-6 lg:px-8">
         <BannerSlider />
 
         {/* Mobile services grid */}
-        <div className="mt-3 grid grid-cols-3 gap-3 md:hidden">
+        <div className="mt-3 grid grid-cols-3 gap-2.5 md:hidden">
           {mobileServices.map((service) => (
             <Link
               key={service.title}
               to={service.to}
-              className="flex min-h-[84px] flex-col items-center justify-center rounded-[14px] border border-slate-100 bg-white px-2 py-2.5 text-center shadow-[0_8px_18px_rgba(11,42,74,0.08)] transition active:scale-[0.97]"
+              className="flex min-h-[72px] flex-col items-center justify-center rounded-[12px] border border-slate-100 bg-white px-2 py-2 text-center shadow-[0_8px_18px_rgba(11,42,74,0.07)] transition active:scale-[0.97]"
             >
-              <span className="flex h-[48px] w-[48px] items-center justify-center text-[39px] text-[#FF6B00]">
+              <span className="flex h-[34px] w-[34px] items-center justify-center text-[28px] text-[#FF6B00]">
                 {service.icon}
               </span>
 
-              <span className="mt-1.5 block font-poppins text-[10.5px] font-bold leading-tight text-slate-950">
+              <span className="mt-1.5 block font-poppins text-[10px] font-bold leading-tight text-slate-950">
                 {service.title}
               </span>
             </Link>

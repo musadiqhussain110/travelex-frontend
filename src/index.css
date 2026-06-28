@@ -148,3 +148,14 @@ section {
 ::-webkit-scrollbar-thumb:hover {
   opacity: 0.9;
 }
+/* Global eyebrow / uppercase label spacing fix */
+.uppercase[class*="tracking-"] {
+  letter-spacing: 0.12em !important;
+}
+
+/* Keep very small mobile labels readable */
+@media (max-width: 640px) {
+  .uppercase[class*="tracking-"] {
+    letter-spacing: 0.08em !important;
+  }
+}

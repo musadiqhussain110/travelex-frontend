@@ -1,12 +1,12 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import {
-  FaWhatsapp,
+  FaArrowRight,
+  FaCheckCircle,
+  FaMapMarkerAlt,
   FaStar,
   FaTag,
-  FaMapMarkerAlt,
-  FaCheckCircle,
-  FaArrowRight,
+  FaWhatsapp,
 } from "react-icons/fa"
 
 import Footer from "../components/Footer"
@@ -30,11 +30,13 @@ const HotelsPage = () => {
 
   return (
     <main className="relative bg-[#F8FAFC]">
-      {/* Simple Hero */}
+      {/* Hero */}
       <section className="relative overflow-hidden bg-slate-950">
         <img
           src={hotels[1]?.image || hotels[0]?.image}
           alt="Hotel booking by TravelEx"
+          loading="eager"
+          decoding="async"
           className="absolute inset-0 h-full w-full object-cover"
         />
 
@@ -43,7 +45,7 @@ const HotelsPage = () => {
 
         <div className="relative z-10 mx-auto max-w-[1340px] px-4 py-7 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
           <div className="max-w-4xl">
-            <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.22em] text-[#00AEEF] sm:text-[12px]">
+            <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-[12px] sm:tracking-[0.12em]">
               Hotel Booking
             </p>
 
@@ -76,7 +78,7 @@ const HotelsPage = () => {
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
           <div className="mb-2 flex flex-col gap-2 md:mb-10 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
+              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.12em]">
                 Available Stays
               </p>
 
@@ -141,13 +143,15 @@ const HotelsPage = () => {
                     <img
                       src={hotel.image}
                       alt={hotel.name}
+                      loading="lazy"
+                      decoding="async"
                       className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                     />
 
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
                     <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-slate-950 to-transparent sm:h-32" />
 
-                    <div className="absolute left-4 top-4 inline-flex h-[29px] items-center gap-1.5 rounded-full border border-white/25 bg-slate-950/30 px-3 font-poppins text-[8px] font-bold uppercase tracking-[0.14em] text-white backdrop-blur-md sm:left-5 sm:top-5 sm:h-[36px] sm:gap-2 sm:px-4 sm:text-[10px] sm:tracking-[0.16em]">
+                    <div className="absolute left-4 top-4 inline-flex h-[29px] items-center gap-1.5 rounded-full border border-white/25 bg-slate-950/30 px-3 font-poppins text-[8px] font-bold uppercase tracking-[0.08em] text-white backdrop-blur-md sm:left-5 sm:top-5 sm:h-[36px] sm:gap-2 sm:px-4 sm:text-[10px] sm:tracking-[0.12em]">
                       <FaTag className="text-[8.5px] text-[#00AEEF] sm:text-[10px]" />
                       {hotel.stars} Star
                     </div>
@@ -172,7 +176,7 @@ const HotelsPage = () => {
 
                       <div className="mt-2 flex items-end justify-between gap-3 sm:mt-3 sm:gap-4">
                         <div>
-                          <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.16em] text-white/45 sm:text-[9px]">
+                          <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.08em] text-white/45 sm:text-[9px] sm:tracking-[0.1em]">
                             Starting
                           </p>
 
@@ -217,7 +221,7 @@ const HotelsPage = () => {
         </div>
       </section>
 
-      {/* Simple Bottom CTA */}
+      {/* Bottom CTA */}
       <section className="bg-[#F8FAFC] pb-8 pt-2 sm:pb-14">
         <div className="mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8">
           <div className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">

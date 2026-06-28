@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import {
+  FaArrowRight,
+  FaCertificate,
   FaChevronLeft,
   FaChevronRight,
-  FaCertificate,
-  FaUsers,
   FaHeadset,
-  FaArrowRight,
+  FaUsers,
   FaWhatsapp,
 } from "react-icons/fa"
 
@@ -39,54 +39,46 @@ const updatedBannerData = [
 
 const mobileBannerText = {
   consultant: {
-    eyebrow: "TRAVEL HELP",
+    eyebrow: "Travel Help",
     before: "Plan",
     highlight: "Trip",
     after: "Easy",
   },
   umrah: {
-    eyebrow: "UMRAH PACKAGES",
+    eyebrow: "Umrah Packages",
     before: "Book",
     highlight: "Umrah",
     after: "Now",
   },
   visa: {
-    eyebrow: "VISA ASSISTANCE",
+    eyebrow: "Visa Assistance",
     before: "Apply",
     highlight: "Visa",
     after: "Easy",
   },
   tours: {
-    eyebrow: "CUSTOM TOURS",
+    eyebrow: "Custom Tours",
     before: "Plan",
     highlight: "Tours",
     after: "Now",
   },
 }
 
-/*
-  Mobile vector controls:
-  Same positions kept as your current file.
-
-  h-[...]       = size
-  bottom-[...] = vertical position
-  right-[...]  = horizontal position
-*/
 const mobileVectorStyles = {
   consultant:
-    "absolute bottom-[-5px] right-[-48px] h-[150px] w-auto max-w-none object-contain",
+    "absolute bottom-[-10px] right-[-88px] h-[140px] w-auto max-w-none object-contain",
 
   umrah:
-    "absolute bottom-[-68px] right-[-38px] h-[220px] w-auto max-w-none object-contain",
+    "absolute bottom-[-38px] right-[-40px] h-[178px] w-auto max-w-none object-contain",
 
   visa:
-    "absolute bottom-[8px] right-[-8px] z-10 h-[194px] w-auto max-w-none object-contain",
+    "absolute bottom-[4px] right-[-34px] z-10 h-[158px] w-auto max-w-none object-contain",
 
   visaDocs:
-    "absolute bottom-[24px] right-[82px] z-20 w-[54px] max-w-none object-contain drop-shadow-[0_8px_12px_rgba(15,23,42,0.20)]",
+    "absolute bottom-[22px] right-[70px] z-20 w-[44px] max-w-none object-contain drop-shadow-[0_8px_12px_rgba(15,23,42,0.20)]",
 
   tours:
-    "absolute bottom-[-52px] right-[-20px] h-[215px] w-auto max-w-none object-contain",
+    "absolute bottom-[-36px] right-[-38px] h-[172px] w-auto max-w-none object-contain",
 }
 
 const mobileVectorAssets = {
@@ -150,6 +142,7 @@ const BannerSlider = () => {
     }
 
     frame = requestAnimationFrame(step)
+
     return () => cancelAnimationFrame(frame)
   }, [])
 
@@ -225,7 +218,7 @@ const BannerSlider = () => {
         key={`mobile-vector-${activeIndex}`}
         src={asset}
         alt={activeBanner.category}
-        className={`banner-slide-item ${className}`}
+        className={`banner-slide-item pointer-events-none ${className}`}
       />
     )
   }
@@ -262,7 +255,7 @@ const BannerSlider = () => {
 
         @keyframes bannerFloat {
           0%, 100% { transform: translateY(0); }
-          50%      { transform: translateY(-11px); }
+          50%      { transform: translateY(-9px); }
         }
 
         @keyframes bannerDotFill {
@@ -290,18 +283,20 @@ const BannerSlider = () => {
         }
       `}</style>
 
-      {/* MOBILE BANNER ONLY */}
-      <div className="relative h-[160px] overflow-hidden rounded-[14px] bg-white shadow-[0_8px_24px_rgba(11,42,74,0.10)] md:hidden">
+      {/* Mobile Banner */}
+      <div className="relative h-[152px] overflow-hidden rounded-[14px] bg-white shadow-[0_8px_24px_rgba(11,42,74,0.10)] md:hidden">
         {renderMobileVisual()}
+
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-[15] w-[72%] bg-gradient-to-r from-white via-white/95 to-white/10" />
 
         <div
           key={`mobile-content-${activeIndex}`}
-          className="banner-slide-item relative z-20 flex h-full max-w-[48%] flex-col justify-center px-4 pb-7 pt-4"
+          className="banner-slide-item relative z-20 flex h-full max-w-[62%] flex-col justify-center px-4 pb-7 pt-4"
         >
           <h3
             data-stagger
             style={stagger(1)}
-            className="whitespace-nowrap font-poppins text-[7px] font-bold uppercase tracking-[0.12em] text-[#00AEEF]"
+            className="whitespace-nowrap font-poppins text-[8px] font-bold uppercase tracking-[0.08em] text-[#00AEEF]"
           >
             {mobileText.eyebrow}
           </h3>
@@ -309,7 +304,7 @@ const BannerSlider = () => {
           <h2
             data-stagger
             style={stagger(2)}
-            className="mt-2 flex flex-nowrap items-center gap-1 font-fredoka text-[12px] font-semibold uppercase leading-none text-slate-950"
+            className="mt-2 flex flex-nowrap items-center gap-1 font-fredoka text-[19px] font-semibold uppercase leading-none text-slate-950"
           >
             <span className="whitespace-nowrap">{mobileText.before}</span>
 
@@ -335,7 +330,7 @@ const BannerSlider = () => {
                   rel: "noreferrer",
                 }
               : { to: activeBanner.buttonLink })}
-            className="group mt-2 inline-flex w-fit items-center gap-1 rounded-[5px] bg-[#FF6B00] px-3 py-1.5 font-poppins text-[8px] font-semibold text-white shadow-[0_6px_16px_rgba(255,107,0,0.28)] transition-colors duration-300 hover:bg-[#00AEEF]"
+            className="group mt-3 inline-flex w-fit items-center gap-1.5 rounded-[5px] bg-[#FF6B00] px-3 py-1.5 font-poppins text-[8.5px] font-semibold text-white shadow-[0_6px_16px_rgba(255,107,0,0.28)] transition-colors duration-300 hover:bg-[#00AEEF]"
           >
             {activeBanner.id === "consultant" && (
               <FaWhatsapp className="text-[9px]" />
@@ -350,7 +345,7 @@ const BannerSlider = () => {
         {renderDots(true)}
       </div>
 
-      {/* DESKTOP BANNER ONLY */}
+      {/* Desktop Banner */}
       <div className="relative hidden h-[370px] rounded-[18px] bg-white/90 px-8 shadow-[0_8px_30px_rgba(11,42,74,0.05)] backdrop-blur-[3px] md:block lg:px-14">
         <div
           key={`desktop-${activeIndex}`}
@@ -395,7 +390,7 @@ const BannerSlider = () => {
             <h3
               data-stagger
               style={stagger(1)}
-              className="font-poppins text-[13px] font-bold uppercase tracking-[0.28em] text-[#00AEEF]"
+              className="font-poppins text-[12px] font-bold uppercase tracking-[0.14em] text-[#00AEEF] lg:text-[13px]"
             >
               {activeBanner.category}
             </h3>
@@ -452,14 +447,15 @@ const BannerSlider = () => {
           {/* Right Visual */}
           <div className="relative hidden h-full min-h-[300px] md:block">
             {activeBanner.id === "consultant" && (
-  <div className="banner-asset absolute top-[-18px] right-[-100px] z-20 w-[760px] max-w-none lg:right-[-150px] lg:w-[820px] xl:right-[-170px] xl:w-[880px]">
-    <img
-      src={consultantAsset}
-      alt="TravelEx Consultant"
-      className="w-full max-w-none origin-center scale-[0.8] object-contain"
-    />
-  </div>
-)}
+              <div className="banner-asset absolute right-[-100px] top-[-18px] z-20 w-[760px] max-w-none lg:right-[-150px] lg:w-[820px] xl:right-[-170px] xl:w-[880px]">
+                <img
+                  src={consultantAsset}
+                  alt="TravelEx Consultant"
+                  className="w-full max-w-none origin-center scale-[0.8] object-contain"
+                />
+              </div>
+            )}
+
             {activeBanner.id === "umrah" && (
               <img
                 src={umrahAsset}
