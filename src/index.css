@@ -173,3 +173,46 @@ section {
     letter-spacing: 0.025em !important;
   }
 }
+html {
+  scroll-behavior: auto !important;
+}
+
+/* Force all reveal / scroll animation elements to stay visible */
+.reveal,
+.reveal-up,
+.reveal-down,
+.reveal-left,
+.reveal-right,
+.scroll-reveal,
+.animate-on-scroll,
+[data-aos],
+[data-reveal],
+[class*="reveal"],
+[class*="Reveal"] {
+  opacity: 1 !important;
+  transform: none !important;
+  translate: none !important;
+  visibility: visible !important;
+  filter: none !important;
+}
+
+/* Disable heavy entrance animations quickly */
+.reveal *,
+.scroll-reveal *,
+.animate-on-scroll *,
+[data-aos] *,
+[data-reveal] * {
+  opacity: 1 !important;
+  transform: none !important;
+  translate: none !important;
+  visibility: visible !important;
+}
+
+/* Reduce animation load */
+*,
+*::before,
+*::after {
+  animation-duration: 0.001ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+}

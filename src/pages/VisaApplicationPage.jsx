@@ -9,12 +9,12 @@ import {
   FaPassport,
   FaPhoneAlt,
   FaUser,
-  FaUsers,
   FaWhatsapp,
 } from "react-icons/fa"
 
 import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
+import { publicApi } from "../services/publicApi"
 
 const whatsappNumber = "923111444192"
 
@@ -39,13 +39,50 @@ const travelerOptions = [
 ]
 
 const labelClass =
-  "mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mb-2 sm:text-xs"
-
-const inputClass =
-  "h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] sm:h-12 sm:px-4 sm:text-sm"
+  "mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs"
 
 const iconInputClass =
   "h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
+
+const parseTravelers = (value) => {
+  if (value === "1 Traveler") {
+    return {
+      adults: 1,
+      children: 0,
+      infants: 0,
+    }
+  }
+
+  if (value === "2 Travelers") {
+    return {
+      adults: 2,
+      children: 0,
+      infants: 0,
+    }
+  }
+
+  if (value === "Family") {
+    return {
+      adults: 2,
+      children: 2,
+      infants: 0,
+    }
+  }
+
+  if (value === "Group" || value === "Corporate / Team") {
+    return {
+      adults: 4,
+      children: 0,
+      infants: 0,
+    }
+  }
+
+  return {
+    adults: 1,
+    children: 0,
+    infants: 0,
+  }
+}
 
 const VisaApplicationPage = () => {
   const [searchParams] = useSearchParams()
@@ -55,7 +92,8 @@ const VisaApplicationPage = () => {
     searchParams.get("visa") || searchParams.get("type") || "Tourist Visa"
 
   const visaTypeOptions = useMemo(
-    () => Array.from(new Set([selectedVisa, ...defaultVisaTypes].filter(Boolean))),
+    () =>
+      Array.from(new Set([selectedVisa, ...defaultVisaTypes].filter(Boolean))),
     [selectedVisa]
   )
 
@@ -72,6 +110,7 @@ const VisaApplicationPage = () => {
   })
 
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
   const handleChange = (event) => {
@@ -94,30 +133,7 @@ const VisaApplicationPage = () => {
     setError("")
   }
 
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    setError("")
-
-    if (!formData.fullName.trim()) {
-      setError("Please enter your full name.")
-      return
-    }
-
-    if (!formData.phone.trim()) {
-      setError("Please enter your phone number.")
-      return
-    }
-
-    if (!formData.country.trim()) {
-      setError("Please enter visa country.")
-      return
-    }
-
-    if (!formData.visaType) {
-      setError("Please select visa type.")
-      return
-    }
-
+  const getWhatsappUrl = () => {
     const message = `
 Assalamualaikum TravelEx,
 
@@ -136,13 +152,81 @@ Additional Message:
 ${formData.message || "No additional message"}
     `.trim()
 
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-      message
-    )}`
+    return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
+  }
 
-    window.open(whatsappUrl, "_blank", "noreferrer")
-    setSubmitted(true)
-    window.scrollTo({ top: 0, behavior: "smooth" })
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setError("")
+
+    if (!formData.fullName.trim()) {
+      setError("Please enter your full name.")
+      return
+    }
+
+    if (!formData.phone.trim()) {
+      setError("Please enter your phone number.")
+      return
+    }
+
+    if (!formData.email.trim()) {
+      setError("Please enter your email address.")
+      return
+    }
+
+    if (!formData.country.trim()) {
+      setError("Please enter visa country.")
+      return
+    }
+
+    if (!formData.visaType) {
+      setError("Please select visa type.")
+      return
+    }
+
+    try {
+      setLoading(true)
+
+      const message = [
+        `Visa application request`,
+        `Country: ${formData.country}`,
+        `Visa Type: ${formData.visaType}`,
+        `Expected Travel Date: ${formData.travelDate || "Not decided"}`,
+        `No. of Travelers: ${formData.travelers}`,
+        `Passport Available: ${formData.hasPassport}`,
+        "",
+        formData.message
+          ? `Additional Message: ${formData.message}`
+          : "Additional Message: Not provided",
+      ].join("\n")
+
+      const payload = {
+        name: formData.fullName.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim(),
+        serviceType: "visa",
+        source: "visa-page",
+        pageUrl: window.location.href,
+        destination: formData.country.trim(),
+        travelers: parseTravelers(formData.travelers),
+        message,
+        priority: "high",
+        companyWebsite: "",
+      }
+
+      await publicApi.createLead(payload)
+
+      setSubmitted(true)
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    } catch (err) {
+      console.error("Visa application lead error:", err)
+      setError(
+        err.message ||
+          "We could not submit your visa application right now. Please try again."
+      )
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -163,7 +247,7 @@ ${formData.message || "No additional message"}
             </Link>
 
             <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:mb-4 sm:gap-3">
-              <span className="inline-flex h-[27px] items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[7.5px] font-bold uppercase tracking-[0.14em] text-[#00AEEF] backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.16em]">
+              <span className="inline-flex h-[27px] items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[7.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.1em]">
                 <FaPassport className="text-[8px] sm:text-[10px]" />
                 Visa Application
               </span>
@@ -202,7 +286,7 @@ ${formData.message || "No additional message"}
             className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7"
           >
             <div className="mb-4 sm:mb-6">
-              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
+              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.1em]">
                 Visa Application Form
               </p>
 
@@ -229,13 +313,24 @@ ${formData.message || "No additional message"}
 
                   <div>
                     <h3 className="font-fredoka text-[20px] font-semibold leading-tight text-green-800 sm:text-[24px]">
-                      Visa request prepared
+                      Visa request submitted
                     </h3>
 
                     <p className="mt-1.5 font-poppins text-[11.5px] font-medium leading-5 text-green-700 sm:text-sm sm:leading-7">
-                      WhatsApp should open with your application details. You
-                      can send it directly to TravelEx.
+                      Your visa application request has been saved in the
+                      TravelEx CRM dashboard. Our consultant will contact you
+                      soon.
                     </p>
+
+                    <a
+                      href={getWhatsappUrl()}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-3 inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-4 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF]"
+                    >
+                      <FaWhatsapp />
+                      Continue on WhatsApp
+                    </a>
                   </div>
                 </div>
               </div>
@@ -277,7 +372,7 @@ ${formData.message || "No additional message"}
               </div>
 
               <div>
-                <label className={labelClass}>Email Address</label>
+                <label className={labelClass}>Email Address *</label>
 
                 <div className="relative">
                   <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
@@ -367,10 +462,11 @@ ${formData.message || "No additional message"}
 
             <button
               type="submit"
-              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
+              disabled={loading}
+              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-70 sm:px-6 sm:py-3 sm:text-sm"
             >
-              Submit Application
-              <FaArrowRight className="text-[10px] sm:text-xs" />
+              {loading ? "Submitting..." : "Submit Application"}
+              {!loading && <FaArrowRight className="text-[10px] sm:text-xs" />}
             </button>
           </form>
 

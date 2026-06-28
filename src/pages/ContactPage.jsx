@@ -10,7 +10,7 @@ import {
 
 import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
-import { createContactInquiry } from "../services/contactService"
+import { publicApi } from "../services/publicApi"
 import contactHero from "../assets/contact/contact.jpg"
 
 const initialForm = {
@@ -36,7 +36,7 @@ const inputClass =
   "w-full rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:px-4 sm:py-3.5 sm:text-sm"
 
 const labelClass =
-  "mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mb-2 sm:text-xs"
+  "mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs"
 
 const contactItems = [
   {
@@ -80,6 +80,9 @@ const ContactPage = () => {
       ...prev,
       [name]: value,
     }))
+
+    setError("")
+    setSuccess("")
   }
 
   const handleInterestedChange = (value) => {
@@ -87,6 +90,9 @@ const ContactPage = () => {
       ...prev,
       interestedIn: value,
     }))
+
+    setError("")
+    setSuccess("")
   }
 
   const handleSubmit = async (event) => {
@@ -135,10 +141,10 @@ ${formData.message.trim()}
         companyWebsite: formData.companyWebsite,
       }
 
-      await createContactInquiry(payload)
+      await publicApi.createContactInquiry(payload)
 
       setSuccess(
-        "Your inquiry has been submitted successfully. Our TravelEx consultant will contact you soon."
+        "Your inquiry has been submitted successfully. TravelEx admin team can now view it in the CRM dashboard."
       )
 
       setFormData(initialForm)
@@ -146,7 +152,8 @@ ${formData.message.trim()}
       console.error("Contact form submission error:", err)
 
       setError(
-        "We couldn't submit your inquiry right now. Please try again or contact us on WhatsApp."
+        err.message ||
+          "We couldn't submit your inquiry right now. Please try again or contact us on WhatsApp."
       )
     } finally {
       setLoading(false)
@@ -160,6 +167,8 @@ ${formData.message.trim()}
         <img
           src={contactHero}
           alt="Contact TravelEx"
+          loading="eager"
+          decoding="async"
           className="absolute inset-0 h-full w-full object-cover object-[center_85%]"
         />
 
@@ -168,7 +177,7 @@ ${formData.message.trim()}
 
         <div className="relative z-10 mx-auto max-w-[1340px] px-4 py-7 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
           <div className="max-w-4xl">
-            <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.22em] text-[#00AEEF] sm:text-[12px]">
+            <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-[12px] sm:tracking-[0.1em]">
               Contact TravelEx
             </p>
 
@@ -199,7 +208,7 @@ ${formData.message.trim()}
             {/* Form */}
             <div className="overflow-hidden rounded-[12px] border border-slate-100 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
               <div className="border-b border-slate-100 bg-white px-4 py-4 sm:px-8 sm:py-7">
-                <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:text-xs sm:tracking-[0.2em]">
+                <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-xs sm:tracking-[0.1em]">
                   Quick Inquiry
                 </p>
 
@@ -334,7 +343,7 @@ ${formData.message.trim()}
 
             {/* Contact Info */}
             <aside className="h-fit rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-8 lg:sticky lg:top-24">
-              <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#FF6B00] sm:text-xs sm:tracking-[0.2em]">
+              <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#FF6B00] sm:text-xs sm:tracking-[0.1em]">
                 Contact Details
               </p>
 
@@ -366,7 +375,7 @@ ${formData.message.trim()}
                       </span>
 
                       <div>
-                        <p className="font-poppins text-[9px] font-bold uppercase tracking-wider text-slate-400 sm:text-xs">
+                        <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:text-xs sm:tracking-[0.1em]">
                           {item.title}
                         </p>
 
@@ -384,7 +393,7 @@ ${formData.message.trim()}
                   </span>
 
                   <div>
-                    <p className="font-poppins text-[9px] font-bold uppercase tracking-wider text-slate-400 sm:text-xs">
+                    <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:text-xs sm:tracking-[0.1em]">
                       Address
                     </p>
 
@@ -397,7 +406,7 @@ ${formData.message.trim()}
               </div>
 
               <div className="mt-4 rounded-[5px] border border-orange-100 bg-orange-50 p-3.5 sm:mt-5 sm:p-4">
-                <p className="font-poppins text-[9px] font-bold uppercase tracking-wider text-[#FF6B00] sm:text-xs">
+                <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-[#FF6B00] sm:text-xs sm:tracking-[0.1em]">
                   Quick Support
                 </p>
 

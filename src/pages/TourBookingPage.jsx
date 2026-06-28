@@ -6,19 +6,16 @@ import {
   FaCalendarAlt,
   FaCheckCircle,
   FaEnvelope,
-  FaGlobeAsia,
-  FaHotel,
   FaMapMarkerAlt,
   FaPhoneAlt,
-  FaRoute,
   FaUser,
-  FaUsers,
   FaWhatsapp,
 } from "react-icons/fa"
 
 import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
 import { tours } from "../data/tours"
+import { publicApi } from "../services/publicApi"
 
 const travelerOptions = [
   "1 Traveler",
@@ -53,10 +50,7 @@ const tripTypeOptions = [
 ]
 
 const labelClass =
-  "mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mb-2 sm:text-xs"
-
-const inputClass =
-  "h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] sm:h-12 sm:px-4 sm:text-sm"
+  "mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs"
 
 const iconInputClass =
   "h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
@@ -79,12 +73,53 @@ const getWhatsappLink = (tour) =>
     `Assalamualaikum TravelEx, I want to book/customize ${tour.title}. Please guide me.`
   )}`
 
+const parseTravelers = (value) => {
+  if (value === "1 Traveler") {
+    return {
+      adults: 1,
+      children: 0,
+      infants: 0,
+    }
+  }
+
+  if (value === "2 Travelers") {
+    return {
+      adults: 2,
+      children: 0,
+      infants: 0,
+    }
+  }
+
+  if (value === "Family") {
+    return {
+      adults: 2,
+      children: 2,
+      infants: 0,
+    }
+  }
+
+  if (value === "Group" || value === "Corporate / Team") {
+    return {
+      adults: 4,
+      children: 0,
+      infants: 0,
+    }
+  }
+
+  return {
+    adults: 1,
+    children: 0,
+    infants: 0,
+  }
+}
+
 const TourBookingPage = () => {
   const { id } = useParams()
   const tour = tours.find((item) => item.id === id)
 
   const [formData, setFormData] = useState(initialForm)
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
   const handleChange = (event) => {
@@ -107,7 +142,7 @@ const TourBookingPage = () => {
     setError("")
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     setError("")
 
@@ -118,6 +153,11 @@ const TourBookingPage = () => {
 
     if (!formData.phone.trim()) {
       setError("Please enter your phone number.")
+      return
+    }
+
+    if (!formData.email.trim()) {
+      setError("Please enter your email address.")
       return
     }
 
@@ -136,8 +176,60 @@ const TourBookingPage = () => {
       return
     }
 
-    setSubmitted(true)
-    window.scrollTo({ top: 0, behavior: "smooth" })
+    try {
+      setLoading(true)
+
+      const travelers = parseTravelers(formData.travelers)
+
+      const message = [
+        `Tour request for: ${tour.title}`,
+        `Tour Location: ${tour.location || tour.title}`,
+        `Tour Price: ${tour.price || "Custom Quote"}`,
+        `Tour Duration: ${tour.duration || "Flexible"}`,
+        `Tour Type: ${tour.type || "Custom Tour"}`,
+        "",
+        `Departure City: ${formData.departureCity}`,
+        `Preferred Travel Date: ${formData.travelDate}`,
+        `Travelers: ${formData.travelers}`,
+        `Hotel Preference: ${formData.hotelPreference || "Not selected"}`,
+        `Budget Range: ${formData.budgetRange || "Not selected"}`,
+        `Trip Type: ${formData.tripType || "Not selected"}`,
+        "",
+        formData.specialRequirements
+          ? `Special Requirements: ${formData.specialRequirements}`
+          : "Special Requirements: Not provided",
+      ].join("\n")
+
+      const payload = {
+        name: formData.fullName.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim(),
+        serviceType: "tour",
+        source: "tour-page",
+        pageUrl: window.location.href,
+        destination: tour.location || tour.title || "",
+        budget: formData.budgetRange || tour.price || "",
+        preferredHotel: formData.hotelPreference || "",
+        travelers,
+        message,
+        priority: "high",
+        companyWebsite: "",
+      }
+
+      await publicApi.createLead(payload)
+
+      setSubmitted(true)
+      setFormData(initialForm)
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    } catch (err) {
+      console.error("Tour booking lead error:", err)
+      setError(
+        err.message ||
+          "We could not submit your tour request right now. Please try again."
+      )
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (!tour) {
@@ -178,6 +270,8 @@ const TourBookingPage = () => {
         <img
           src={tour.image}
           alt={tour.title}
+          loading="eager"
+          decoding="async"
           className="absolute inset-0 h-full w-full object-cover"
         />
 
@@ -195,7 +289,7 @@ const TourBookingPage = () => {
             </Link>
 
             <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:mb-4 sm:gap-3">
-              <span className="inline-flex h-[27px] items-center rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[7.5px] font-bold uppercase tracking-[0.14em] text-[#00AEEF] backdrop-blur sm:h-auto sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.16em]">
+              <span className="inline-flex h-[27px] items-center rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[7.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] backdrop-blur sm:h-auto sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.1em]">
                 Tour Request
               </span>
 
@@ -232,7 +326,7 @@ const TourBookingPage = () => {
           {/* Form */}
           <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
             <div className="mb-4 sm:mb-6">
-              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
+              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.1em]">
                 Tour Booking Form
               </p>
 
@@ -257,8 +351,8 @@ const TourBookingPage = () => {
                 </h3>
 
                 <p className="mt-2 font-poppins text-[11.5px] font-medium leading-5 text-green-700 sm:text-sm sm:leading-7">
-                  Your tour request has been prepared successfully. Backend
-                  connection will later send this request to the admin dashboard.
+                  Your tour request has been submitted successfully. TravelEx
+                  admin team can now view it in the CRM dashboard.
                 </p>
 
                 <div className="mt-5 flex flex-col gap-3 sm:flex-row">
@@ -448,10 +542,13 @@ const TourBookingPage = () => {
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <button
                     type="submit"
-                    className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
+                    disabled={loading}
+                    className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-70 sm:px-6 sm:py-3 sm:text-sm"
                   >
-                    Submit Tour Request
-                    <FaArrowRight className="text-[10px] sm:text-xs" />
+                    {loading ? "Submitting..." : "Submit Tour Request"}
+                    {!loading && (
+                      <FaArrowRight className="text-[10px] sm:text-xs" />
+                    )}
                   </button>
 
                   <a
@@ -475,13 +572,15 @@ const TourBookingPage = () => {
                 <img
                   src={tour.image}
                   alt={tour.title}
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover"
                 />
 
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
 
                 <div className="absolute bottom-3 left-4 right-4 sm:bottom-4">
-                  <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.16em] text-white/65 sm:text-[10px]">
+                  <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-white/65 sm:text-[10px] sm:tracking-[0.1em]">
                     Selected Tour
                   </p>
 
@@ -492,7 +591,7 @@ const TourBookingPage = () => {
               </div>
 
               <div className="p-4 sm:p-5">
-                <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.16em] text-slate-400 sm:text-[10px]">
+                <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:text-[10px] sm:tracking-[0.1em]">
                   Starting from
                 </p>
 
@@ -518,7 +617,7 @@ const TourBookingPage = () => {
                 </div>
 
                 <div className="mt-4 rounded-[5px] bg-[#F8FAFC] p-3.5 sm:mt-5 sm:p-4">
-                  <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.16em] text-[#00AEEF] sm:text-[11px]">
+                  <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-[11px] sm:tracking-[0.1em]">
                     Important Note
                   </p>
 
