@@ -40,6 +40,7 @@ import AdminLeadsPage from "./pages/admin/AdminLeadsPage"
 import AdminLeadDetailPage from "./pages/admin/AdminLeadDetailPage"
 import AdminWhatsappLogsPage from "./pages/admin/AdminWhatsappLogsPage"
 import AdminContactInquiriesPage from "./pages/admin/AdminContactInquiriesPage"
+import TicketsPage from "./pages/TicketsPage"
 const AppContent = () => {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith("/admin")
@@ -97,7 +98,7 @@ const AppContent = () => {
           <Route path="/hotels" element={<HotelsPage />} />
           <Route path="/hotels/:id" element={<HotelDetailsPage />} />
           <Route path="/booking/hotels/:id" element={<HotelBookingPage />} />
-
+<Route path="/tickets" element={<TicketsPage />} />
           {/* Services */}
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/car-rental" element={<CarRentalPage />} />

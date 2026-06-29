@@ -17,6 +17,7 @@ import {
   FaPassport,
   FaSuitcase,
   FaPlaneDeparture,
+  FaTicketAlt,
   FaMoon,
 } from "react-icons/fa"
 
@@ -24,6 +25,7 @@ const services = [
   { name: "Umrah", icon: <FaKaaba /> },
   { name: "Visa Assistance", icon: <FaPassport /> },
   { name: "International Tours", icon: <FaGlobeAsia /> },
+  { name: "Tickets", icon: <FaTicketAlt /> },
   { name: "Hotel Booking", icon: <FaHotel /> },
   { name: "Transport Services", icon: <FaCar /> },
 ]
@@ -90,6 +92,29 @@ const visaOptions = [
 
 const carOptions = ["Economy Car", "SUV", "Luxury Car", "Coaster / Van"]
 
+const ticketTypeOptions = ["Domestic Ticket", "International Ticket"]
+
+const ticketDestinationOptions = [
+  "Karachi",
+  "Lahore",
+  "Islamabad",
+  "Peshawar",
+  "Quetta",
+  "Multan",
+  "Sialkot",
+  "Faisalabad",
+  "Dubai",
+  "Jeddah",
+  "Riyadh",
+  "Doha",
+  "Istanbul",
+  "Baku",
+  "Malaysia",
+  "Thailand",
+  "United Kingdom",
+  "Schengen",
+]
+
 const monthNames = [
   "January",
   "February",
@@ -133,26 +158,47 @@ const ServiceSearchBar = ({ defaultService = "Umrah" }) => {
   const nightsText = `${nights.makkah} Makkah · ${nights.madinah} Madinah`
 
   const getSearchPath = () => {
-  if (service === "Umrah") return "/umrah"
-  if (service === "Visa Assistance") {
-    const selectedCountry = formValues.Country
+    if (service === "Umrah") return "/umrah"
 
-    return selectedCountry
-      ? `/visa?country=${encodeURIComponent(selectedCountry)}`
-      : "/visa"
+    if (service === "Visa Assistance") {
+      const selectedCountry = formValues.Country
+
+      return selectedCountry
+        ? `/visa?country=${encodeURIComponent(selectedCountry)}`
+        : "/visa"
+    }
+
+    if (service === "International Tours") return "/tours"
+
+    if (service === "Tickets") {
+      const fromCity = formValues["From City"]
+      const toCity = formValues["To City"]
+
+      const params = new URLSearchParams()
+
+      if (fromCity) params.set("from", fromCity)
+      if (toCity) params.set("to", toCity)
+
+      const query = params.toString()
+
+      return query ? `/tickets?${query}` : "/tickets"
+    }
+
+    if (service === "Hotel Booking") return "/hotels"
+    if (service === "Transport Services") return "/car-rental"
+
+    return "/contact"
   }
-  if (service === "International Tours") return "/tours"
-  if (service === "Hotel Booking") return "/hotels"
-  if (service === "Transport Services") return "/car-rental"
 
-  return "/contact"
-}
   const getSearchLabel = () => {
     if (service === "Umrah") return "Get Personalized Plan"
     if (service === "Visa Assistance") return "Check Requirements"
     if (service === "International Tours") return "Start Planning"
+    if (service === "Tickets") return "Request Ticket Quote"
     if (service === "Hotel Booking") return "Find Trusted Hotels"
-    return "Book Transport"
+    if (service === "Transport Services") return "Book Transport"
+
+    return "Start Planning"
   }
 
   const updatePassenger = (type, action) => {
@@ -276,34 +322,73 @@ const ServiceSearchBar = ({ defaultService = "Umrah" }) => {
     }
 
     if (service === "Hotel Booking") {
-  return [
-    {
-      label: "Location",
-      placeholder: "Where are you staying?",
-      icon: <FaHotel />,
-      type: "select",
-      options: hotelOptions,
-    },
-    {
-      label: "Check In",
-      placeholder: "Select date",
-      icon: <FaCalendarAlt />,
-      type: "date",
-    },
-    {
-      label: "Check Out",
-      placeholder: "Select date",
-      icon: <FaCalendarAlt />,
-      type: "date",
-    },
-    {
-      label: "Guests",
-      placeholder: passengerText,
-      icon: <FaUsers />,
-      type: "passengers",
-    },
-  ]
-}
+      return [
+        {
+          label: "Location",
+          placeholder: "Where are you staying?",
+          icon: <FaHotel />,
+          type: "select",
+          options: hotelOptions,
+        },
+        {
+          label: "Check In",
+          placeholder: "Select date",
+          icon: <FaCalendarAlt />,
+          type: "date",
+        },
+        {
+          label: "Check Out",
+          placeholder: "Select date",
+          icon: <FaCalendarAlt />,
+          type: "date",
+        },
+        {
+          label: "Guests",
+          placeholder: passengerText,
+          icon: <FaUsers />,
+          type: "passengers",
+        },
+      ]
+    }
+
+    if (service === "Tickets") {
+      return [
+        {
+          label: "Ticket Type",
+          placeholder: "Domestic / International",
+          icon: <FaTicketAlt />,
+          type: "select",
+          options: ticketTypeOptions,
+        },
+        {
+          label: "From City",
+          placeholder: "Select departure city",
+          icon: <FaPlaneDeparture />,
+          type: "select",
+          options: departureCityOptions,
+        },
+        {
+          label: "To City",
+          placeholder: "Select destination",
+          icon: <FaMapMarkerAlt />,
+          type: "select",
+          options: ticketDestinationOptions,
+        },
+        {
+          label: "Travel Date",
+          placeholder: "Select date",
+          icon: <FaCalendarAlt />,
+          type: "date",
+        },
+        {
+          label: "Travelers",
+          placeholder: passengerText,
+          icon: <FaUsers />,
+          type: "passengers",
+        },
+      ]
+    }
+
     if (service === "Transport Services") {
       return [
         {
@@ -329,34 +414,33 @@ const ServiceSearchBar = ({ defaultService = "Umrah" }) => {
       ]
     }
 
-    // International Tours
-return [
-  {
-    label: "Destination",
-    placeholder: "Select destination",
-    icon: <FaMapMarkerAlt />,
-    type: "select",
-    options: arrivalOptions,
-  },
-  {
-    label: "Travel Date",
-    placeholder: "Select date",
-    icon: <FaCalendarAlt />,
-    type: "date",
-  },
-  {
-    label: "Return Date",
-    placeholder: "Select date",
-    icon: <FaCalendarAlt />,
-    type: "date",
-  },
-  {
-    label: "Travelers",
-    placeholder: passengerText,
-    icon: <FaUsers />,
-    type: "passengers",
-  },
-]
+    return [
+      {
+        label: "Destination",
+        placeholder: "Select destination",
+        icon: <FaMapMarkerAlt />,
+        type: "select",
+        options: arrivalOptions,
+      },
+      {
+        label: "Travel Date",
+        placeholder: "Select date",
+        icon: <FaCalendarAlt />,
+        type: "date",
+      },
+      {
+        label: "Return Date",
+        placeholder: "Select date",
+        icon: <FaCalendarAlt />,
+        type: "date",
+      },
+      {
+        label: "Travelers",
+        placeholder: passengerText,
+        icon: <FaUsers />,
+        type: "passengers",
+      },
+    ]
   }
 
   const isFieldFilled = (field) => {
@@ -548,8 +632,7 @@ return [
 
         <div className="grid grid-cols-3 gap-2">
           {monthNames.map((monthName, index) => {
-            const disabled =
-              pickerYear === currentYear && index < currentMonth
+            const disabled = pickerYear === currentYear && index < currentMonth
             const value = `${monthName} ${pickerYear}`
             const selected = formValues[field.label] === value
 
@@ -635,9 +718,7 @@ return [
               return (
                 <div
                   key={field.label}
-                  className={`relative ${
-                    fieldIsOpen ? "z-[100]" : "z-10"
-                  }`}
+                  className={`relative ${fieldIsOpen ? "z-[100]" : "z-10"}`}
                 >
                   <span className="absolute left-4 top-1/2 z-10 -translate-y-1/2 text-base text-[#00AEEF]">
                     {field.icon}

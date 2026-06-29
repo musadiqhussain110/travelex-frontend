@@ -9,6 +9,7 @@ import {
   FaKaaba,
   FaPassport,
   FaSearch,
+  FaTicketAlt,
   FaWhatsapp,
 } from "react-icons/fa"
 import { Link, useLocation, useNavigate } from "react-router-dom"
@@ -27,6 +28,12 @@ const services = [
     link: "/tours",
     icon: <FaGlobeAsia />,
     desc: "Customized international trips",
+  },
+  {
+    label: "Tickets",
+    link: "/tickets",
+    icon: <FaTicketAlt />,
+    desc: "Domestic & international air tickets",
   },
   {
     label: "Visa Assistance",
@@ -52,6 +59,7 @@ const navLinks = [
   ["Home", "/"],
   ["Umrah", "/umrah"],
   ["Tours", "/tours"],
+  ["Tickets", "/tickets"],
   ["Visa", "/visa"],
   ["Contact", "/contact"],
 ]
@@ -227,7 +235,7 @@ const Navbar = () => {
         </form>
 
         {/* Desktop Nav */}
-        <nav className="hidden items-center gap-7 font-poppins text-[14px] font-semibold text-slate-800 lg:flex">
+        <nav className="hidden items-center gap-6 font-poppins text-[14px] font-semibold text-slate-800 lg:flex xl:gap-7">
           <Link to="/" onClick={closeMenus} className={navLinkClass}>
             Home
             <span className={underline} />
@@ -253,7 +261,7 @@ const Navbar = () => {
             </button>
 
             <div
-              className={`absolute left-1/2 top-full z-[1200] w-[680px] -translate-x-1/2 pt-5 transition-all duration-200 ${
+              className={`absolute left-1/2 top-full z-[1200] w-[720px] -translate-x-1/2 pt-5 transition-all duration-200 ${
                 servicesOpen
                   ? "visible translate-y-0 opacity-100"
                   : "invisible translate-y-2 opacity-0"
