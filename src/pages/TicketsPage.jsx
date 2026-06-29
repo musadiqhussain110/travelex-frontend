@@ -49,24 +49,6 @@ const classOptions = ["Economy", "Premium Economy", "Business", "First Class"]
 
 const flexibleOptions = ["Yes", "No"]
 
-const popularRoutes = [
-  {
-    title: "Domestic Tickets",
-    text: "Karachi, Lahore, Islamabad, Peshawar, Quetta and other local routes.",
-    icon: FaPlaneDeparture,
-  },
-  {
-    title: "International Tickets",
-    text: "Dubai, Saudi Arabia, Turkey, Malaysia, Thailand, Qatar and more.",
-    icon: FaGlobeAsia,
-  },
-  {
-    title: "Return Tickets",
-    text: "One-way and return ticket support based on travel plan and budget.",
-    icon: FaPlaneArrival,
-  },
-]
-
 const trustPoints = [
   "Domestic and international ticket support",
   "One-way, return and multi-city guidance",
@@ -311,33 +293,9 @@ const TicketsPage = () => {
         </div>
       </section>
 
-      {/* Quick Cards */}
-<section className="relative z-20 -mt-4 bg-transparent sm:-mt-6">
-        <div className="mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-3 rounded-[12px] border border-slate-100 bg-white p-3 shadow-[0_14px_36px_rgba(15,23,42,0.09)] sm:grid-cols-3 sm:p-4">
-            {popularRoutes.map((item) => {
-              const Icon = item.icon
-
-              return (
-                <div key={item.title} className="rounded-[5px] bg-[#F8FAFC] p-4">
-                  <Icon className="text-lg text-[#00AEEF] sm:text-xl" />
-
-                  <h3 className="mt-2 font-fredoka text-[20px] font-semibold text-slate-950 sm:text-[24px]">
-                    {item.title}
-                  </h3>
-
-                  <p className="mt-1 font-poppins text-[11px] font-medium leading-5 text-slate-600 sm:text-sm sm:leading-6">
-                    {item.text}
-                  </p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
 
       {/* Ticket Form */}
-      <section id="ticket-form" className="scroll-mt-24 bg-white py-8 sm:py-16">
+<section id="ticket-form" className="scroll-mt-24 bg-white pt-4 pb-8 sm:pt-7 sm:pb-12">
         <div className="mx-auto grid max-w-[1440px] gap-5 px-4 sm:px-6 lg:grid-cols-[1fr_360px] lg:gap-6 lg:px-8">
           <form
             onSubmit={handleSubmit}
