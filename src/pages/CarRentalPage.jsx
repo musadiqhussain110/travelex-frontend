@@ -537,69 +537,7 @@ const CarRentalPage = () => {
         </div>
       </section>
 
-      {/* Service Intro */}
-      <section className="relative z-20 -mt-5 bg-transparent sm:-mt-8">
-        <div className="mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-2 rounded-[5px] border border-slate-100 bg-white p-3 shadow-[0_14px_36px_rgba(15,23,42,0.09)] sm:grid-cols-2 sm:gap-3 sm:p-4 lg:grid-cols-4">
-            {[
-              {
-                title: "Destination",
-                desktopTitle: "Destination Based",
-                text: "City based support",
-                desktopText: "Country and city based support",
-                icon: FaGlobeAsia,
-              },
-              {
-                title: "Pickup",
-                desktopTitle: "Pickup Support",
-                text: "Airport or hotel",
-                desktopText: "Airport, hotel and route transfers",
-                icon: FaPlaneArrival,
-              },
-              {
-                title: "Flexible",
-                desktopTitle: "Flexible Options",
-                text: "Self-drive or driver",
-                desktopText: "Self-drive or driver-included",
-                icon: FaRoute,
-              },
-              {
-                title: "Quote",
-                desktopTitle: "Quote Based",
-                text: "After availability",
-                desktopText: "Final quote after availability check",
-                icon: FaClock,
-              },
-            ].map((item) => {
-              const Icon = item.icon
-
-              return (
-                <div
-                  key={item.desktopTitle}
-                  className="rounded-[5px] bg-[#F8FAFC] p-3 sm:p-4"
-                >
-                  <Icon className="text-base text-[#00AEEF] sm:text-xl" />
-
-                  <p className="mt-2 font-poppins text-[8px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mt-3 sm:text-[10px] sm:tracking-[0.1em]">
-                    <span className="sm:hidden">{item.title}</span>
-                    <span className="hidden sm:inline">
-                      {item.desktopTitle}
-                    </span>
-                  </p>
-
-                  <p className="mt-1 font-poppins text-[10px] font-semibold leading-4 text-slate-950 sm:text-sm sm:leading-6">
-                    <span className="sm:hidden">{item.text}</span>
-                    <span className="hidden sm:inline">
-                      {item.desktopText}
-                    </span>
-                  </p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
+      
       {/* Quote Form */}
       <section
         ref={quoteFormRef}

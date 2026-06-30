@@ -255,7 +255,7 @@ const HotelBookingPage = () => {
         email: booking.email.trim(),
 
         serviceType: "hotel",
-        source: "hotel-booking-page",
+source: "hotel-page",
         pageUrl: window.location.href,
 
         city: booking.city.trim(),

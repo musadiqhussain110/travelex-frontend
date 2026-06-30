@@ -215,34 +215,7 @@ const PackageDetails = () => {
         </div>
       </section>
 
-      {/* Quick Facts */}
-      <section className="relative z-20 -mt-4 bg-transparent sm:-mt-8">
-        <div className="mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-2 rounded-[12px] border border-slate-100 bg-white p-2.5 shadow-[0_14px_36px_rgba(15,23,42,0.09)] sm:grid-cols-2 sm:gap-3 sm:p-4 lg:grid-cols-4">
-            {quickFacts.map((item) => {
-              const Icon = item.icon
-
-              return (
-                <div
-                  key={item.label}
-                  className="rounded-[5px] bg-[#F8FAFC] p-2.5 sm:p-4"
-                >
-                  <Icon className="text-[13px] text-[#00AEEF] sm:text-xl" />
-
-                  <p className="mt-1.5 font-poppins text-[7px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mt-3 sm:text-[10px] sm:tracking-[0.16em]">
-                    {item.label}
-                  </p>
-
-                  <p className="mt-0.5 line-clamp-2 font-poppins text-[9px] font-semibold leading-3.5 text-slate-950 sm:mt-1 sm:text-sm sm:leading-6">
-                    {item.value}
-                  </p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
+ 
       {/* Main Details */}
       <section className="bg-[#F8FAFC] py-8 sm:py-14">
         <div className="mx-auto grid max-w-[1440px] gap-5 px-4 sm:px-6 lg:grid-cols-[1fr_360px] lg:gap-6 lg:px-8">
