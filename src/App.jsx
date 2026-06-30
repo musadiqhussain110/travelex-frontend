@@ -31,6 +31,7 @@ import FAQPage from "./pages/FAQPage"
 
 import SearchResultsPage from "./pages/SearchResultsPage"
 import NotFoundPage from "./pages/NotFoundPage"
+import TicketsPage from "./pages/TicketsPage"
 
 import AdminProtectedRoute from "./components/admin/AdminProtectedRoute"
 import AdminLayout from "./components/admin/AdminLayout"
@@ -40,7 +41,8 @@ import AdminLeadsPage from "./pages/admin/AdminLeadsPage"
 import AdminLeadDetailPage from "./pages/admin/AdminLeadDetailPage"
 import AdminWhatsappLogsPage from "./pages/admin/AdminWhatsappLogsPage"
 import AdminContactInquiriesPage from "./pages/admin/AdminContactInquiriesPage"
-import TicketsPage from "./pages/TicketsPage"
+import AdminNotificationsPage from "./pages/admin/AdminNotificationsPage"
+import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute"
 const AppContent = () => {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith("/admin")
@@ -65,16 +67,52 @@ const AppContent = () => {
 
           {/* Protected Admin Routes */}
           <Route element={<AdminProtectedRoute />}>
-            <Route path="/admin" element={<AdminLayout />}>
+            <Route
+  path="/admin"
+  element={
+    <ProtectedAdminRoute>
+      <AdminLayout />
+    </ProtectedAdminRoute>
+  }
+>
               <Route index element={<AdminDashboardPage />} />
               <Route path="dashboard" element={<AdminDashboardPage />} />
+<Route path="notifications" element={<AdminNotificationsPage />} />
+              {/* Admin Lead Pages */}
               <Route path="leads" element={<AdminLeadsPage />} />
+              <Route
+                path="leads/umrah"
+                element={<AdminLeadsPage serviceType="umrah" />}
+              />
+              <Route
+                path="leads/tour"
+                element={<AdminLeadsPage serviceType="tour" />}
+              />
+              <Route
+                path="leads/visa"
+                element={<AdminLeadsPage serviceType="visa" />}
+              />
+              <Route
+                path="leads/ticket"
+                element={<AdminLeadsPage serviceType="ticket" />}
+              />
+              <Route
+                path="leads/hotel"
+                element={<AdminLeadsPage serviceType="hotel" />}
+              />
+              <Route
+                path="leads/car-rental"
+                element={<AdminLeadsPage serviceType="carRental" />}
+              />
+
+              {/* Keep dynamic lead detail after service-specific routes */}
               <Route path="leads/:id" element={<AdminLeadDetailPage />} />
+
               <Route path="whatsapp" element={<AdminWhatsappLogsPage />} />
               <Route
-  path="contact-inquiries"
-  element={<AdminContactInquiriesPage />}
-/>
+                path="contact-inquiries"
+                element={<AdminContactInquiriesPage />}
+              />
             </Route>
           </Route>
 
@@ -98,10 +136,11 @@ const AppContent = () => {
           <Route path="/hotels" element={<HotelsPage />} />
           <Route path="/hotels/:id" element={<HotelDetailsPage />} />
           <Route path="/booking/hotels/:id" element={<HotelBookingPage />} />
-<Route path="/tickets" element={<TicketsPage />} />
+
           {/* Services */}
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/car-rental" element={<CarRentalPage />} />
+          <Route path="/tickets" element={<TicketsPage />} />
           <Route path="/visa" element={<VisaPage />} />
           <Route path="/visa/apply" element={<VisaApplicationPage />} />
 

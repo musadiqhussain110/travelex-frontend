@@ -1,7 +1,8 @@
 import { useState } from "react"
 import { Navigate, useLocation, useNavigate } from "react-router-dom"
-import { FaLock } from "react-icons/fa"
+
 import { useAdminAuth } from "../../context/AdminAuthContext"
+import logo from "../../assets/logo.webp"
 
 const AdminLoginPage = () => {
   const navigate = useNavigate()
@@ -47,24 +48,26 @@ const AdminLoginPage = () => {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#F8FAFC] px-4 py-10">
-      <div className="w-full max-w-md rounded-[18px] border border-slate-100 bg-white p-6 shadow-[0_24px_70px_rgba(15,23,42,0.10)] sm:p-8">
-        <div className="mb-6 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#FF6B00]/10 text-[#FF6B00]">
-            <FaLock />
-          </div>
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#F8FAFC] px-4 py-10">
+      <div className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-[#00AEEF]/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 bottom-10 h-72 w-72 rounded-full bg-[#FF6B00]/10 blur-3xl" />
 
-          <h1 className="mt-4 font-fredoka text-[30px] font-semibold text-slate-950">
+      <div className="relative w-full max-w-md rounded-[5px] border border-slate-100 bg-white px-6 pb-8 pt-[190px] shadow-[0_24px_70px_rgba(15,23,42,0.10)] sm:px-8 sm:pb-10 sm:pt-[210px]">
+        <img
+          src={logo}
+          alt="TravelEx.pk"
+          className="absolute left-1/2 top-[95px] h-20 w-auto -translate-x-1/2 object-contain sm:top-[105px] sm:h-24"
+        />
+
+        <div className="mb-7 text-center">
+          <h1 className="font-fredoka text-[30px] font-semibold leading-tight text-slate-950">
             Admin Login
           </h1>
 
-          <p className="mt-1 font-poppins text-sm font-medium text-slate-500">
-            Login to manage TravelEx CRM.
-          </p>
         </div>
 
         {error && (
-          <div className="mb-4 rounded-[10px] border border-red-100 bg-red-50 px-4 py-3 font-poppins text-sm font-semibold text-red-600">
+          <div className="mb-4 rounded-[5px] border border-red-100 bg-red-50 px-4 py-3 font-poppins text-sm font-semibold text-red-600">
             {error}
           </div>
         )}
@@ -81,8 +84,8 @@ const AdminLoginPage = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              placeholder="admin@travelex.pk"
-              className="h-12 w-full rounded-[8px] border border-slate-200 bg-[#F8FAFC] px-4 font-poppins text-sm font-semibold text-slate-800 outline-none transition focus:border-[#00AEEF] focus:bg-white"
+              placeholder="Enter email"
+              className="h-12 w-full rounded-[5px] border border-slate-200 bg-[#F8FAFC] px-4 font-poppins text-sm font-semibold text-slate-800 outline-none transition focus:border-[#00AEEF] focus:bg-white focus:ring-2 focus:ring-[#00AEEF]/10"
             />
           </div>
 
@@ -98,14 +101,14 @@ const AdminLoginPage = () => {
               onChange={handleChange}
               required
               placeholder="Enter password"
-              className="h-12 w-full rounded-[8px] border border-slate-200 bg-[#F8FAFC] px-4 font-poppins text-sm font-semibold text-slate-800 outline-none transition focus:border-[#00AEEF] focus:bg-white"
+              className="h-12 w-full rounded-[5px] border border-slate-200 bg-[#F8FAFC] px-4 font-poppins text-sm font-semibold text-slate-800 outline-none transition focus:border-[#00AEEF] focus:bg-white focus:ring-2 focus:ring-[#00AEEF]/10"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 h-12 rounded-[8px] bg-[#FF6B00] font-poppins text-sm font-semibold text-white shadow-[0_14px_30px_rgba(255,107,0,0.25)] transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-2 h-12 rounded-[5px] bg-[#FF6B00] font-poppins text-sm font-semibold text-white shadow-[0_14px_30px_rgba(255,107,0,0.25)] transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Logging in..." : "Login"}
           </button>

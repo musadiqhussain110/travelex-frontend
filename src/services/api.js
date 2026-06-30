@@ -1,23 +1,44 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/v1"
 
+const ADMIN_TOKEN_KEY = "travelex_admin_token"
+const ADMIN_USER_KEY = "travelex_admin"
+
 const getAdminToken = () => {
-  return localStorage.getItem("travelex_admin_token")
+  return localStorage.getItem(ADMIN_TOKEN_KEY)
+}
+
+const buildQueryString = (params = {}) => {
+  if (typeof params === "string") {
+    return params
+  }
+
+  const query = new URLSearchParams()
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      query.append(key, value)
+    }
+  })
+
+  const queryString = query.toString()
+
+  return queryString ? `?${queryString}` : ""
 }
 
 export const apiRequest = async (endpoint, options = {}) => {
   const token = getAdminToken()
+  const isFormData = options.body instanceof FormData
 
   const headers = {
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers || {}),
   }
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`
-  }
+  const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${API_BASE_URL}${normalizedEndpoint}`, {
     ...options,
     headers,
   })
@@ -36,6 +57,40 @@ export const apiRequest = async (endpoint, options = {}) => {
   return data
 }
 
+export const adminStorage = {
+  saveSession: ({ token, admin }) => {
+    if (token) {
+      localStorage.setItem(ADMIN_TOKEN_KEY, token)
+    }
+
+    if (admin) {
+      localStorage.setItem(ADMIN_USER_KEY, JSON.stringify(admin))
+    }
+  },
+
+  getToken: () => {
+    return localStorage.getItem(ADMIN_TOKEN_KEY)
+  },
+
+  getAdmin: () => {
+    const savedAdmin = localStorage.getItem(ADMIN_USER_KEY)
+
+    if (!savedAdmin) return null
+
+    try {
+      return JSON.parse(savedAdmin)
+    } catch {
+      localStorage.removeItem(ADMIN_USER_KEY)
+      return null
+    }
+  },
+
+  clearSession: () => {
+    localStorage.removeItem(ADMIN_TOKEN_KEY)
+    localStorage.removeItem(ADMIN_USER_KEY)
+  },
+}
+
 export const adminApi = {
   login: (payload) =>
     apiRequest("/auth/login", {
@@ -45,9 +100,13 @@ export const adminApi = {
 
   me: () => apiRequest("/auth/me"),
 
+  getDashboardOverview: (params = {}) =>
+    apiRequest(`/dashboard/overview${buildQueryString(params)}`),
+
   getLeadStats: () => apiRequest("/leads/stats"),
 
-  getLeads: (query = "") => apiRequest(`/leads${query}`),
+  getLeads: (params = "") =>
+    apiRequest(`/leads${buildQueryString(params)}`),
 
   getLeadById: (id) => apiRequest(`/leads/${id}`),
 
@@ -63,19 +122,96 @@ export const adminApi = {
       body: JSON.stringify({ text }),
     }),
 
-  getWhatsappLogs: (query = "") => apiRequest(`/whatsapp/logs${query}`),
+  assignLead: (id, assignedTo) =>
+    apiRequest(`/leads/${id}/assign`, {
+      method: "PATCH",
+      body: JSON.stringify({ assignedTo }),
+    }),
 
-  getWhatsappStats: () => apiRequest("/whatsapp/logs/stats"),
+  archiveLead: (id) =>
+    apiRequest(`/leads/${id}/archive`, {
+      method: "PATCH",
+    }),
 
-  getContactInquiries: (query = "") =>
-  apiRequest(`/contact-inquiries${query}`),
+  getNotifications: (params = {}) =>
+    apiRequest(`/notifications${buildQueryString(params)}`),
 
-getContactInquiryById: (id) =>
-  apiRequest(`/contact-inquiries/${id}`),
+  getUnreadNotificationCount: () =>
+    apiRequest("/notifications/unread-count"),
 
-updateContactInquiryStatus: (id, status) =>
-  apiRequest(`/contact-inquiries/${id}/status`, {
-    method: "PATCH",
-    body: JSON.stringify({ status }),
-  }),
+  markNotificationAsRead: (id) =>
+    apiRequest(`/notifications/${id}/read`, {
+      method: "PATCH",
+    }),
+
+  markAllNotificationsAsRead: () =>
+    apiRequest("/notifications/mark-all-read", {
+      method: "PATCH",
+    }),
+
+  archiveNotification: (id) =>
+    apiRequest(`/notifications/${id}/archive`, {
+      method: "PATCH",
+    }),
+
+  getContactInquiries: (params = "") =>
+    apiRequest(`/contact-inquiries${buildQueryString(params)}`),
+
+  getContactInquiryStats: () =>
+    apiRequest("/contact-inquiries/stats/summary"),
+
+  getContactInquiryById: (id) =>
+    apiRequest(`/contact-inquiries/${id}`),
+
+  updateContactInquiryStatus: (id, status) =>
+    apiRequest(`/contact-inquiries/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status }),
+    }),
+
+  addContactInquiryNote: (id, text) =>
+    apiRequest(`/contact-inquiries/${id}/notes`, {
+      method: "POST",
+      body: JSON.stringify({ text }),
+    }),
+
+  assignContactInquiry: (id, assignedTo) =>
+    apiRequest(`/contact-inquiries/${id}/assign`, {
+      method: "PATCH",
+      body: JSON.stringify({ assignedTo }),
+    }),
+
+  archiveContactInquiry: (id) =>
+    apiRequest(`/contact-inquiries/${id}/archive`, {
+      method: "PATCH",
+    }),
+}
+
+export const publicApi = {
+  createLead: (payload) =>
+    apiRequest("/leads", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  createContactInquiry: (payload) =>
+    apiRequest("/contact-inquiries", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  getUmrahPackages: (params = {}) =>
+    apiRequest(`/umrah-packages${buildQueryString(params)}`),
+
+  getTours: (params = {}) =>
+    apiRequest(`/tours${buildQueryString(params)}`),
+
+  getVisaServices: (params = {}) =>
+    apiRequest(`/visa-services${buildQueryString(params)}`),
+
+  getBlogs: (params = {}) =>
+    apiRequest(`/blogs${buildQueryString(params)}`),
+
+  getFaqs: (params = {}) =>
+    apiRequest(`/faqs${buildQueryString(params)}`),
 }

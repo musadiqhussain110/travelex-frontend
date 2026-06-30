@@ -247,12 +247,12 @@ const HotelDetailsPage = () => {
 
             <div className="mt-3 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:gap-3">
               <Link
-                to="/contact"
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-              >
-                Request Quote
-                <FaArrowRight className="text-[10px] sm:text-xs" />
-              </Link>
+  to={`/booking/hotels/${hotel.id}`}
+  className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
+>
+  Book Now
+  <FaArrowRight className="text-[10px] sm:text-xs" />
+</Link>
 
               <a
                 href={getHotelWhatsappLink(hotel)}
@@ -516,12 +516,12 @@ const HotelDetailsPage = () => {
 
                 <div className="mt-4 grid gap-2 sm:mt-5 sm:gap-3">
                   <Link
-                    to="/contact"
-                    className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    Request Quote
-                    <FaArrowRight className="text-[10px] sm:text-xs" />
-                  </Link>
+  to={`/booking/hotels/${hotel.id}`}
+  className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
+>
+  Book Now
+  <FaArrowRight className="text-[10px] sm:text-xs" />
+</Link>
 
                   <a
                     href={getHotelWhatsappLink(hotel)}

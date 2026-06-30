@@ -1,8 +1,6 @@
 import { useRef, useState } from "react"
-import { Link } from "react-router-dom"
 import {
   FaArrowRight,
-  FaCalendarAlt,
   FaCar,
   FaCheckCircle,
   FaClock,
@@ -21,6 +19,8 @@ import {
 
 import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
+import AppDatePicker from "../components/common/AppDatePicker"
+import AppTimePicker from "../components/common/AppTimePicker"
 import { publicApi } from "../services/publicApi"
 
 import carHero1 from "../assets/Cars/Car5.avif"
@@ -30,9 +30,9 @@ import carHero5 from "../assets/Cars/Car6.webp"
 const vehicleCategories = [
   {
     title: "Economy Car",
-    subtitle: "Budget-friendly international rental",
+    subtitle: "Budget-friendly rental option",
     description:
-      "Suitable for city travel, solo travelers, couples, and short international trips.",
+      "Suitable for city travel, solo travelers, couples, and short trips.",
     icon: FaCar,
     image: carHero4,
     bestFor: ["City travel", "Budget trips", "Couples"],
@@ -41,7 +41,7 @@ const vehicleCategories = [
     title: "SUV / Family Car",
     subtitle: "Comfortable option for families",
     description:
-      "A better option for families, luggage, long routes, and comfortable travel abroad.",
+      "A better option for families, luggage, long routes, and comfortable travel.",
     icon: FaUsers,
     image: carHero5,
     bestFor: ["Families", "Luggage", "Long routes"],
@@ -68,14 +68,14 @@ const vehicleCategories = [
     title: "Airport Transfer",
     subtitle: "Private airport pickup and drop-off",
     description:
-      "Book airport-to-hotel, hotel-to-airport, and private transfer services in major cities.",
+      "Book airport-to-hotel, hotel-to-airport, and private transfer services.",
     icon: FaPlaneArrival,
     image: carHero4,
     bestFor: ["Airport pickup", "Hotel transfer", "Easy arrival"],
   },
   {
     title: "Chauffeur Service",
-    subtitle: "Driver-included international service",
+    subtitle: "Driver-included service",
     description:
       "A guided driver-included option for business, family trips, city tours, and safe travel.",
     icon: FaShieldAlt,
@@ -119,29 +119,29 @@ const popularDestinations = [
 
 const processSteps = [
   {
-    title: "Share destination details",
+    title: "Share rental details",
     description:
-      "Tell us your country, city, pickup location, travel dates, car type, and passenger count.",
+      "Tell us destination, pickup location, dates, car type, passenger count, and driver preference.",
   },
   {
     title: "TravelEx checks availability",
     description:
-      "Our team verifies international supplier availability, route details, and suitable options.",
+      "Our team checks available rental options based on your route, time, and vehicle requirement.",
   },
   {
     title: "Get final quote",
     description:
-      "You receive a confirmed quote based on destination, dates, car category, driver option, and supplier policy.",
+      "You receive a suitable quote based on car category, date, duration, pickup, and driver option.",
   },
   {
     title: "Confirm your rental",
     description:
-      "After confirmation, TravelEx guides you with documents, payment method, and pickup instructions.",
+      "After confirmation, TravelEx guides you with booking, payment, and pickup instructions.",
   },
 ]
 
 const trustPoints = [
-  "International car rental quote support",
+  "Car rental quote support",
   "Airport and hotel pickup guidance",
   "Self-drive or driver-included options",
   "Family, business and group transport support",
@@ -155,7 +155,27 @@ const destinationOptions = [
   "Azerbaijan",
   "Qatar",
   "Thailand",
+  "Pakistan",
   "Other Destination",
+]
+
+const vehicleOptions = [
+  "Economy Car",
+  "SUV / Family Car",
+  "Luxury / Business Car",
+  "Van / Group Transport",
+  "Airport Transfer",
+  "Chauffeur Service",
+]
+
+const rentalTypeOptions = [
+  "Airport Transfer",
+  "City Travel",
+  "Outstation Travel",
+  "Full Day Rental",
+  "Multi-day Rental",
+  "Business Travel",
+  "Tour Transport",
 ]
 
 const driverOptions = [
@@ -163,18 +183,6 @@ const driverOptions = [
   "With driver / chauffeur",
   "Airport transfer only",
   "Not sure, need guidance",
-]
-
-const timeOptions = [
-  ...Array.from({ length: 48 }, (_, index) => {
-    const hour = Math.floor(index / 2)
-    const minute = index % 2 === 0 ? "00" : "30"
-    const hour12 = hour % 12 || 12
-    const period = hour < 12 ? "AM" : "PM"
-
-    return `${String(hour12).padStart(2, "0")}:${minute} ${period}`
-  }),
-  "Not sure yet",
 ]
 
 const initialQuoteForm = {
@@ -192,12 +200,29 @@ const initialQuoteForm = {
   companyWebsite: "",
 }
 
+const labelClass =
+  "mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs"
+
+const inputClass =
+  "h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:h-12 sm:px-4 sm:text-sm"
+
+const iconInputClass =
+  "h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
+
 const whatsappLink =
-  "https://wa.me/923111444192?text=Assalamualaikum%20TravelEx%2C%20I%20need%20guidance%20about%20international%20car%20rental."
+  "https://wa.me/923111444192?text=Assalamualaikum%20TravelEx%2C%20I%20need%20guidance%20about%20car%20rental%20service."
+
+const getDateIso = (value) => {
+  if (!value) return undefined
+
+  const date = new Date(`${value}T00:00:00`)
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
+}
 
 const CarRentalPage = () => {
   const [selectedCountry, setSelectedCountry] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("")
+  const [selectedVehicle, setSelectedVehicle] = useState("")
+  const [selectedRentalType, setSelectedRentalType] = useState("")
   const [selectedDriverOption, setSelectedDriverOption] = useState("")
   const [pickupTime, setPickupTime] = useState("")
   const [returnTime, setReturnTime] = useState("")
@@ -208,8 +233,8 @@ const CarRentalPage = () => {
 
   const quoteFormRef = useRef(null)
 
-  const openQuoteForm = (category = "") => {
-    setSelectedCategory(category)
+  const openQuoteForm = (vehicle = "") => {
+    setSelectedVehicle(vehicle)
     setQuoteSent(false)
     setFormError("")
 
@@ -230,11 +255,29 @@ const CarRentalPage = () => {
     }))
 
     setFormError("")
+    setQuoteSent(false)
+  }
+
+  const handleQuoteValueChange = (name, value) => {
+    setQuoteForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+
+    setFormError("")
+    setQuoteSent(false)
+  }
+
+  const handleSelectChange = (setter, value) => {
+    setter(value)
+    setFormError("")
+    setQuoteSent(false)
   }
 
   const resetFormState = () => {
     setSelectedCountry("")
-    setSelectedCategory("")
+    setSelectedVehicle("")
+    setSelectedRentalType("")
     setSelectedDriverOption("")
     setPickupTime("")
     setReturnTime("")
@@ -245,6 +288,22 @@ const CarRentalPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault()
     setFormError("")
+    setQuoteSent(false)
+
+    if (!quoteForm.fullName.trim()) {
+      setFormError("Please enter your full name.")
+      return
+    }
+
+    if (!quoteForm.phone.trim()) {
+      setFormError("Please enter your phone or WhatsApp number.")
+      return
+    }
+
+    if (!quoteForm.email.trim()) {
+      setFormError("Please enter your email address.")
+      return
+    }
 
     if (!selectedCountry) {
       setFormError("Please select destination country.")
@@ -271,7 +330,12 @@ const CarRentalPage = () => {
       return
     }
 
-    if (!selectedCategory) {
+    if (!selectedVehicle) {
+      setFormError("Please select vehicle required.")
+      return
+    }
+
+    if (!selectedRentalType) {
       setFormError("Please select rental type.")
       return
     }
@@ -286,28 +350,17 @@ const CarRentalPage = () => {
       return
     }
 
-    if (!quoteForm.fullName.trim()) {
-      setFormError("Please enter your full name.")
-      return
-    }
-
-    if (!quoteForm.phone.trim()) {
-      setFormError("Please enter your phone or WhatsApp number.")
-      return
-    }
-
-    if (!quoteForm.email.trim()) {
-      setFormError("Please enter your email address.")
-      return
-    }
-
     try {
       setLoading(true)
 
       const passengers = Math.max(1, Number(quoteForm.passengers) || 1)
 
       const message = [
-        `International car rental quote request`,
+        "Car rental inquiry request",
+        "",
+        `Full Name: ${quoteForm.fullName}`,
+        `Mobile / WhatsApp: ${quoteForm.phone}`,
+        `Email Address: ${quoteForm.email}`,
         "",
         `Destination Country: ${selectedCountry}`,
         `Destination City: ${quoteForm.city}`,
@@ -320,14 +373,15 @@ const CarRentalPage = () => {
         `Return Date: ${quoteForm.returnDate || "Not provided"}`,
         `Return Time: ${returnTime || "Not provided"}`,
         "",
-        `Rental Type: ${selectedCategory}`,
+        `Vehicle Required: ${selectedVehicle}`,
+        `Rental Type: ${selectedRentalType}`,
         `Driver Option: ${selectedDriverOption}`,
         `Passengers: ${passengers}`,
         `Luggage: ${quoteForm.luggage || "Not provided"}`,
         "",
         quoteForm.specialRequest
-          ? `Special Request: ${quoteForm.specialRequest}`
-          : "Special Request: Not provided",
+          ? `Additional Requirements: ${quoteForm.specialRequest}`
+          : "Additional Requirements: Not provided",
       ].join("\n")
 
       const payload = {
@@ -337,15 +391,32 @@ const CarRentalPage = () => {
         serviceType: "carRental",
         source: "car-rental-page",
         pageUrl: window.location.href,
+
+        city: quoteForm.city.trim(),
+        destinationCountry: selectedCountry,
         destination: `${selectedCountry} - ${quoteForm.city.trim()}`,
+
+        pickupLocation: quoteForm.pickupLocation.trim(),
+        dropoffLocation: quoteForm.dropoffLocation.trim(),
+        pickupDate: getDateIso(quoteForm.pickupDate),
+        pickupTime,
+        returnDate: getDateIso(quoteForm.returnDate),
+        returnTime,
+        travelDate: getDateIso(quoteForm.pickupDate),
+
+        vehicleType: selectedVehicle,
+        rentalType: selectedRentalType,
+        driverOption: selectedDriverOption,
+        passengerCount: passengers,
+        luggage: quoteForm.luggage.trim(),
+
         travelers: {
           adults: passengers,
           children: 0,
           infants: 0,
         },
-        travelDate: quoteForm.pickupDate
-          ? new Date(`${quoteForm.pickupDate}T00:00:00`).toISOString()
-          : undefined,
+
+        additionalRequirements: quoteForm.specialRequest.trim(),
         message,
         priority: "high",
         companyWebsite: quoteForm.companyWebsite,
@@ -355,6 +426,11 @@ const CarRentalPage = () => {
 
       setQuoteSent(true)
       resetFormState()
+
+      window.scrollTo({
+        top: quoteFormRef.current?.offsetTop || 0,
+        behavior: "smooth",
+      })
     } catch (err) {
       console.error("Car rental quote error:", err)
       setFormError(
@@ -372,7 +448,7 @@ const CarRentalPage = () => {
       <section className="relative overflow-hidden bg-slate-950">
         <img
           src={carHero1}
-          alt="International car rental by TravelEx"
+          alt="Car rental by TravelEx"
           loading="eager"
           decoding="async"
           className="absolute inset-0 h-full w-full object-cover"
@@ -385,13 +461,13 @@ const CarRentalPage = () => {
           <div className="grid gap-8 lg:grid-cols-[1fr_390px] lg:items-center">
             <div className="max-w-4xl">
               <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-[12px] sm:tracking-[0.1em]">
-                International Car Rentals
+                Car Rental Service
               </p>
 
               <h1 className="mt-1 font-fredoka text-[17px] font-semibold leading-[1.08] text-white sm:mt-2 sm:text-[46px] sm:uppercase sm:leading-[1.08] lg:text-[54px]">
                 <span className="sm:hidden">Car Rental Support</span>
                 <span className="hidden sm:inline">
-                  Rent cars and transfers worldwide
+                  Rent cars and private transfers
                 </span>
               </h1>
 
@@ -401,9 +477,9 @@ const CarRentalPage = () => {
                 </span>
 
                 <span className="hidden sm:inline">
-                  Get international car rental, airport transfer, private driver,
-                  family transport, and business travel options through TravelEx
-                  quote support.
+                  Share your pickup details, travel dates, passenger count and
+                  vehicle preference. TravelEx will check availability and share
+                  suitable rental options.
                 </span>
               </p>
 
@@ -430,27 +506,22 @@ const CarRentalPage = () => {
             </div>
 
             <div className="hidden lg:block">
-              <div className="rounded-[16px] border border-white/15 bg-white/10 p-5 shadow-[0_22px_60px_rgba(0,0,0,0.28)] backdrop-blur-md">
+              <div className="rounded-[5px] border border-white/15 bg-white/10 p-5 shadow-[0_22px_60px_rgba(0,0,0,0.28)] backdrop-blur-md">
                 <div className="flex h-12 w-12 items-center justify-center rounded-[5px] bg-[#00AEEF]/15 text-[#00AEEF]">
                   <FaGlobeAsia />
                 </div>
 
                 <h3 className="mt-4 font-fredoka text-[28px] font-semibold leading-tight text-white">
-                  Quote-based international rental
+                  Quote-based rental support
                 </h3>
 
                 <p className="mt-2 font-poppins text-sm font-medium leading-7 text-white/70">
-                  Prices vary by country, city, date, supplier, car category,
-                  insurance, and pickup location.
+                  Prices vary by destination, date, car category, driver option,
+                  route, and pickup location.
                 </p>
 
                 <div className="mt-5 grid gap-3">
-                  {[
-                    "Country and city based quote",
-                    "Airport or hotel pickup",
-                    "Self-drive or chauffeur service",
-                    "Final price after availability check",
-                  ].map((item) => (
+                  {trustPoints.map((item) => (
                     <p
                       key={item}
                       className="flex items-center gap-2 rounded-[5px] bg-white/10 px-3 py-2 font-poppins text-xs font-semibold text-white/85"
@@ -469,19 +540,19 @@ const CarRentalPage = () => {
       {/* Service Intro */}
       <section className="relative z-20 -mt-5 bg-transparent sm:-mt-8">
         <div className="mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-2 rounded-[12px] border border-slate-100 bg-white p-3 shadow-[0_14px_36px_rgba(15,23,42,0.09)] sm:grid-cols-2 sm:gap-3 sm:p-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 rounded-[5px] border border-slate-100 bg-white p-3 shadow-[0_14px_36px_rgba(15,23,42,0.09)] sm:grid-cols-2 sm:gap-3 sm:p-4 lg:grid-cols-4">
             {[
               {
-                title: "Global",
-                desktopTitle: "Global Destinations",
+                title: "Destination",
+                desktopTitle: "Destination Based",
                 text: "City based support",
                 desktopText: "Country and city based support",
                 icon: FaGlobeAsia,
               },
               {
-                title: "Airport",
-                desktopTitle: "Airport Pickup",
-                text: "Pickup and transfer",
+                title: "Pickup",
+                desktopTitle: "Pickup Support",
+                text: "Airport or hotel",
                 desktopText: "Airport, hotel and route transfers",
                 icon: FaPlaneArrival,
               },
@@ -536,465 +607,439 @@ const CarRentalPage = () => {
         className="scroll-mt-24 bg-white py-8 sm:py-16"
       >
         <div className="mx-auto grid max-w-[1440px] gap-5 px-4 sm:px-6 lg:grid-cols-[1fr_380px] lg:gap-6 lg:px-8">
-          <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
+          <form
+            onSubmit={handleSubmit}
+            className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7"
+          >
+            <input
+              type="text"
+              name="companyWebsite"
+              value={quoteForm.companyWebsite}
+              onChange={handleQuoteChange}
+              className="hidden"
+              tabIndex="-1"
+              autoComplete="off"
+            />
+
             <div className="mb-4 sm:mb-6">
               <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.1em]">
-                Rental Quote Form
+                Rental Inquiry Form
               </p>
 
               <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[40px]">
-                <span className="sm:hidden">Request Rental Quote</span>
-                <span className="hidden sm:inline">
-                  Request international car rental quote
-                </span>
+                Request car rental quote
               </h2>
 
               <p className="mt-1.5 max-w-3xl font-poppins text-[10.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-base sm:leading-7">
-                <span className="sm:hidden">
-                  Add destination, date and car type.
-                </span>
-
-                <span className="hidden sm:inline">
-                  Fill in your destination, pickup details, dates, and car type.
-                  TravelEx will confirm final pricing after supplier
-                  availability check.
-                </span>
+                Fill in your pickup, drop-off, vehicle, and passenger details.
+                TravelEx will contact you with suitable rental options.
               </p>
             </div>
 
-            {quoteSent ? (
-              <div className="rounded-[8px] border border-green-100 bg-green-50 p-5 sm:p-6">
-                <h3 className="font-fredoka text-[22px] font-semibold text-green-700 sm:text-[28px]">
-                  Rental quote request received
-                </h3>
-
-                <p className="mt-2 font-poppins text-[11.5px] font-medium leading-5 text-green-700 sm:text-sm sm:leading-7">
-                  Your rental quote request has been submitted successfully.
+            {quoteSent && (
+              <div className="mb-4 flex items-start gap-3 rounded-[5px] border border-green-200 bg-green-50 px-4 py-3 font-poppins text-[11.5px] font-semibold leading-5 text-green-700 sm:text-sm">
+                <FaCheckCircle className="mt-0.5 shrink-0" />
+                <span>
+                  Your car rental inquiry has been submitted successfully.
                   TravelEx admin team can now view it in the CRM dashboard.
-                </p>
+                </span>
+              </div>
+            )}
 
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                  <a
-                    href={whatsappLink}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    <FaWhatsapp />
-                    Continue on WhatsApp
-                  </a>
+            {formError && (
+              <div className="mb-4 rounded-[5px] border border-red-200 bg-red-50 px-4 py-3 font-poppins text-[11.5px] font-semibold leading-5 text-red-700 sm:text-sm">
+                {formError}
+              </div>
+            )}
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setQuoteSent(false)
-                      resetFormState()
-                    }}
-                    className="inline-flex items-center justify-center rounded-[5px] border border-slate-200 bg-white px-5 py-2.5 font-poppins text-xs font-semibold text-slate-800 transition hover:border-[#00AEEF] hover:text-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    Submit Another Request
-                  </button>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div>
+                <label className={labelClass}>Full Name</label>
+
+                <div className="relative">
+                  <FaUserTie className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={quoteForm.fullName}
+                    onChange={handleQuoteChange}
+                    placeholder="Enter full name"
+                    className={iconInputClass}
+                  />
                 </div>
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="grid gap-4">
+
+              <div>
+                <label className={labelClass}>Mobile / WhatsApp</label>
+
+                <div className="relative">
+                  <FaPhoneAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={quoteForm.phone}
+                    onChange={handleQuoteChange}
+                    placeholder="03XXXXXXXXX"
+                    className={iconInputClass}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>Email Address</label>
+
+                <div className="relative">
+                  <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                  <input
+                    type="email"
+                    name="email"
+                    value={quoteForm.email}
+                    onChange={handleQuoteChange}
+                    placeholder="your@email.com"
+                    className={iconInputClass}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <AppSelect
+                label="Destination Country"
+                value={selectedCountry}
+                onChange={(value) =>
+                  handleSelectChange(setSelectedCountry, value)
+                }
+                placeholder="Select destination country"
+                options={destinationOptions}
+              />
+
+              <div>
+                <label className={labelClass}>Destination City</label>
+
+                <div className="relative">
+                  <FaMapMarkerAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                  <input
+                    type="text"
+                    name="city"
+                    value={quoteForm.city}
+                    onChange={handleQuoteChange}
+                    placeholder="Dubai, Jeddah, Istanbul..."
+                    className={iconInputClass}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Pickup Location</label>
+
+                <div className="relative">
+                  <FaMapMarkerAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                  <input
+                    type="text"
+                    name="pickupLocation"
+                    value={quoteForm.pickupLocation}
+                    onChange={handleQuoteChange}
+                    placeholder="Airport, hotel, address..."
+                    className={iconInputClass}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>Drop-off Location</label>
+
+                <div className="relative">
+                  <FaMapMarkerAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                  <input
+                    type="text"
+                    name="dropoffLocation"
+                    value={quoteForm.dropoffLocation}
+                    onChange={handleQuoteChange}
+                    placeholder="Same as pickup / another location"
+                    className={iconInputClass}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <AppDatePicker
+                label="Pickup Date"
+                value={quoteForm.pickupDate}
+                onChange={(value) => handleQuoteValueChange("pickupDate", value)}
+                placeholder="Select pickup date"
+              />
+
+              <AppTimePicker
+                label="Pickup Time"
+                value={pickupTime}
+                onChange={(value) => handleSelectChange(setPickupTime, value)}
+                placeholder="Select pickup time"
+              />
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <AppDatePicker
+                label="Return Date"
+                value={quoteForm.returnDate}
+                onChange={(value) => handleQuoteValueChange("returnDate", value)}
+                placeholder="Select return date"
+              />
+
+              <AppTimePicker
+                label="Return Time"
+                value={returnTime}
+                onChange={(value) => handleSelectChange(setReturnTime, value)}
+                placeholder="Select return time"
+              />
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              <AppSelect
+                label="Vehicle Required"
+                value={selectedVehicle}
+                onChange={(value) => handleSelectChange(setSelectedVehicle, value)}
+                placeholder="Select vehicle"
+                options={vehicleOptions}
+              />
+
+              <AppSelect
+                label="Rental Type"
+                value={selectedRentalType}
+                onChange={(value) =>
+                  handleSelectChange(setSelectedRentalType, value)
+                }
+                placeholder="Select rental type"
+                options={rentalTypeOptions}
+              />
+
+              <AppSelect
+                label="Driver Option"
+                value={selectedDriverOption}
+                onChange={(value) =>
+                  handleSelectChange(setSelectedDriverOption, value)
+                }
+                placeholder="Select driver option"
+                options={driverOptions}
+              />
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Number of Passengers</label>
+
+                <div className="relative">
+                  <FaUsers className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                  <input
+                    type="number"
+                    name="passengers"
+                    min="1"
+                    value={quoteForm.passengers}
+                    onChange={handleQuoteChange}
+                    placeholder="Example: 4"
+                    className={iconInputClass}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>Luggage</label>
+
                 <input
                   type="text"
-                  name="companyWebsite"
-                  value={quoteForm.companyWebsite}
+                  name="luggage"
+                  value={quoteForm.luggage}
                   onChange={handleQuoteChange}
-                  className="hidden"
-                  tabIndex="-1"
-                  autoComplete="off"
+                  placeholder="Example: 2 large bags, 1 hand carry"
+                  className={inputClass}
                 />
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <AppSelect
-                    label="Destination Country"
-                    value={selectedCountry}
-                    onChange={(value) => {
-                      setSelectedCountry(value)
-                      setFormError("")
-                    }}
-                    placeholder="Select country"
-                    options={destinationOptions}
-                  />
-
-                  <div>
-                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs">
-                      City
-                    </label>
-
-                    <input
-                      type="text"
-                      name="city"
-                      value={quoteForm.city}
-                      onChange={handleQuoteChange}
-                      required
-                      placeholder="Dubai, Istanbul, Baku..."
-                      className="h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:px-4 sm:text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs">
-                      Pickup Location
-                    </label>
-
-                    <input
-                      type="text"
-                      name="pickupLocation"
-                      value={quoteForm.pickupLocation}
-                      onChange={handleQuoteChange}
-                      required
-                      placeholder="Airport, hotel, city area..."
-                      className="h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:px-4 sm:text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs">
-                      Drop-off Location
-                    </label>
-
-                    <input
-                      type="text"
-                      name="dropoffLocation"
-                      value={quoteForm.dropoffLocation}
-                      onChange={handleQuoteChange}
-                      placeholder="Same as pickup or different location"
-                      className="h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:px-4 sm:text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <div>
-                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs">
-                      Pickup Date
-                    </label>
-
-                    <div className="relative">
-                      <FaCalendarAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
-                      <input
-                        type="date"
-                        name="pickupDate"
-                        value={quoteForm.pickupDate}
-                        onChange={handleQuoteChange}
-                        required
-                        className="h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <AppSelect
-                    label="Pickup Time"
-                    value={pickupTime}
-                    onChange={(value) => {
-                      setPickupTime(value)
-                      setFormError("")
-                    }}
-                    placeholder="Select pickup time"
-                    options={timeOptions}
-                  />
-
-                  <div>
-                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs">
-                      Return Date
-                    </label>
-
-                    <input
-                      type="date"
-                      name="returnDate"
-                      value={quoteForm.returnDate}
-                      onChange={handleQuoteChange}
-                      className="h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:px-4 sm:text-sm"
-                    />
-                  </div>
-
-                  <AppSelect
-                    label="Return Time"
-                    value={returnTime}
-                    onChange={(value) => {
-                      setReturnTime(value)
-                      setFormError("")
-                    }}
-                    placeholder="Select return time"
-                    options={timeOptions}
-                  />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <AppSelect
-                    label="Rental Type"
-                    value={selectedCategory}
-                    onChange={(value) => {
-                      setSelectedCategory(value)
-                      setFormError("")
-                    }}
-                    placeholder="Select rental type"
-                    options={vehicleCategories.map((category) => category.title)}
-                  />
-
-                  <AppSelect
-                    label="Driver Option"
-                    value={selectedDriverOption}
-                    onChange={(value) => {
-                      setSelectedDriverOption(value)
-                      setFormError("")
-                    }}
-                    placeholder="Select option"
-                    options={driverOptions}
-                  />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs">
-                      Passengers
-                    </label>
-
-                    <div className="relative">
-                      <FaUsers className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
-                      <input
-                        type="number"
-                        name="passengers"
-                        value={quoteForm.passengers}
-                        onChange={handleQuoteChange}
-                        min="1"
-                        required
-                        placeholder="Number of passengers"
-                        className="h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs">
-                      Luggage
-                    </label>
-
-                    <div className="relative">
-                      <FaSuitcaseRolling className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
-                      <input
-                        type="text"
-                        name="luggage"
-                        value={quoteForm.luggage}
-                        onChange={handleQuoteChange}
-                        placeholder="Example: 2 bags, 4 bags..."
-                        className="h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <div>
-                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs">
-                      Full Name
-                    </label>
-
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={quoteForm.fullName}
-                      onChange={handleQuoteChange}
-                      required
-                      placeholder="Enter your name"
-                      className="h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:px-4 sm:text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs">
-                      Phone / WhatsApp
-                    </label>
-
-                    <div className="relative">
-                      <FaPhoneAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={quoteForm.phone}
-                        onChange={handleQuoteChange}
-                        required
-                        placeholder="03XXXXXXXXX"
-                        className="h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs">
-                      Email
-                    </label>
-
-                    <div className="relative">
-                      <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
-                      <input
-                        type="email"
-                        name="email"
-                        value={quoteForm.email}
-                        onChange={handleQuoteChange}
-                        required
-                        placeholder="Enter email"
-                        className="h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs">
-                    Special Request
-                  </label>
-
-                  <textarea
-                    rows="4"
-                    name="specialRequest"
-                    value={quoteForm.specialRequest}
-                    onChange={handleQuoteChange}
-                    placeholder="Write flight number, hotel name, route, car preference, budget, or any special requirement..."
-                    className="w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] sm:px-4 sm:text-sm"
-                  />
-                </div>
-
-                {formError && (
-                  <p className="rounded-[5px] bg-red-50 px-4 py-3 font-poppins text-xs font-semibold leading-5 text-red-600">
-                    {formError}
-                  </p>
-                )}
-
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-70 sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    {loading ? "Submitting..." : "Submit Rental Quote"}
-                    {!loading && <FaArrowRight className="text-[10px] sm:text-xs" />}
-                  </button>
-
-                  <a
-                    href={whatsappLink}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 bg-white px-5 py-2.5 font-poppins text-xs font-semibold text-slate-800 transition hover:border-[#25D366] hover:text-[#25D366] sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    <FaWhatsapp />
-                    WhatsApp Instead
-                  </a>
-                </div>
-              </form>
-            )}
-          </div>
-
-          {/* Sticky Info Sidebar */}
-          <aside className="h-fit lg:sticky lg:top-24 lg:self-start">
-            <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_16px_45px_rgba(15,23,42,0.08)] sm:p-5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-[5px] bg-[#00AEEF]/10 text-[#00AEEF] sm:h-12 sm:w-12">
-                <FaGlobeAsia />
               </div>
+            </div>
 
-              <h3 className="mt-3 font-fredoka text-[22px] font-semibold leading-tight text-slate-950 sm:mt-4 sm:text-[28px]">
-                How international rental works
-              </h3>
+            <div className="mt-4">
+              <label className={labelClass}>Additional Requirements</label>
 
-              <p className="mt-1.5 font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
-                International car rental prices are confirmed after supplier
-                availability check. TravelEx will guide you before final booking.
+              <textarea
+                rows="4"
+                name="specialRequest"
+                value={quoteForm.specialRequest}
+                onChange={handleQuoteChange}
+                placeholder="Write any special request, child seat, extra luggage, route plan, driver language, airport pickup details..."
+                className="w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:px-4 sm:text-sm"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-6 py-3.5 font-poppins text-xs font-semibold uppercase tracking-[0.04em] text-white transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-70 sm:text-sm"
+            >
+              {loading ? "Submitting..." : "Submit Rental Inquiry"}
+              {!loading && <FaArrowRight className="text-[10px] sm:text-xs" />}
+            </button>
+          </form>
+
+          <aside className="h-fit lg:sticky lg:top-24 lg:self-start">
+            <div className="rounded-[5px] border border-slate-100 bg-[#F8FAFC] p-4 sm:p-5">
+              <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-[11px] sm:tracking-[0.1em]">
+                Consultant Note
               </p>
 
-              <div className="mt-4 grid gap-2 sm:mt-5 sm:gap-3">
-                {processSteps.map((step, index) => (
-                  <div
-                    key={step.title}
-                    className="rounded-[5px] bg-[#F8FAFC] p-3.5 sm:p-4"
+              <h3 className="mt-2 font-fredoka text-[24px] font-semibold leading-tight text-slate-950 sm:text-[28px]">
+                Rental quote depends on availability
+              </h3>
+
+              <p className="mt-2 font-poppins text-[11.5px] font-medium leading-6 text-slate-600 sm:text-sm sm:leading-7">
+                Final car rental price can change based on destination, date,
+                pickup location, car category, driver option, luggage and route.
+              </p>
+
+              <div className="mt-4 grid gap-2">
+                {trustPoints.map((point) => (
+                  <p
+                    key={point}
+                    className="flex items-center gap-2 rounded-[5px] bg-white px-3 py-2 font-poppins text-xs font-semibold text-slate-700"
                   >
-                    <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-[10px] sm:tracking-[0.1em]">
-                      Step {index + 1}
-                    </p>
-
-                    <h4 className="mt-1 font-poppins text-xs font-bold text-slate-950 sm:text-sm">
-                      {step.title}
-                    </h4>
-
-                    <p className="mt-1 font-poppins text-[10.5px] font-medium leading-5 text-slate-600 sm:text-xs sm:leading-6">
-                      {step.description}
-                    </p>
-                  </div>
+                    <FaCheckCircle className="shrink-0 text-[#00AEEF]" />
+                    {point}
+                  </p>
                 ))}
               </div>
 
-              <div className="mt-4 rounded-[5px] border border-orange-100 bg-orange-50 p-3.5 sm:mt-5 sm:p-4">
-                <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#FF6B00] sm:text-[11px] sm:tracking-[0.1em]">
-                  Important Note
-                </p>
-
-                <p className="mt-1.5 font-poppins text-[11px] font-semibold leading-5 text-orange-800 sm:mt-2 sm:text-sm sm:leading-7">
-                  Final rental price may vary by country, supplier, dates,
-                  insurance, deposit, pickup location, and driver option.
-                </p>
-              </div>
+              <a
+                href={whatsappLink}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-3 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
+              >
+                <FaWhatsapp />
+                Ask on WhatsApp
+              </a>
             </div>
           </aside>
         </div>
       </section>
 
-      {/* Popular Destinations */}
+      {/* Vehicle Categories */}
       <section className="bg-[#F8FAFC] py-8 sm:py-16">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
-          <div className="mb-4 text-center sm:mb-8">
-            <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.1em]">
-              Popular Destinations
+        <div className="mx-auto max-w-[1340px] px-4 sm:px-6 lg:px-8">
+          <div className="mb-5 sm:mb-8">
+            <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-[12px] sm:tracking-[0.1em]">
+              Vehicle Options
             </p>
 
-            <h2 className="font-fredoka text-[18px] font-semibold leading-[1.08] text-slate-950 sm:text-[44px]">
-              <span className="sm:hidden">Popular Cities</span>
-              <span className="hidden sm:inline">
-                International cities we can help with
-              </span>
+            <h2 className="mt-1 font-fredoka text-[24px] font-semibold leading-tight text-slate-950 sm:text-[42px]">
+              Choose your rental type
             </h2>
 
-            <p className="mx-auto mt-1 max-w-2xl font-poppins text-[10px] font-medium leading-4 text-slate-600 sm:mt-2 sm:text-base sm:leading-7">
-              <span className="sm:hidden">
-                Rental support in major destinations.
-              </span>
-
-              <span className="hidden sm:inline">
-                TravelEx can guide you with international rental options in major
-                travel destinations based on availability and supplier response.
-              </span>
+            <p className="mt-2 max-w-3xl font-poppins text-[11.5px] font-medium leading-6 text-slate-600 sm:text-base sm:leading-7">
+              Select a car category and submit your inquiry. TravelEx will guide
+              you with available options and final quote.
             </p>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-            {popularDestinations.map((destination) => (
-              <div
-                key={destination.country}
-                className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.05)] transition hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(15,23,42,0.08)] sm:p-5"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-[5px] bg-[#00AEEF]/10 text-[#00AEEF] sm:h-11 sm:w-11">
-                  <FaMapMarkerAlt />
-                </div>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {vehicleCategories.map((category) => {
+              const Icon = category.icon
 
-                <h3 className="mt-3 font-fredoka text-[22px] font-semibold text-slate-950 sm:mt-4 sm:text-[26px]">
-                  {destination.country}
+              return (
+                <article
+                  key={category.title}
+                  className="overflow-hidden rounded-[5px] border border-slate-100 bg-white shadow-[0_12px_34px_rgba(15,23,42,0.06)]"
+                >
+                  <div className="relative h-44 overflow-hidden">
+                    <img
+                      src={category.image}
+                      alt={category.title}
+                      className="h-full w-full object-cover transition duration-500 hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent" />
+
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-[5px] bg-white/15 text-white backdrop-blur">
+                        <Icon />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 sm:p-5">
+                    <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-[#00AEEF]">
+                      {category.subtitle}
+                    </p>
+
+                    <h3 className="mt-1 font-fredoka text-[24px] font-semibold leading-tight text-slate-950">
+                      {category.title}
+                    </h3>
+
+                    <p className="mt-2 font-poppins text-sm font-medium leading-6 text-slate-600">
+                      {category.description}
+                    </p>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {category.bestFor.map((item) => (
+                        <span
+                          key={item}
+                          className="rounded-[5px] bg-[#F8FAFC] px-3 py-1 font-poppins text-[11px] font-semibold text-slate-600"
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => openQuoteForm(category.title)}
+                      className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-slate-950 px-5 py-3 font-poppins text-xs font-semibold text-white transition hover:bg-[#FF6B00] sm:text-sm"
+                    >
+                      Request This Vehicle
+                      <FaArrowRight className="text-[10px]" />
+                    </button>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Popular Destinations */}
+      <section className="bg-white py-8 sm:py-16">
+        <div className="mx-auto max-w-[1340px] px-4 sm:px-6 lg:px-8">
+          <div className="mb-5 sm:mb-8">
+            <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-[#FF6B00] sm:text-[12px] sm:tracking-[0.1em]">
+              Common Destinations
+            </p>
+
+            <h2 className="mt-1 font-fredoka text-[24px] font-semibold leading-tight text-slate-950 sm:text-[42px]">
+              Popular car rental locations
+            </h2>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {popularDestinations.map((item) => (
+              <div
+                key={item.country}
+                className="rounded-[5px] border border-slate-100 bg-[#F8FAFC] p-4 sm:p-5"
+              >
+                <h3 className="font-fredoka text-[24px] font-semibold text-slate-950">
+                  {item.country}
                 </h3>
 
-                <p className="mt-1 font-poppins text-xs font-bold text-[#FF6B00] sm:text-sm">
-                  {destination.cities}
+                <p className="mt-1 font-poppins text-sm font-semibold text-[#00AEEF]">
+                  {item.cities}
                 </p>
 
-                <p className="mt-1.5 font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
-                  {destination.use}
+                <p className="mt-2 font-poppins text-sm font-medium leading-6 text-slate-600">
+                  {item.use}
                 </p>
               </div>
             ))}
@@ -1002,53 +1047,38 @@ const CarRentalPage = () => {
         </div>
       </section>
 
-      {/* Bottom CTA */}
-      <section className="bg-[#F8FAFC] pb-8 sm:pb-14">
-        <div className="mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8">
-          <div className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
-            <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
-              <div>
-                <h3 className="font-fredoka text-[21px] font-semibold leading-tight text-slate-950 sm:text-[32px]">
-                  Need a custom international transport plan?
+      {/* Process */}
+      <section className="bg-[#F8FAFC] py-8 sm:py-16">
+        <div className="mx-auto max-w-[1340px] px-4 sm:px-6 lg:px-8">
+          <div className="mb-5 text-center sm:mb-8">
+            <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-[12px] sm:tracking-[0.1em]">
+              Booking Process
+            </p>
+
+            <h2 className="mt-1 font-fredoka text-[24px] font-semibold leading-tight text-slate-950 sm:text-[42px]">
+              How rental quote works
+            </h2>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {processSteps.map((step, index) => (
+              <div
+                key={step.title}
+                className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.04)] sm:p-5"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-[5px] bg-[#FF6B00] font-poppins text-sm font-bold text-white">
+                  {index + 1}
+                </div>
+
+                <h3 className="mt-4 font-fredoka text-[22px] font-semibold leading-tight text-slate-950">
+                  {step.title}
                 </h3>
 
-                <p className="mt-1.5 max-w-3xl font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:text-sm sm:leading-7">
-                  Share your country, pickup city, travel dates, route, and
-                  passenger count. TravelEx can guide you with a suitable
-                  international rental or transfer option.
+                <p className="mt-2 font-poppins text-sm font-medium leading-6 text-slate-600">
+                  {step.description}
                 </p>
-
-                <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                  {trustPoints.map((item) => (
-                    <p
-                      key={item}
-                      className="flex items-center gap-2 font-poppins text-[11.5px] font-semibold text-slate-700 sm:text-sm"
-                    >
-                      <FaCheckCircle className="shrink-0 text-[#00AEEF]" />
-                      {item}
-                    </p>
-                  ))}
-                </div>
               </div>
-
-              <div className="flex flex-col gap-3 sm:flex-row md:flex-col">
-                <button
-                  type="button"
-                  onClick={() => openQuoteForm()}
-                  className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                >
-                  Get Quote
-                  <FaArrowRight className="text-[10px] sm:text-xs" />
-                </button>
-
-                <Link
-                  to="/contact"
-                  className="inline-flex items-center justify-center rounded-[5px] border border-slate-200 bg-white px-5 py-2.5 font-poppins text-xs font-semibold text-slate-800 transition hover:border-[#00AEEF] hover:text-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                >
-                  Contact TravelEx
-                </Link>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>

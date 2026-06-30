@@ -3,16 +3,11 @@ import { Link, useParams } from "react-router-dom"
 import {
   FaArrowLeft,
   FaArrowRight,
-  FaCalendarAlt,
   FaCheckCircle,
-  FaCreditCard,
   FaEnvelope,
   FaHotel,
-  FaLock,
-  FaMoneyBillWave,
+  FaMapMarkerAlt,
   FaPhoneAlt,
-  FaReceipt,
-  FaShieldAlt,
   FaUser,
   FaUsers,
   FaWhatsapp,
@@ -20,47 +15,49 @@ import {
 
 import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
+import AppDatePicker from "../components/common/AppDatePicker"
 import { hotels } from "../data/hotelsData"
 import { publicApi } from "../services/publicApi"
-
-const paymentMethods = [
-  {
-    id: "card",
-    title: "Card / Payment Gateway",
-    description: "Recommended secure online payment flow.",
-    icon: FaCreditCard,
-  },
-  {
-    id: "bank",
-    title: "Bank Transfer",
-    description: "Pay through bank transfer after booking review.",
-    icon: FaMoneyBillWave,
-  },
-  {
-    id: "manual",
-    title: "Pay with TravelEx Support",
-    description: "Let TravelEx team guide you manually.",
-    icon: FaShieldAlt,
-  },
-]
 
 const mealPlanOptions = [
   "Room Only",
   "Breakfast Included",
   "Half Board",
   "Full Board",
+  "Not Sure",
+]
+
+const roomTypeOptions = [
+  "Single Room",
+  "Double Room",
+  "Twin Room",
+  "Triple Room",
+  "Quad Room",
+  "Family Room",
+  "Suite",
+  "Not Sure",
+]
+
+const hotelCategoryOptions = [
+  "3 Star",
+  "4 Star",
+  "5 Star",
+  "Budget Hotel",
+  "Standard Hotel",
+  "Luxury Hotel",
+  "Not Sure",
 ]
 
 const labelClass =
   "mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs"
 
 const inputClass =
-  "h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] sm:h-12 sm:px-4 sm:text-sm"
+  "h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:h-12 sm:px-4 sm:text-sm"
 
 const iconInputClass =
-  "h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
+  "h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
 
-const parseTravelDate = (value) => {
+const parseDateInput = (value) => {
   if (!value) return null
 
   const cleanValue = value.trim()
@@ -80,66 +77,80 @@ const parseTravelDate = (value) => {
   return Number.isNaN(date.getTime()) ? null : date
 }
 
+const getDateIso = (value) => {
+  const date = parseDateInput(value)
+  return date ? date.toISOString() : undefined
+}
+
+const getNights = (checkIn, checkOut) => {
+  const startDate = parseDateInput(checkIn)
+  const endDate = parseDateInput(checkOut)
+
+  if (!startDate || !endDate) return "-"
+
+  const difference = Math.ceil(
+    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+  )
+
+  return difference > 0 ? difference : "-"
+}
+
 const getWhatsappLink = (hotel) =>
   `https://wa.me/923111444192?text=${encodeURIComponent(
-    `Assalamualaikum TravelEx, I want to book ${hotel.name}. Please guide me.`
+    `Assalamualaikum TravelEx, I want to request hotel booking for ${hotel.name}. Please guide me.`
   )}`
 
 const HotelBookingPage = () => {
   const { id } = useParams()
   const hotel = hotels.find((item) => item.id === id)
 
-  const [step, setStep] = useState(1)
-  const [termsAccepted, setTermsAccepted] = useState(false)
   const [formError, setFormError] = useState("")
+  const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
   const [bookingRef] = useState(
     () => `TXH-${Math.floor(100000 + Math.random() * 900000)}`
   )
 
   const [booking, setBooking] = useState({
-    checkIn: "",
-    checkOut: "",
-    rooms: "1",
-    guests: "2",
-    roomType: "",
-    mealPlan: "Room Only",
     fullName: "",
     phone: "",
     email: "",
     city: "",
+    destinationCity: "",
+    checkInDate: "",
+    checkOutDate: "",
+    adults: "2",
+    children: "0",
+    rooms: "1",
+    hotelCategory: "",
+    roomType: "",
+    mealPlan: "Room Only",
+    budget: "",
     specialRequest: "",
-    paymentMethod: "card",
+    companyWebsite: "",
   })
 
   useEffect(() => {
     if (hotel) {
       setBooking((prev) => ({
         ...prev,
+        destinationCity: hotel.location || "",
+        hotelCategory: hotel.stars ? `${hotel.stars} Star` : "",
         roomType: hotel.roomOptions?.[0] || "",
       }))
     }
   }, [hotel])
 
   const nights = useMemo(() => {
-    const startDate = parseTravelDate(booking.checkIn)
-    const endDate = parseTravelDate(booking.checkOut)
+    return getNights(booking.checkInDate, booking.checkOutDate)
+  }, [booking.checkInDate, booking.checkOutDate])
 
-    if (!startDate || !endDate) return 1
+  const totalGuests = useMemo(() => {
+    const adults = Math.max(0, Number(booking.adults) || 0)
+    const children = Math.max(0, Number(booking.children) || 0)
 
-    const difference = Math.ceil(
-      (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-    )
-
-    return difference > 0 ? difference : 1
-  }, [booking.checkIn, booking.checkOut])
-
-  const rooms = Math.max(1, Number(booking.rooms) || 1)
-  const guests = Math.max(1, Number(booking.guests) || 1)
-  const startingPrice = Number(hotel?.startingPrice || 0)
-  const subtotal = startingPrice * nights * rooms
-  const serviceFee = Math.round(subtotal * 0.03)
-  const estimatedTotal = subtotal + serviceFee
+    return adults + children
+  }, [booking.adults, booking.children])
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -150,6 +161,7 @@ const HotelBookingPage = () => {
     }))
 
     setFormError("")
+    setSuccess(false)
   }
 
   const handleSelectChange = (name, value) => {
@@ -159,120 +171,150 @@ const HotelBookingPage = () => {
     }))
 
     setFormError("")
+    setSuccess(false)
   }
 
-  const scrollTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
+  const validateForm = () => {
+    if (!booking.fullName.trim()) return "Please enter full name."
+    if (!booking.phone.trim()) return "Please enter mobile / WhatsApp number."
+    if (!booking.email.trim()) return "Please enter email address."
+    if (!booking.city.trim()) return "Please enter your city."
+    if (!booking.destinationCity.trim()) return "Please enter destination city."
+    if (!booking.checkInDate) return "Please select check-in date."
+    if (!booking.checkOutDate) return "Please select check-out date."
 
-  const goToGuestDetails = (event) => {
-    event.preventDefault()
-    setFormError("")
-
-    if (
-      !booking.checkIn.trim() ||
-      !booking.checkOut.trim() ||
-      !booking.roomType ||
-      !booking.mealPlan ||
-      !booking.guests ||
-      !booking.rooms
-    ) {
-      setFormError("Please complete check-in, check-out, room type and guests.")
-      return
+    if (!booking.adults || Number(booking.adults) < 1) {
+      return "Please enter number of adults."
     }
 
-    setStep(2)
-    scrollTop()
-  }
-
-  const goToPayment = (event) => {
-    event.preventDefault()
-    setFormError("")
-
-    if (
-      !booking.fullName.trim() ||
-      !booking.phone.trim() ||
-      !booking.email.trim()
-    ) {
-      setFormError("Please enter full name, phone number and email address.")
-      return
+    if (!booking.rooms || Number(booking.rooms) < 1) {
+      return "Please enter number of rooms."
     }
 
-    setStep(3)
-    scrollTop()
+    if (!booking.hotelCategory) return "Please select hotel category."
+    if (!booking.roomType) return "Please select room type."
+    if (!booking.mealPlan) return "Please select meal plan."
+
+    return ""
   }
 
-  const confirmPayment = async (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     setFormError("")
+    setSuccess(false)
 
-    if (!termsAccepted) {
-      setFormError("Please confirm the booking details before proceeding.")
+    const validationError = validateForm()
+
+    if (validationError) {
+      setFormError(validationError)
       return
     }
 
     try {
       setLoading(true)
 
-      const selectedPayment = paymentMethods.find(
-        (method) => method.id === booking.paymentMethod
-      )
-
-      const checkInDate = parseTravelDate(booking.checkIn)
+      const adults = Math.max(1, Number(booking.adults) || 1)
+      const children = Math.max(0, Number(booking.children) || 0)
+      const rooms = Math.max(1, Number(booking.rooms) || 1)
+      const guests = adults + children
 
       const message = [
         `Hotel booking request for: ${hotel.name}`,
         `Booking Reference: ${bookingRef}`,
-        `Hotel Location: ${hotel.location || "Not provided"}`,
-        `Hotel Type: ${hotel.type || "Hotel"}`,
-        `Hotel Stars: ${hotel.stars || "-"} Star`,
         "",
-        `Check-in: ${booking.checkIn}`,
-        `Check-out: ${booking.checkOut}`,
+        `Full Name: ${booking.fullName}`,
+        `Mobile / WhatsApp: ${booking.phone}`,
+        `Email Address: ${booking.email}`,
+        `City: ${booking.city}`,
+        "",
+        `Selected Hotel: ${hotel.name}`,
+        `Hotel Location: ${hotel.location || "Not provided"}`,
+        `Destination City: ${booking.destinationCity}`,
+        `Hotel Category: ${booking.hotelCategory}`,
+        "",
+        `Check-in Date: ${booking.checkInDate}`,
+        `Check-out Date: ${booking.checkOutDate}`,
         `Nights: ${nights}`,
-        `Rooms: ${rooms}`,
-        `Guests: ${guests}`,
+        `Adults: ${adults}`,
+        `Children: ${children}`,
+        `Total Guests: ${guests}`,
+        `Number of Rooms: ${rooms}`,
         `Room Type: ${booking.roomType}`,
         `Meal Plan: ${booking.mealPlan}`,
         "",
-        `Guest Name: ${booking.fullName}`,
-        `Phone: ${booking.phone}`,
-        `Email: ${booking.email}`,
-        `City: ${booking.city || "Not provided"}`,
-        "",
-        `Payment Method: ${selectedPayment?.title || booking.paymentMethod}`,
-        `Estimated Total: PKR ${estimatedTotal.toLocaleString()}`,
+        `Budget: ${booking.budget || "Not provided"}`,
         "",
         booking.specialRequest
-          ? `Special Request: ${booking.specialRequest}`
-          : "Special Request: Not provided",
+          ? `Additional Requirements: ${booking.specialRequest}`
+          : "Additional Requirements: Not provided",
       ].join("\n")
 
       const payload = {
         name: booking.fullName.trim(),
         phone: booking.phone.trim(),
         email: booking.email.trim(),
+
         serviceType: "hotel",
-        source: "hotel-page",
+        source: "hotel-booking-page",
         pageUrl: window.location.href,
-        destination: hotel.location || hotel.name || "",
-        budget: `PKR ${estimatedTotal.toLocaleString()}`,
+
+        city: booking.city.trim(),
+        destination: booking.destinationCity.trim(),
+        destinationCity: booking.destinationCity.trim(),
+
         preferredHotel: hotel.name,
+        hotelName: hotel.name,
+        hotelLocation: hotel.location || "",
+        hotelCategory: booking.hotelCategory,
+
+        checkInDate: getDateIso(booking.checkInDate),
+        checkOutDate: getDateIso(booking.checkOutDate),
+        travelDate: getDateIso(booking.checkInDate),
+        returnDate: getDateIso(booking.checkOutDate),
+
+        numberOfAdults: adults,
+        numberOfChildren: children,
+        numberOfGuests: guests,
+        numberOfRooms: rooms,
+
+        roomType: booking.roomType,
+        mealPlan: booking.mealPlan,
+
+        bookingReference: bookingRef,
+        budget: booking.budget.trim(),
+        additionalRequirements: booking.specialRequest.trim(),
+
         travelers: {
-          adults: guests,
-          children: 0,
+          adults,
+          children,
           infants: 0,
         },
-        travelDate: checkInDate ? checkInDate.toISOString() : undefined,
+
         message,
         priority: "high",
-        companyWebsite: "",
+        companyWebsite: booking.companyWebsite,
       }
 
       await publicApi.createLead(payload)
 
-      setStep(4)
-      scrollTop()
+      setSuccess(true)
+      window.scrollTo({ top: 0, behavior: "smooth" })
+
+      setBooking((prev) => ({
+        ...prev,
+        fullName: "",
+        phone: "",
+        email: "",
+        city: "",
+        checkInDate: "",
+        checkOutDate: "",
+        adults: "2",
+        children: "0",
+        rooms: "1",
+        budget: "",
+        specialRequest: "",
+        companyWebsite: "",
+      }))
     } catch (err) {
       console.error("Hotel booking lead error:", err)
       setFormError(
@@ -289,7 +331,7 @@ const HotelBookingPage = () => {
       <main className="bg-[#F8FAFC]">
         <section className="bg-[#F8FAFC] px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
           <div className="mx-auto max-w-[1180px]">
-            <div className="rounded-[12px] border border-slate-100 bg-white p-5 text-center shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-8">
+            <div className="rounded-[5px] border border-slate-100 bg-white p-5 text-center shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-8">
               <h1 className="font-fredoka text-[24px] font-semibold text-slate-950 sm:text-[34px]">
                 Hotel not found
               </h1>
@@ -314,10 +356,6 @@ const HotelBookingPage = () => {
     )
   }
 
-  const selectedPayment = paymentMethods.find(
-    (method) => method.id === booking.paymentMethod
-  )
-
   return (
     <main className="bg-[#F8FAFC]">
       {/* Hero */}
@@ -330,8 +368,8 @@ const HotelBookingPage = () => {
           className="absolute inset-0 h-full w-full object-cover"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/65 via-slate-950/45 to-slate-950/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-slate-950/50 to-slate-950/25" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-transparent" />
 
         <div className="relative z-10 mx-auto max-w-[1340px] px-4 py-7 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
           <div className="max-w-5xl">
@@ -346,7 +384,7 @@ const HotelBookingPage = () => {
             <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:mb-4 sm:gap-3">
               <span className="inline-flex h-[27px] items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[7.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.1em]">
                 <FaHotel className="text-[8px] sm:text-[10px]" />
-                Hotel Booking
+                Request Based Booking
               </span>
 
               <span className="inline-flex h-[27px] items-center rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:px-4 sm:py-2 sm:text-xs">
@@ -359,138 +397,270 @@ const HotelBookingPage = () => {
             </div>
 
             <h1 className="font-fredoka text-[18px] font-semibold leading-[1.08] text-white sm:text-[46px] sm:uppercase sm:leading-[1.1] lg:text-[52px]">
-              Book {hotel.name}
+              Request booking for {hotel.name}
             </h1>
 
             <p className="mt-1 max-w-3xl font-poppins text-[9px] font-medium leading-4 text-white/85 sm:mt-4 sm:text-base sm:leading-7">
-              <span className="sm:hidden">Complete hotel booking details.</span>
+              <span className="sm:hidden">
+                Submit hotel request. TravelEx will confirm.
+              </span>
 
               <span className="hidden sm:inline">
-                Fill your stay details, review your booking, and submit the
-                request to TravelEx CRM.
+                Submit your hotel stay requirements. TravelEx consultant will
+                check availability, confirm price, and guide you before final
+                booking.
               </span>
             </p>
           </div>
         </div>
       </section>
 
-      {/* Booking Area */}
+      {/* Request Area */}
       <section className="bg-[#F8FAFC] py-8 sm:py-14">
         <div className="mx-auto grid max-w-[1440px] gap-5 px-4 sm:px-6 lg:grid-cols-[1fr_380px] lg:gap-6 lg:px-8">
-          <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
-            {/* Stepper */}
-            <div className="mb-5 grid grid-cols-4 gap-2 sm:mb-7 sm:gap-3">
-              {[
-                "Stay Details",
-                "Guest Details",
-                "Payment",
-                "Confirmation",
-              ].map((label, index) => {
-                const stepNumber = index + 1
-                const isActive = step === stepNumber
-                const isDone = step > stepNumber
+          <form
+            onSubmit={handleSubmit}
+            className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7"
+          >
+            <input
+              type="text"
+              name="companyWebsite"
+              value={booking.companyWebsite}
+              onChange={handleChange}
+              className="hidden"
+              tabIndex="-1"
+              autoComplete="off"
+            />
 
-                return (
-                  <div
-                    key={label}
-                    className={`rounded-[5px] border p-2 sm:p-3 ${
-                      isActive
-                        ? "border-[#00AEEF]/30 bg-sky-50"
-                        : isDone
-                          ? "border-green-100 bg-green-50"
-                          : "border-slate-100 bg-[#F8FAFC]"
-                    }`}
-                  >
-                    <span
-                      className={`flex h-7 w-7 items-center justify-center rounded-full font-poppins text-[10px] font-bold sm:h-8 sm:w-8 sm:text-xs ${
-                        isDone
-                          ? "bg-green-600 text-white"
-                          : isActive
-                            ? "bg-[#00AEEF] text-white"
-                            : "bg-white text-slate-400"
-                      }`}
-                    >
-                      {isDone ? <FaCheckCircle /> : stepNumber}
-                    </span>
+            <div className="mb-5">
+              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.1em]">
+                Hotel Booking Request
+              </p>
 
-                    <p className="mt-1.5 line-clamp-1 font-poppins text-[8.5px] font-bold text-slate-700 sm:mt-2 sm:text-xs">
-                      {label}
-                    </p>
-                  </div>
-                )
-              })}
+              <h2 className="font-fredoka text-[22px] font-semibold leading-tight text-slate-950 sm:text-[40px]">
+                Share your hotel stay details
+              </h2>
+
+              <p className="mt-2 font-poppins text-[11.5px] font-medium leading-6 text-slate-600 sm:text-base sm:leading-7">
+                This is a request-based booking. Final room availability, price,
+                and confirmation will be shared by TravelEx consultant.
+              </p>
             </div>
 
+            {success && (
+              <div className="mb-5 rounded-[5px] border border-green-200 bg-green-50 p-4">
+                <div className="flex items-start gap-3">
+                  <FaCheckCircle className="mt-1 shrink-0 text-green-600" />
+
+                  <div>
+                    <h3 className="font-poppins text-sm font-bold text-green-800">
+                      Hotel request submitted successfully.
+                    </h3>
+
+                    <p className="mt-1 font-poppins text-xs font-semibold leading-5 text-green-700 sm:text-sm">
+                      Booking Reference: {bookingRef}. TravelEx admin team can
+                      now view this request in CRM.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {formError && (
-              <p className="mb-4 rounded-[5px] bg-red-50 px-4 py-3 font-poppins text-[11.5px] font-semibold leading-5 text-red-600 sm:text-sm">
+              <p className="mb-5 rounded-[5px] border border-red-200 bg-red-50 px-4 py-3 font-poppins text-[11.5px] font-semibold leading-5 text-red-600 sm:text-sm">
                 {formError}
               </p>
             )}
 
-            {/* Step 1 */}
-            {step === 1 && (
-              <form onSubmit={goToGuestDetails} className="grid gap-4">
-                <div>
-                  <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.1em]">
-                    Step 1
-                  </p>
+            <div className="grid gap-5">
+              {/* Customer Details */}
+              <div>
+                <h3 className="font-fredoka text-[24px] font-semibold text-slate-950">
+                  Customer Details
+                </h3>
 
-                  <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[32px]">
-                    Stay details
-                  </h2>
-
-                  <p className="mt-1.5 font-poppins text-[10.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
-                    Add check-in, check-out, room type, guests and room count.
-                  </p>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="mt-4 grid gap-4 sm:grid-cols-3">
                   <div>
-                    <label className={labelClass}>Check-in Date</label>
+                    <label className={labelClass}>Full Name</label>
 
                     <div className="relative">
-                      <FaCalendarAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+                      <FaUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
 
                       <input
                         type="text"
-                        name="checkIn"
-                        required
-                        value={booking.checkIn}
+                        name="fullName"
+                        value={booking.fullName}
                         onChange={handleChange}
-                        placeholder="DD/MM/YYYY"
-                        inputMode="numeric"
+                        placeholder="Enter full name"
                         className={iconInputClass}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className={labelClass}>Check-out Date</label>
+                    <label className={labelClass}>Mobile / WhatsApp</label>
 
                     <div className="relative">
-                      <FaCalendarAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+                      <FaPhoneAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
 
                       <input
-                        type="text"
-                        name="checkOut"
-                        required
-                        value={booking.checkOut}
+                        type="tel"
+                        name="phone"
+                        value={booking.phone}
                         onChange={handleChange}
-                        placeholder="DD/MM/YYYY"
-                        inputMode="numeric"
+                        placeholder="03XXXXXXXXX"
+                        className={iconInputClass}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Email Address</label>
+
+                    <div className="relative">
+                      <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="email"
+                        name="email"
+                        value={booking.email}
+                        onChange={handleChange}
+                        placeholder="your@email.com"
                         className={iconInputClass}
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass}>Your City</label>
+
+                    <input
+                      type="text"
+                      name="city"
+                      value={booking.city}
+                      onChange={handleChange}
+                      placeholder="Karachi, Lahore, Hyderabad..."
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Destination City</label>
+
+                    <div className="relative">
+                      <FaMapMarkerAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="text"
+                        name="destinationCity"
+                        value={booking.destinationCity}
+                        onChange={handleChange}
+                        placeholder="Makkah, Madinah, Dubai..."
+                        className={iconInputClass}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stay Details */}
+              <div>
+                <h3 className="font-fredoka text-[24px] font-semibold text-slate-950">
+                  Stay Details
+                </h3>
+
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <AppDatePicker
+                    label="Check-in Date"
+                    value={booking.checkInDate}
+                    onChange={(value) =>
+                      handleSelectChange("checkInDate", value)
+                    }
+                    placeholder="Select check-in date"
+                  />
+
+                  <AppDatePicker
+                    label="Check-out Date"
+                    value={booking.checkOutDate}
+                    onChange={(value) =>
+                      handleSelectChange("checkOutDate", value)
+                    }
+                    placeholder="Select check-out date"
+                  />
+                </div>
+
+                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <label className={labelClass}>Number of Adults</label>
+
+                    <div className="relative">
+                      <FaUsers className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="number"
+                        name="adults"
+                        min="1"
+                        value={booking.adults}
+                        onChange={handleChange}
+                        className={iconInputClass}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Number of Children</label>
+
+                    <input
+                      type="number"
+                      name="children"
+                      min="0"
+                      value={booking.children}
+                      onChange={handleChange}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Number of Rooms</label>
+
+                    <div className="relative">
+                      <FaHotel className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="number"
+                        name="rooms"
+                        min="1"
+                        value={booking.rooms}
+                        onChange={handleChange}
+                        className={iconInputClass}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                  <AppSelect
+                    label="Hotel Category"
+                    value={booking.hotelCategory}
+                    onChange={(value) =>
+                      handleSelectChange("hotelCategory", value)
+                    }
+                    placeholder="Select hotel category"
+                    options={hotelCategoryOptions}
+                  />
+
                   <AppSelect
                     label="Room Type"
                     value={booking.roomType}
                     onChange={(value) => handleSelectChange("roomType", value)}
                     placeholder="Select room type"
-                    options={hotel.roomOptions || []}
+                    options={
+                      hotel.roomOptions?.length
+                        ? [...hotel.roomOptions, "Not Sure"]
+                        : roomTypeOptions
+                    }
                   />
 
                   <AppSelect
@@ -502,390 +672,49 @@ const HotelBookingPage = () => {
                   />
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className={labelClass}>Guests</label>
+                <div className="mt-4">
+                  <label className={labelClass}>Budget / Price Range</label>
 
-                    <div className="relative">
-                      <FaUsers className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
-                      <input
-                        type="number"
-                        name="guests"
-                        min="1"
-                        required
-                        value={booking.guests}
-                        onChange={handleChange}
-                        className={iconInputClass}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={labelClass}>Rooms</label>
-
-                    <div className="relative">
-                      <FaHotel className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
-                      <input
-                        type="number"
-                        name="rooms"
-                        min="1"
-                        required
-                        value={booking.rooms}
-                        onChange={handleChange}
-                        className={iconInputClass}
-                      />
-                    </div>
-                  </div>
+                  <input
+                    type="text"
+                    name="budget"
+                    value={booking.budget}
+                    onChange={handleChange}
+                    placeholder="Example: PKR 50,000 - 80,000 or flexible"
+                    className={inputClass}
+                  />
                 </div>
 
-                <div className="flex justify-end">
-                  <button
-                    type="submit"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:w-auto sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    Continue to Guest Details
-                    <FaArrowRight className="text-[10px] sm:text-xs" />
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Step 2 */}
-            {step === 2 && (
-              <form onSubmit={goToPayment} className="grid gap-4">
-                <div>
-                  <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.1em]">
-                    Step 2
-                  </p>
-
-                  <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[32px]">
-                    Guest details
-                  </h2>
-
-                  <p className="mt-1.5 font-poppins text-[10.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
-                    Add traveler contact details for booking confirmation.
-                  </p>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className={labelClass}>Full Name</label>
-
-                    <div className="relative">
-                      <FaUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
-                      <input
-                        type="text"
-                        name="fullName"
-                        required
-                        placeholder="Enter full name"
-                        value={booking.fullName}
-                        onChange={handleChange}
-                        className={iconInputClass}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={labelClass}>Phone / WhatsApp</label>
-
-                    <div className="relative">
-                      <FaPhoneAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
-                      <input
-                        type="tel"
-                        name="phone"
-                        required
-                        placeholder="03XXXXXXXXX"
-                        value={booking.phone}
-                        onChange={handleChange}
-                        className={iconInputClass}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className={labelClass}>Email Address</label>
-
-                    <div className="relative">
-                      <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
-                      <input
-                        type="email"
-                        name="email"
-                        required
-                        placeholder="Enter email address"
-                        value={booking.email}
-                        onChange={handleChange}
-                        className={iconInputClass}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={labelClass}>City</label>
-
-                    <input
-                      type="text"
-                      name="city"
-                      placeholder="Your city"
-                      value={booking.city}
-                      onChange={handleChange}
-                      className={inputClass}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={labelClass}>Special Request</label>
+                <div className="mt-4">
+                  <label className={labelClass}>
+                    Additional Requirements
+                  </label>
 
                   <textarea
                     name="specialRequest"
                     rows="4"
-                    placeholder="Write early check-in, late check-out, family room, Haram distance, breakfast, or any special request..."
+                    placeholder="Write early check-in, late check-out, family room, Haram distance, breakfast preference, room sharing, or any special request..."
                     value={booking.specialRequest}
                     onChange={handleChange}
-                    className="w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] sm:px-4 sm:text-sm"
+                    className="w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:px-4 sm:text-sm"
                   />
-                </div>
-
-                <div className="flex flex-col justify-between gap-3 sm:flex-row">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormError("")
-                      setStep(1)
-                    }}
-                    className="inline-flex items-center justify-center rounded-[5px] border border-slate-200 bg-white px-5 py-2.5 font-poppins text-xs font-semibold text-slate-800 transition hover:border-[#00AEEF] hover:text-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    Back
-                  </button>
-
-                  <button
-                    type="submit"
-                    className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    Review & Proceed
-                    <FaArrowRight className="text-[10px] sm:text-xs" />
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Step 3 */}
-            {step === 3 && (
-              <form onSubmit={confirmPayment} className="grid gap-5">
-                <div>
-                  <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.1em]">
-                    Step 3
-                  </p>
-
-                  <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[32px]">
-                    Payment Review
-                  </h2>
-
-                  <p className="mt-1.5 font-poppins text-[10.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
-                    Review your booking and submit it to TravelEx team.
-                  </p>
-                </div>
-
-                <div className="rounded-[8px] border border-slate-100 bg-[#F8FAFC] p-3.5 sm:p-4">
-                  <h3 className="font-fredoka text-[21px] font-semibold text-slate-950 sm:text-[24px]">
-                    Booking Review
-                  </h3>
-
-                  <div className="mt-3 grid gap-2 sm:mt-4 sm:grid-cols-2 sm:gap-3">
-                    {[
-                      ["Hotel", hotel.name],
-                      ["Room Type", booking.roomType],
-                      ["Check-in", booking.checkIn],
-                      ["Check-out", booking.checkOut],
-                      ["Nights", nights],
-                      ["Rooms", booking.rooms],
-                      ["Guests", booking.guests],
-                      ["Guest", booking.fullName],
-                    ].map(([label, value]) => (
-                      <div
-                        key={label}
-                        className="rounded-[5px] bg-white px-3 py-2.5 sm:px-4 sm:py-3"
-                      >
-                        <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:text-[10px] sm:tracking-[0.1em]">
-                          {label}
-                        </p>
-
-                        <p className="mt-1 font-poppins text-[11.5px] font-semibold text-slate-900 sm:text-sm">
-                          {value || "-"}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-fredoka text-[21px] font-semibold text-slate-950 sm:text-[24px]">
-                    Select Payment Method
-                  </h3>
-
-                  <div className="mt-3 grid gap-2 sm:mt-4 sm:gap-3">
-                    {paymentMethods.map((method) => {
-                      const Icon = method.icon
-                      const isActive = booking.paymentMethod === method.id
-
-                      return (
-                        <button
-                          key={method.id}
-                          type="button"
-                          onClick={() =>
-                            setBooking((prev) => ({
-                              ...prev,
-                              paymentMethod: method.id,
-                            }))
-                          }
-                          className={`flex items-start gap-3 rounded-[8px] border p-3.5 text-left transition sm:gap-4 sm:p-4 ${
-                            isActive
-                              ? "border-[#00AEEF]/40 bg-sky-50"
-                              : "border-slate-100 bg-white hover:border-[#00AEEF]/25"
-                          }`}
-                        >
-                          <span
-                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[5px] sm:h-11 sm:w-11 ${
-                              isActive
-                                ? "bg-[#00AEEF] text-white"
-                                : "bg-[#F8FAFC] text-[#00AEEF]"
-                            }`}
-                          >
-                            <Icon />
-                          </span>
-
-                          <span>
-                            <span className="block font-poppins text-[12px] font-bold text-slate-950 sm:text-sm">
-                              {method.title}
-                            </span>
-
-                            <span className="mt-1 block font-poppins text-[10.5px] font-medium leading-5 text-slate-500 sm:text-xs sm:leading-6">
-                              {method.description}
-                            </span>
-                          </span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-
-                <div className="rounded-[8px] border border-orange-100 bg-orange-50 p-3.5 sm:p-4">
-                  <div className="flex gap-2.5 sm:gap-3">
-                    <FaLock className="mt-1 shrink-0 text-sm text-[#FF6B00]" />
-
-                    <div>
-                      <h4 className="font-poppins text-[12px] font-bold text-orange-900 sm:text-sm">
-                        Secure payment note
-                      </h4>
-
-                      <p className="mt-1 font-poppins text-[10.5px] font-semibold leading-5 text-orange-800 sm:text-xs sm:leading-6">
-                        This step submits your hotel request to TravelEx CRM.
-                        Final payment will be verified by TravelEx team.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <label className="flex items-start gap-3 rounded-[5px] bg-[#F8FAFC] p-3.5 sm:p-4">
-                  <input
-                    type="checkbox"
-                    checked={termsAccepted}
-                    onChange={(event) => setTermsAccepted(event.target.checked)}
-                    className="mt-1 accent-[#00AEEF]"
-                  />
-
-                  <span className="font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:text-sm sm:leading-6">
-                    I confirm that the booking details are correct and agree to
-                    proceed with TravelEx review.
-                  </span>
-                </label>
-
-                <div className="flex flex-col justify-between gap-3 sm:flex-row">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormError("")
-                      setStep(2)
-                    }}
-                    className="inline-flex items-center justify-center rounded-[5px] border border-slate-200 bg-white px-5 py-2.5 font-poppins text-xs font-semibold text-slate-800 transition hover:border-[#00AEEF] hover:text-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    Back
-                  </button>
-
-                  <button
-                    type="submit"
-                    disabled={!termsAccepted || loading}
-                    className={`inline-flex items-center justify-center gap-2 rounded-[5px] px-5 py-2.5 font-poppins text-xs font-semibold transition sm:px-6 sm:py-3 sm:text-sm ${
-                      termsAccepted && !loading
-                        ? "bg-[#FF6B00] text-white hover:bg-[#00AEEF]"
-                        : "cursor-not-allowed bg-slate-200 text-slate-400"
-                    }`}
-                  >
-                    {loading ? "Submitting..." : "Submit Hotel Request"}
-                    {!loading && <FaArrowRight className="text-[10px] sm:text-xs" />}
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Step 4 */}
-            {step === 4 && (
-              <div className="rounded-[8px] border border-green-100 bg-green-50 p-5 sm:p-6">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-600 text-white sm:h-14 sm:w-14">
-                  <FaCheckCircle className="text-lg sm:text-xl" />
-                </div>
-
-                <h2 className="mt-4 font-fredoka text-[24px] font-semibold leading-tight text-green-800 sm:text-[32px]">
-                  Hotel request submitted
-                </h2>
-
-                <p className="mt-2 font-poppins text-[11.5px] font-medium leading-5 text-green-700 sm:text-sm sm:leading-7">
-                  Your hotel booking request has been submitted successfully.
-                  TravelEx admin team can now view it in the CRM dashboard.
-                </p>
-
-                <div className="mt-5 rounded-[5px] bg-white p-4">
-                  <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-                    Booking Reference
-                  </p>
-
-                  <p className="mt-1 font-poppins text-xl font-bold text-slate-950">
-                    {bookingRef}
-                  </p>
-                </div>
-
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                  <Link
-                    to="/hotels"
-                    className="inline-flex items-center justify-center rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    Back to Hotels
-                  </Link>
-
-                  <a
-                    href={getWhatsappLink(hotel)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    <FaWhatsapp />
-                    Contact TravelEx
-                  </a>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Booking Summary */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-6 py-3.5 font-poppins text-xs font-semibold uppercase tracking-[0.04em] text-white transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-70 sm:text-sm"
+            >
+              {loading ? "Submitting Request..." : "Submit Hotel Request"}
+              {!loading && <FaArrowRight className="text-[10px] sm:text-xs" />}
+            </button>
+          </form>
+
+          {/* Request Summary */}
           <aside className="h-fit lg:sticky lg:top-24 lg:self-start">
-            <div className="overflow-hidden rounded-[12px] border border-slate-100 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.08)]">
+            <div className="overflow-hidden rounded-[5px] border border-slate-100 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.08)]">
               <div className="relative h-36 overflow-hidden sm:h-44">
                 <img
                   src={hotel.image}
@@ -910,96 +739,58 @@ const HotelBookingPage = () => {
 
               <div className="p-4 sm:p-5">
                 <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:text-[10px] sm:tracking-[0.1em]">
-                  Booking Summary
+                  Request Summary
                 </p>
 
                 <div className="mt-4 grid gap-2 sm:gap-3">
-                  <div className="rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 sm:px-4 sm:py-3">
-                    <p className="font-poppins text-[10px] font-bold text-slate-400 sm:text-xs">
-                      Price per night
-                    </p>
-
-                    <p className="mt-1 font-poppins text-sm font-semibold text-slate-950 sm:text-base">
-                      PKR {startingPrice.toLocaleString()}
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                    <div className="rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 sm:px-4 sm:py-3">
+                  {[
+                    ["Hotel", hotel.name],
+                    ["Location", hotel.location || "-"],
+                    ["Hotel Type", hotel.type || "-"],
+                    ["Category", booking.hotelCategory || "-"],
+                    ["Check-in", booking.checkInDate || "-"],
+                    ["Check-out", booking.checkOutDate || "-"],
+                    ["Nights", nights],
+                    ["Guests", totalGuests || "-"],
+                    ["Rooms", booking.rooms || "-"],
+                    ["Room Type", booking.roomType || "-"],
+                    ["Meal Plan", booking.mealPlan || "-"],
+                  ].map(([label, value]) => (
+                    <div
+                      key={label}
+                      className="rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 sm:px-4 sm:py-3"
+                    >
                       <p className="font-poppins text-[10px] font-bold text-slate-400 sm:text-xs">
-                        Nights
+                        {label}
                       </p>
 
-                      <p className="mt-1 font-poppins text-sm font-semibold text-slate-950 sm:text-base">
-                        {nights}
+                      <p className="mt-1 break-words font-poppins text-sm font-semibold text-slate-950 sm:text-base">
+                        {value || "-"}
                       </p>
                     </div>
-
-                    <div className="rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 sm:px-4 sm:py-3">
-                      <p className="font-poppins text-[10px] font-bold text-slate-400 sm:text-xs">
-                        Rooms
-                      </p>
-
-                      <p className="mt-1 font-poppins text-sm font-semibold text-slate-950 sm:text-base">
-                        {rooms}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 sm:px-4 sm:py-3">
-                    <p className="font-poppins text-[10px] font-bold text-slate-400 sm:text-xs">
-                      Subtotal
-                    </p>
-
-                    <p className="mt-1 font-poppins text-sm font-semibold text-slate-950 sm:text-base">
-                      PKR {subtotal.toLocaleString()}
-                    </p>
-                  </div>
-
-                  <div className="rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 sm:px-4 sm:py-3">
-                    <p className="font-poppins text-[10px] font-bold text-slate-400 sm:text-xs">
-                      Service fee
-                    </p>
-
-                    <p className="mt-1 font-poppins text-sm font-semibold text-slate-950 sm:text-base">
-                      PKR {serviceFee.toLocaleString()}
-                    </p>
-                  </div>
-
-                  <div className="rounded-[5px] bg-orange-50 px-3.5 py-3 sm:px-4 sm:py-4">
-                    <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-[#FF6B00] sm:text-xs sm:tracking-[0.1em]">
-                      Estimated Total
-                    </p>
-
-                    <p className="mt-1 font-poppins text-[22px] font-semibold text-[#FF6B00] sm:text-2xl">
-                      PKR {estimatedTotal.toLocaleString()}
-                    </p>
-                  </div>
+                  ))}
                 </div>
 
-                {selectedPayment && (
-                  <div className="mt-4 rounded-[5px] border border-slate-100 bg-white p-3.5 sm:mt-5 sm:p-4">
-                    <p className="flex items-center gap-2 font-poppins text-xs font-bold text-slate-950 sm:text-sm">
-                      <FaReceipt className="text-[#00AEEF]" />
-                      {selectedPayment.title}
-                    </p>
-
-                    <p className="mt-1 font-poppins text-[10.5px] font-medium leading-5 text-slate-500 sm:text-xs sm:leading-6">
-                      {selectedPayment.description}
-                    </p>
-                  </div>
-                )}
-
-                <div className="mt-4 rounded-[5px] bg-[#F8FAFC] p-3.5 sm:mt-5 sm:p-4">
-                  <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-[11px] sm:tracking-[0.1em]">
-                    Important Note
+                <div className="mt-4 rounded-[5px] bg-orange-50 p-3.5 sm:mt-5 sm:p-4">
+                  <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-[#FF6B00] sm:text-[11px] sm:tracking-[0.1em]">
+                    Request Based Booking
                   </p>
 
-                  <p className="mt-1.5 font-poppins text-[11px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
-                    Final booking and payment verification will be confirmed by
-                    TravelEx after review.
+                  <p className="mt-1.5 font-poppins text-[11px] font-medium leading-5 text-orange-800 sm:mt-2 sm:text-sm sm:leading-7">
+                    No online payment is charged here. TravelEx consultant will
+                    verify availability and final price before confirmation.
                   </p>
                 </div>
+
+                <a
+                  href={getWhatsappLink(hotel)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-3 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
+                >
+                  <FaWhatsapp />
+                  Ask on WhatsApp
+                </a>
               </div>
             </div>
           </aside>

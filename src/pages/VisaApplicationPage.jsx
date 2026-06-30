@@ -6,6 +6,7 @@ import {
   FaCalendarAlt,
   FaCheckCircle,
   FaEnvelope,
+  FaGlobeAsia,
   FaPassport,
   FaPhoneAlt,
   FaUser,
@@ -14,6 +15,7 @@ import {
 
 import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
+import AppDatePicker from "../components/common/AppDatePicker"
 import { publicApi } from "../services/publicApi"
 
 const whatsappNumber = "923111444192"
@@ -22,66 +24,24 @@ const defaultVisaTypes = [
   "Tourist Visa",
   "Visit Visa",
   "Business Visa",
+  "Family Visit Visa",
   "Student Visa",
-  "Family Visa",
-  "Umrah Visa",
-  "Other",
 ]
 
-const passportOptions = ["Yes", "No", "Applied / In Process"]
-
-const travelerOptions = [
-  "1 Traveler",
-  "2 Travelers",
-  "Family",
-  "Group",
-  "Corporate / Team",
-]
+const yesNoOptions = ["Yes", "No"]
 
 const labelClass =
   "mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs"
 
+const inputClass =
+  "h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:h-12 sm:px-4 sm:text-sm"
+
 const iconInputClass =
-  "h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
+  "h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
 
-const parseTravelers = (value) => {
-  if (value === "1 Traveler") {
-    return {
-      adults: 1,
-      children: 0,
-      infants: 0,
-    }
-  }
-
-  if (value === "2 Travelers") {
-    return {
-      adults: 2,
-      children: 0,
-      infants: 0,
-    }
-  }
-
-  if (value === "Family") {
-    return {
-      adults: 2,
-      children: 2,
-      infants: 0,
-    }
-  }
-
-  if (value === "Group" || value === "Corporate / Team") {
-    return {
-      adults: 4,
-      children: 0,
-      infants: 0,
-    }
-  }
-
-  return {
-    adults: 1,
-    children: 0,
-    infants: 0,
-  }
+const toIsoDate = (value) => {
+  if (!value) return undefined
+  return new Date(`${value}T00:00:00`).toISOString()
 }
 
 const VisaApplicationPage = () => {
@@ -101,12 +61,21 @@ const VisaApplicationPage = () => {
     fullName: "",
     phone: "",
     email: "",
-    country: selectedCountry,
+    city: "",
+    nationality: "",
+    destinationCountry: selectedCountry,
     visaType: selectedVisa,
-    travelDate: "",
-    travelers: "1 Traveler",
-    hasPassport: "Yes",
-    message: "",
+    intendedTravelDate: "",
+    durationOfStay: "",
+    numberOfApplicants: "1",
+    traveledAbroadBefore: "",
+    visaRefusedBefore: "",
+    currentOccupation: "",
+    monthlyIncome: "",
+    flightBookingAssistance: "",
+    hotelBookingAssistance: "",
+    additionalRequirements: "",
+    companyWebsite: "",
   })
 
   const [submitted, setSubmitted] = useState(false)
@@ -137,19 +106,27 @@ const VisaApplicationPage = () => {
     const message = `
 Assalamualaikum TravelEx,
 
-I want to apply for a visa.
+I want to submit a visa application inquiry.
 
 Full Name: ${formData.fullName}
-Phone: ${formData.phone}
-Email: ${formData.email || "Not provided"}
-Country: ${formData.country}
+Mobile / WhatsApp: ${formData.phone}
+Email Address: ${formData.email || "Not provided"}
+City: ${formData.city}
+Nationality: ${formData.nationality}
+Destination Country: ${formData.destinationCountry}
 Visa Type: ${formData.visaType}
-Expected Travel Date: ${formData.travelDate || "Not decided"}
-No. of Travelers: ${formData.travelers}
-Passport Available: ${formData.hasPassport}
+Intended Travel Date: ${formData.intendedTravelDate || "Not decided"}
+Duration of Stay: ${formData.durationOfStay || "Not provided"}
+Number of Applicants: ${formData.numberOfApplicants}
+Traveled Abroad Before: ${formData.traveledAbroadBefore || "Not selected"}
+Visa Refused Before: ${formData.visaRefusedBefore || "Not selected"}
+Current Occupation: ${formData.currentOccupation || "Not provided"}
+Monthly Income: ${formData.monthlyIncome || "Not provided"}
+Flight Booking Assistance: ${formData.flightBookingAssistance || "Not selected"}
+Hotel Booking Assistance: ${formData.hotelBookingAssistance || "Not selected"}
 
-Additional Message:
-${formData.message || "No additional message"}
+Additional Information / Requirements:
+${formData.additionalRequirements || "No additional information"}
     `.trim()
 
     return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`
@@ -165,7 +142,7 @@ ${formData.message || "No additional message"}
     }
 
     if (!formData.phone.trim()) {
-      setError("Please enter your phone number.")
+      setError("Please enter your mobile / WhatsApp number.")
       return
     }
 
@@ -174,8 +151,18 @@ ${formData.message || "No additional message"}
       return
     }
 
-    if (!formData.country.trim()) {
-      setError("Please enter visa country.")
+    if (!formData.city.trim()) {
+      setError("Please enter your city.")
+      return
+    }
+
+    if (!formData.nationality.trim()) {
+      setError("Please enter your nationality.")
+      return
+    }
+
+    if (!formData.destinationCountry.trim()) {
+      setError("Please enter destination country.")
       return
     }
 
@@ -184,20 +171,79 @@ ${formData.message || "No additional message"}
       return
     }
 
+    if (!formData.intendedTravelDate) {
+      setError("Please select intended travel date.")
+      return
+    }
+
+    if (!formData.durationOfStay.trim()) {
+      setError("Please enter duration of stay.")
+      return
+    }
+
+    if (!formData.numberOfApplicants || Number(formData.numberOfApplicants) < 1) {
+      setError("Please enter number of applicants.")
+      return
+    }
+
+    if (!formData.traveledAbroadBefore) {
+      setError("Please select whether you have traveled abroad before.")
+      return
+    }
+
+    if (!formData.visaRefusedBefore) {
+      setError("Please select whether you have been refused a visa before.")
+      return
+    }
+
+    if (!formData.currentOccupation.trim()) {
+      setError("Please enter current occupation.")
+      return
+    }
+
+    if (!formData.monthlyIncome.trim()) {
+      setError("Please enter monthly income.")
+      return
+    }
+
+    if (!formData.flightBookingAssistance) {
+      setError("Please select whether you require flight booking assistance.")
+      return
+    }
+
+    if (!formData.hotelBookingAssistance) {
+      setError("Please select whether you require hotel booking assistance.")
+      return
+    }
+
     try {
       setLoading(true)
 
+      const applicants = Math.max(1, Number(formData.numberOfApplicants) || 1)
+
       const message = [
-        `Visa application request`,
-        `Country: ${formData.country}`,
-        `Visa Type: ${formData.visaType}`,
-        `Expected Travel Date: ${formData.travelDate || "Not decided"}`,
-        `No. of Travelers: ${formData.travelers}`,
-        `Passport Available: ${formData.hasPassport}`,
+        "Visa application inquiry",
         "",
-        formData.message
-          ? `Additional Message: ${formData.message}`
-          : "Additional Message: Not provided",
+        `Full Name: ${formData.fullName}`,
+        `Mobile / WhatsApp: ${formData.phone}`,
+        `Email Address: ${formData.email}`,
+        `City: ${formData.city}`,
+        `Nationality: ${formData.nationality}`,
+        `Destination Country: ${formData.destinationCountry}`,
+        `Visa Type: ${formData.visaType}`,
+        `Intended Travel Date: ${formData.intendedTravelDate}`,
+        `Duration of Stay: ${formData.durationOfStay}`,
+        `Number of Applicants: ${applicants}`,
+        `Have You Traveled Abroad Before?: ${formData.traveledAbroadBefore}`,
+        `Have You Been Refused a Visa Before?: ${formData.visaRefusedBefore}`,
+        `Current Occupation: ${formData.currentOccupation}`,
+        `Monthly Income: ${formData.monthlyIncome}`,
+        `Do You Require Flight Booking Assistance?: ${formData.flightBookingAssistance}`,
+        `Do You Require Hotel Booking Assistance?: ${formData.hotelBookingAssistance}`,
+        "",
+        formData.additionalRequirements
+          ? `Additional Information / Requirements: ${formData.additionalRequirements}`
+          : "Additional Information / Requirements: Not provided",
       ].join("\n")
 
       const payload = {
@@ -207,11 +253,29 @@ ${formData.message || "No additional message"}
         serviceType: "visa",
         source: "visa-page",
         pageUrl: window.location.href,
-        destination: formData.country.trim(),
-        travelers: parseTravelers(formData.travelers),
+        city: formData.city.trim(),
+        nationality: formData.nationality.trim(),
+        destinationCountry: formData.destinationCountry.trim(),
+        destination: formData.destinationCountry.trim(),
+        visaType: formData.visaType,
+        travelDate: toIsoDate(formData.intendedTravelDate),
+        durationOfStay: formData.durationOfStay.trim(),
+        numberOfApplicants: applicants,
+        travelers: {
+          adults: applicants,
+          children: 0,
+          infants: 0,
+        },
+        traveledAbroadBefore: formData.traveledAbroadBefore,
+        visaRefusedBefore: formData.visaRefusedBefore,
+        currentOccupation: formData.currentOccupation.trim(),
+        monthlyIncome: formData.monthlyIncome.trim(),
+        flightBookingAssistance: formData.flightBookingAssistance,
+        hotelBookingAssistance: formData.hotelBookingAssistance,
+        additionalRequirements: formData.additionalRequirements.trim(),
         message,
         priority: "high",
-        companyWebsite: "",
+        companyWebsite: formData.companyWebsite,
       }
 
       await publicApi.createLead(payload)
@@ -231,7 +295,6 @@ ${formData.message || "No additional message"}
 
   return (
     <main className="bg-[#F8FAFC]">
-      {/* Hero */}
       <section className="relative overflow-hidden bg-slate-950">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,174,239,0.24),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(255,107,0,0.22),transparent_32%)]" />
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/92 to-slate-900" />
@@ -247,47 +310,51 @@ ${formData.message || "No additional message"}
             </Link>
 
             <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:mb-4 sm:gap-3">
-              <span className="inline-flex h-[27px] items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[7.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.1em]">
+              <span className="inline-flex h-[27px] items-center gap-1.5 rounded-[5px] border border-white/15 bg-white/10 px-2.5 font-poppins text-[7.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.1em]">
                 <FaPassport className="text-[8px] sm:text-[10px]" />
-                Visa Application
+                Visa Inquiry
               </span>
 
-              <span className="inline-flex h-[27px] items-center rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:px-4 sm:py-2 sm:text-xs">
-                {selectedCountry || "Visa Assistance"}
+              <span className="inline-flex h-[27px] items-center rounded-[5px] border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:px-4 sm:py-2 sm:text-xs">
+                {formData.destinationCountry || "Visa Assistance"}
               </span>
 
-              <span className="inline-flex h-[27px] items-center rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:px-4 sm:py-2 sm:text-xs">
-                {selectedVisa}
+              <span className="inline-flex h-[27px] items-center rounded-[5px] border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:px-4 sm:py-2 sm:text-xs">
+                {formData.visaType}
               </span>
             </div>
 
             <h1 className="font-fredoka text-[18px] font-semibold leading-[1.08] text-white sm:text-[46px] sm:uppercase sm:leading-[1.1] lg:text-[54px]">
-              Apply for{" "}
-              {selectedCountry ? `${selectedCountry} Visa` : "Visa Assistance"}
+              Visa Application Inquiry
             </h1>
 
             <p className="mt-1 max-w-3xl font-poppins text-[9px] font-medium leading-4 text-white/85 sm:mt-4 sm:text-base sm:leading-7">
-              <span className="sm:hidden">Submit visa request.</span>
-
-              <span className="hidden sm:inline">
-                Fill this form and TravelEx will guide you about visa
-                requirements, documents, processing and next steps.
-              </span>
+              Submit your visa details and TravelEx will guide you about
+              requirements, documents, processing and next steps.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Form Section */}
       <section className="bg-[#F8FAFC] py-8 sm:py-14">
         <div className="mx-auto grid max-w-[1440px] gap-5 px-4 sm:px-6 lg:grid-cols-[1fr_360px] lg:gap-6 lg:px-8">
           <form
             onSubmit={handleSubmit}
-            className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7"
+            className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7"
           >
+            <input
+              type="text"
+              name="companyWebsite"
+              value={formData.companyWebsite}
+              onChange={handleChange}
+              className="hidden"
+              tabIndex="-1"
+              autoComplete="off"
+            />
+
             <div className="mb-4 sm:mb-6">
               <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.1em]">
-                Visa Application Form
+                Visa Application Inquiry Form
               </p>
 
               <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[36px]">
@@ -295,8 +362,7 @@ ${formData.message || "No additional message"}
               </h2>
 
               <p className="mt-1.5 font-poppins text-[10.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
-                Submit your visa request. TravelEx will review your details and
-                guide you on documents and processing.
+                Fill the required details exactly as requested by TravelEx.
               </p>
             </div>
 
@@ -307,17 +373,17 @@ ${formData.message || "No additional message"}
             )}
 
             {submitted && (
-              <div className="mb-4 rounded-[8px] border border-green-100 bg-green-50 p-4 sm:p-5">
+              <div className="mb-4 rounded-[5px] border border-green-100 bg-green-50 p-4 sm:p-5">
                 <div className="flex items-start gap-3">
                   <FaCheckCircle className="mt-1 shrink-0 text-green-600" />
 
                   <div>
                     <h3 className="font-fredoka text-[20px] font-semibold leading-tight text-green-800 sm:text-[24px]">
-                      Visa request submitted
+                      Visa inquiry submitted
                     </h3>
 
                     <p className="mt-1.5 font-poppins text-[11.5px] font-medium leading-5 text-green-700 sm:text-sm sm:leading-7">
-                      Your visa application request has been saved in the
+                      Your visa application inquiry has been saved in the
                       TravelEx CRM dashboard. Our consultant will contact you
                       soon.
                     </p>
@@ -336,30 +402,26 @@ ${formData.message || "No additional message"}
               </div>
             )}
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-3">
               <div>
                 <label className={labelClass}>Full Name *</label>
-
                 <div className="relative">
                   <FaUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
                   <input
                     type="text"
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleChange}
-                    placeholder="Enter your full name"
+                    placeholder="Enter full name"
                     className={iconInputClass}
                   />
                 </div>
               </div>
 
               <div>
-                <label className={labelClass}>Phone / WhatsApp *</label>
-
+                <label className={labelClass}>Mobile / WhatsApp *</label>
                 <div className="relative">
                   <FaPhoneAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
                   <input
                     type="tel"
                     name="phone"
@@ -373,10 +435,8 @@ ${formData.message || "No additional message"}
 
               <div>
                 <label className={labelClass}>Email Address *</label>
-
                 <div className="relative">
                   <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
                   <input
                     type="email"
                     name="email"
@@ -387,133 +447,191 @@ ${formData.message || "No additional message"}
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              <div>
+                <label className={labelClass}>City *</label>
+                <input
+                  type="text"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  placeholder="Your city"
+                  className={inputClass}
+                />
+              </div>
 
               <div>
-                <label className={labelClass}>Visa Country *</label>
+                <label className={labelClass}>Nationality *</label>
+                <input
+                  type="text"
+                  name="nationality"
+                  value={formData.nationality}
+                  onChange={handleChange}
+                  placeholder="Pakistani"
+                  className={inputClass}
+                />
+              </div>
 
+              <div>
+                <label className={labelClass}>Destination Country *</label>
                 <div className="relative">
-                  <FaPassport className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
+                  <FaGlobeAsia className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
                   <input
                     type="text"
-                    name="country"
-                    value={formData.country}
+                    name="destinationCountry"
+                    value={formData.destinationCountry}
                     onChange={handleChange}
-                    placeholder="Thailand, Dubai, Schengen..."
+                    placeholder="UAE, UK, Schengen..."
                     className={iconInputClass}
                   />
                 </div>
               </div>
+            </div>
 
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
               <AppSelect
-                label="Visa Type"
+                label="Visa Type *"
                 value={formData.visaType}
                 onChange={(value) => handleSelectChange("visaType", value)}
                 placeholder="Select visa type"
                 options={visaTypeOptions}
               />
 
+              <AppDatePicker
+                label="Intended Travel Date *"
+                value={formData.intendedTravelDate}
+                onChange={(value) => handleSelectChange("intendedTravelDate", value)}
+                placeholder="Select intended travel date"
+              />
+
               <div>
-                <label className={labelClass}>Expected Travel Date</label>
+                <label className={labelClass}>Duration of Stay *</label>
+                <input
+                  type="text"
+                  name="durationOfStay"
+                  value={formData.durationOfStay}
+                  onChange={handleChange}
+                  placeholder="Example: 15 days"
+                  className={inputClass}
+                />
+              </div>
+            </div>
 
-                <div className="relative">
-                  <FaCalendarAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
-                  <input
-                    type="text"
-                    name="travelDate"
-                    value={formData.travelDate}
-                    onChange={handleChange}
-                    placeholder="Example: March 2026"
-                    className={iconInputClass}
-                  />
-                </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+              <div>
+                <label className={labelClass}>Number of Applicants *</label>
+                <input
+                  type="number"
+                  name="numberOfApplicants"
+                  min="1"
+                  value={formData.numberOfApplicants}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
               </div>
 
               <AppSelect
-                label="No. of Travelers"
-                value={formData.travelers}
-                onChange={(value) => handleSelectChange("travelers", value)}
-                placeholder="Select travelers"
-                options={travelerOptions}
+                label="Traveled Abroad Before? *"
+                value={formData.traveledAbroadBefore}
+                onChange={(value) => handleSelectChange("traveledAbroadBefore", value)}
+                placeholder="Select option"
+                options={yesNoOptions}
               />
 
               <AppSelect
-                label="Passport Available?"
-                value={formData.hasPassport}
-                onChange={(value) => handleSelectChange("hasPassport", value)}
-                placeholder="Select passport status"
-                options={passportOptions}
+                label="Visa Refused Before? *"
+                value={formData.visaRefusedBefore}
+                onChange={(value) => handleSelectChange("visaRefusedBefore", value)}
+                placeholder="Select option"
+                options={yesNoOptions}
+              />
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Current Occupation *</label>
+                <input
+                  type="text"
+                  name="currentOccupation"
+                  value={formData.currentOccupation}
+                  onChange={handleChange}
+                  placeholder="Job, business, student..."
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>Monthly Income *</label>
+                <input
+                  type="text"
+                  name="monthlyIncome"
+                  value={formData.monthlyIncome}
+                  onChange={handleChange}
+                  placeholder="Example: PKR 150,000"
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <AppSelect
+                label="Require Flight Booking Assistance? *"
+                value={formData.flightBookingAssistance}
+                onChange={(value) => handleSelectChange("flightBookingAssistance", value)}
+                placeholder="Select option"
+                options={yesNoOptions}
+              />
+
+              <AppSelect
+                label="Require Hotel Booking Assistance? *"
+                value={formData.hotelBookingAssistance}
+                onChange={(value) => handleSelectChange("hotelBookingAssistance", value)}
+                placeholder="Select option"
+                options={yesNoOptions}
               />
             </div>
 
             <div className="mt-4">
-              <label className={labelClass}>Additional Message</label>
-
+              <label className={labelClass}>Additional Information / Requirements</label>
               <textarea
-                name="message"
-                value={formData.message}
+                rows="4"
+                name="additionalRequirements"
+                value={formData.additionalRequirements}
                 onChange={handleChange}
-                rows="5"
-                placeholder="Write any specific requirement, document issue, travel plan, or family visa detail..."
-                className="w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] sm:px-4 sm:text-sm"
+                placeholder="Write any extra visa information, family details, document concerns, or special requirements..."
+                className={`${inputClass} h-auto resize-none py-3 leading-6`}
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-70 sm:px-6 sm:py-3 sm:text-sm"
+              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-6 py-3.5 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
             >
-              {loading ? "Submitting..." : "Submit Application"}
-              {!loading && <FaArrowRight className="text-[10px] sm:text-xs" />}
+              {loading ? "Submitting..." : "Submit Visa Inquiry"}
+              {!loading && <FaArrowRight className="text-xs" />}
             </button>
           </form>
 
-          {/* Sidebar */}
-          <aside className="h-fit lg:sticky lg:top-24 lg:self-start">
-            <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_16px_45px_rgba(15,23,42,0.08)] sm:p-5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-[12px] bg-[#FF6B00]/10 text-xl text-[#FF6B00] sm:h-14 sm:w-14 sm:text-2xl">
-                <FaPassport />
-              </div>
-
-              <h2 className="mt-4 font-fredoka text-[22px] font-semibold leading-tight text-slate-950 sm:text-2xl">
-                What happens next?
-              </h2>
-
-              <div className="mt-4 grid gap-3">
-                {[
-                  "Our team reviews your visa requirement.",
-                  "You receive country-specific document guidance.",
-                  "TravelEx guides you about processing and next steps.",
-                  "You can share documents directly with our consultant.",
-                ].map((item) => (
-                  <p
-                    key={item}
-                    className="flex gap-2.5 font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:gap-3 sm:text-sm sm:leading-6"
-                  >
-                    <FaCheckCircle className="mt-1 shrink-0 text-[#00AEEF]" />
-                    {item}
-                  </p>
-                ))}
-              </div>
-
-              <p className="mt-4 rounded-[5px] bg-[#F8FAFC] p-3.5 font-poppins text-[10.5px] font-medium leading-5 text-slate-500 sm:mt-5 sm:p-4 sm:text-xs sm:leading-6">
-                Note: Visa approval depends on embassy, consulate or
-                immigration authority decision. TravelEx provides guidance and
-                application support.
-              </p>
-
-              <a
-                href={`https://wa.me/${whatsappNumber}`}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:mt-5 sm:px-6 sm:py-3 sm:text-sm"
-              >
-                <FaWhatsapp />
-                Ask on WhatsApp
-              </a>
-            </div>
+          <aside className="h-fit rounded-[5px] border border-slate-100 bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+            <h3 className="font-fredoka text-[24px] font-semibold text-slate-950">
+              Visa support
+            </h3>
+            <p className="mt-2 font-poppins text-sm font-medium leading-7 text-slate-600">
+              TravelEx will review your details and guide you about documents,
+              eligibility and processing requirements.
+            </p>
+            <a
+              href={getWhatsappUrl()}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-3 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
+            >
+              <FaWhatsapp />
+              WhatsApp TravelEx
+            </a>
           </aside>
         </div>
       </section>

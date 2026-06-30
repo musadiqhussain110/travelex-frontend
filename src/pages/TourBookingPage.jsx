@@ -14,110 +14,59 @@ import {
 
 import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
+import AppDatePicker from "../components/common/AppDatePicker"
 import { tours } from "../data/tours"
 import { publicApi } from "../services/publicApi"
 
-const travelerOptions = [
-  "1 Traveler",
-  "2 Travelers",
-  "Family",
-  "Group",
-  "Corporate / Team",
-]
-
-const hotelPreferenceOptions = [
-  "Budget Hotel",
-  "Standard Hotel",
-  "Premium Hotel",
-  "Luxury Hotel",
-  "Need Suggestions",
-]
-
-const budgetRangeOptions = [
-  "Budget Friendly",
-  "Standard Comfort",
-  "Premium Experience",
-  "Luxury Travel",
-  "Custom Budget",
-]
-
-const tripTypeOptions = [
-  "Family Trip",
-  "Couple Trip",
-  "Friends Group",
-  "Solo Travel",
-  "Corporate Travel",
-]
+const hotelCategoryOptions = ["3 Star", "4 Star", "5 Star"]
+const interestedInOptions = ["Group Tour", "Private Tour"]
 
 const labelClass =
   "mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs"
 
+const inputClass =
+  "h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:h-12 sm:px-4 sm:text-sm"
+
 const iconInputClass =
-  "h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
+  "h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
 
 const initialForm = {
   fullName: "",
   phone: "",
   email: "",
-  departureCity: "",
+  city: "",
+  destination: "",
   travelDate: "",
-  travelers: "",
-  hotelPreference: "",
-  budgetRange: "",
-  tripType: "",
-  specialRequirements: "",
+  returnDate: "",
+  adults: "1",
+  children: "0",
+  infants: "0",
+  hotelCategory: "",
+  interestedIn: "",
+  additionalRequirements: "",
+  companyWebsite: "",
 }
+
+const toIsoDate = (value) => {
+  if (!value) return undefined
+  return new Date(`${value}T00:00:00`).toISOString()
+}
+
+const getNumber = (value, fallback = 0) => Math.max(fallback, Number(value) || fallback)
 
 const getWhatsappLink = (tour) =>
   `https://wa.me/923111444192?text=${encodeURIComponent(
-    `Assalamualaikum TravelEx, I want to book/customize ${tour.title}. Please guide me.`
+    `Assalamualaikum TravelEx, I want to inquire about ${tour.title}. Please guide me.`
   )}`
-
-const parseTravelers = (value) => {
-  if (value === "1 Traveler") {
-    return {
-      adults: 1,
-      children: 0,
-      infants: 0,
-    }
-  }
-
-  if (value === "2 Travelers") {
-    return {
-      adults: 2,
-      children: 0,
-      infants: 0,
-    }
-  }
-
-  if (value === "Family") {
-    return {
-      adults: 2,
-      children: 2,
-      infants: 0,
-    }
-  }
-
-  if (value === "Group" || value === "Corporate / Team") {
-    return {
-      adults: 4,
-      children: 0,
-      infants: 0,
-    }
-  }
-
-  return {
-    adults: 1,
-    children: 0,
-    infants: 0,
-  }
-}
 
 const TourBookingPage = () => {
   const { id } = useParams()
   const tour = tours.find((item) => item.id === id)
 
-  const [formData, setFormData] = useState(initialForm)
+  const [formData, setFormData] = useState({
+    ...initialForm,
+    destination: tour?.location || tour?.title || "",
+  })
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -152,7 +101,7 @@ const TourBookingPage = () => {
     }
 
     if (!formData.phone.trim()) {
-      setError("Please enter your phone number.")
+      setError("Please enter your mobile / WhatsApp number.")
       return
     }
 
@@ -161,43 +110,65 @@ const TourBookingPage = () => {
       return
     }
 
-    if (!formData.departureCity.trim()) {
-      setError("Please enter your departure city.")
+    if (!formData.city.trim()) {
+      setError("Please enter your city.")
       return
     }
 
-    if (!formData.travelDate.trim()) {
-      setError("Please enter your preferred travel date.")
+    if (!formData.destination.trim()) {
+      setError("Please enter destination.")
       return
     }
 
-    if (!formData.travelers) {
-      setError("Please select number of travelers.")
+    if (!formData.travelDate) {
+      setError("Please select travel date.")
+      return
+    }
+
+    if (!formData.returnDate) {
+      setError("Please select return date.")
+      return
+    }
+
+    if (!formData.hotelCategory) {
+      setError("Please select hotel category.")
+      return
+    }
+
+    if (!formData.interestedIn) {
+      setError("Please select whether you are interested in group or private tour.")
       return
     }
 
     try {
       setLoading(true)
 
-      const travelers = parseTravelers(formData.travelers)
+      const travelers = {
+        adults: getNumber(formData.adults, 1),
+        children: getNumber(formData.children, 0),
+        infants: getNumber(formData.infants, 0),
+      }
 
       const message = [
-        `Tour request for: ${tour.title}`,
+        `Tour package inquiry for: ${tour.title}`,
         `Tour Location: ${tour.location || tour.title}`,
         `Tour Price: ${tour.price || "Custom Quote"}`,
         `Tour Duration: ${tour.duration || "Flexible"}`,
         `Tour Type: ${tour.type || "Custom Tour"}`,
         "",
-        `Departure City: ${formData.departureCity}`,
-        `Preferred Travel Date: ${formData.travelDate}`,
-        `Travelers: ${formData.travelers}`,
-        `Hotel Preference: ${formData.hotelPreference || "Not selected"}`,
-        `Budget Range: ${formData.budgetRange || "Not selected"}`,
-        `Trip Type: ${formData.tripType || "Not selected"}`,
+        `City: ${formData.city}`,
+        `Destination: ${formData.destination}`,
+        `Travel Date: ${formData.travelDate}`,
+        `Return Date: ${formData.returnDate}`,
+        `Adults: ${travelers.adults}`,
+        `Children: ${travelers.children}`,
+        `Infants: ${travelers.infants}`,
+        `Hotel Category: ${formData.hotelCategory}`,
+        `Interested In: ${formData.interestedIn}`,
         "",
-        formData.specialRequirements
-          ? `Special Requirements: ${formData.specialRequirements}`
-          : "Special Requirements: Not provided",
+        formData.additionalRequirements
+          ? `Additional Requirements: ${formData.additionalRequirements}`
+          : "Additional Requirements: Not provided",
       ].join("\n")
 
       const payload = {
@@ -207,25 +178,34 @@ const TourBookingPage = () => {
         serviceType: "tour",
         source: "tour-page",
         pageUrl: window.location.href,
-        destination: tour.location || tour.title || "",
-        budget: formData.budgetRange || tour.price || "",
-        preferredHotel: formData.hotelPreference || "",
+        city: formData.city.trim(),
+        destination: formData.destination.trim(),
+        travelDate: toIsoDate(formData.travelDate),
+        returnDate: toIsoDate(formData.returnDate),
         travelers,
+        hotelCategory: formData.hotelCategory,
+        preferredHotel: formData.hotelCategory,
+        interestedIn: formData.interestedIn,
+        budget: tour.price || "",
+        additionalRequirements: formData.additionalRequirements.trim(),
         message,
         priority: "high",
-        companyWebsite: "",
+        companyWebsite: formData.companyWebsite,
       }
 
       await publicApi.createLead(payload)
 
       setSubmitted(true)
-      setFormData(initialForm)
+      setFormData({
+        ...initialForm,
+        destination: tour?.location || tour?.title || "",
+      })
       window.scrollTo({ top: 0, behavior: "smooth" })
     } catch (err) {
-      console.error("Tour booking lead error:", err)
+      console.error("Tour inquiry error:", err)
       setError(
         err.message ||
-          "We could not submit your tour request right now. Please try again."
+          "We could not submit your tour inquiry right now. Please try again."
       )
     } finally {
       setLoading(false)
@@ -237,14 +217,14 @@ const TourBookingPage = () => {
       <main className="bg-[#F8FAFC]">
         <section className="bg-[#F8FAFC] px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
           <div className="mx-auto max-w-[1180px]">
-            <div className="rounded-[12px] border border-slate-100 bg-white p-5 text-center shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-8">
+            <div className="rounded-[5px] border border-slate-100 bg-white p-5 text-center shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-8">
               <h1 className="font-fredoka text-[24px] font-semibold text-slate-950 sm:text-[34px]">
                 Tour not found
               </h1>
 
               <p className="mx-auto mt-2 max-w-2xl font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:mt-3 sm:text-sm sm:leading-7">
-                The tour you are trying to book does not exist or may have been
-                moved.
+                The tour you are trying to inquire about does not exist or may
+                have been moved.
               </p>
 
               <Link
@@ -265,7 +245,6 @@ const TourBookingPage = () => {
 
   return (
     <main className="bg-[#F8FAFC]">
-      {/* Hero */}
       <section className="relative overflow-hidden bg-slate-950">
         <img
           src={tour.image}
@@ -275,7 +254,7 @@ const TourBookingPage = () => {
           className="absolute inset-0 h-full w-full object-cover"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/65 via-slate-950/45 to-slate-950/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-slate-950/45 to-slate-950/20" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
 
         <div className="relative z-10 mx-auto max-w-[1340px] px-4 py-7 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
@@ -289,45 +268,34 @@ const TourBookingPage = () => {
             </Link>
 
             <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:mb-4 sm:gap-3">
-              <span className="inline-flex h-[27px] items-center rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[7.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] backdrop-blur sm:h-auto sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.1em]">
-                Tour Request
+              <span className="inline-flex h-[27px] items-center rounded-[5px] border border-white/15 bg-white/10 px-2.5 font-poppins text-[7.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] backdrop-blur sm:h-auto sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.1em]">
+                Tour Inquiry
               </span>
 
-              <span className="inline-flex h-[27px] items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-xs">
+              <span className="inline-flex h-[27px] items-center gap-1.5 rounded-[5px] border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-xs">
                 <FaCalendarAlt className="text-[#FF6B00]" />
                 {tour.duration || "Flexible"}
-              </span>
-
-              <span className="inline-flex h-[27px] items-center rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:px-4 sm:py-2 sm:text-xs">
-                {tour.type || "Custom Tour"}
               </span>
             </div>
 
             <h1 className="font-fredoka text-[18px] font-semibold leading-[1.08] text-white sm:text-[46px] sm:uppercase sm:leading-[1.1] lg:text-[54px]">
-              Book {tour.title}
+              Tour Inquiry for {tour.title}
             </h1>
 
             <p className="mt-1 max-w-3xl font-poppins text-[9px] font-medium leading-4 text-white/85 sm:mt-4 sm:text-base sm:leading-7">
-              <span className="sm:hidden">Submit your tour request.</span>
-
-              <span className="hidden sm:inline">
-                Fill out your tour request and TravelEx will contact you with
-                availability, final price, hotel options, transport support, and
-                the next steps.
-              </span>
+              Submit your real tour inquiry details. TravelEx will contact you
+              with availability, hotel options and final quote.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Booking Content */}
       <section className="bg-[#F8FAFC] py-8 sm:py-14">
         <div className="mx-auto grid max-w-[1440px] gap-5 px-4 sm:px-6 lg:grid-cols-[1fr_380px] lg:gap-6 lg:px-8">
-          {/* Form */}
-          <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
+          <div className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
             <div className="mb-4 sm:mb-6">
               <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.1em]">
-                Tour Booking Form
+                Tour Package Inquiry Form
               </p>
 
               <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[36px]">
@@ -335,24 +303,23 @@ const TourBookingPage = () => {
               </h2>
 
               <p className="mt-1.5 font-poppins text-[10.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
-                Submit your request. TravelEx will confirm availability, hotel
-                options and final price before booking.
+                Fill the required details exactly as requested by TravelEx.
               </p>
             </div>
 
             {submitted ? (
-              <div className="rounded-[8px] border border-green-100 bg-green-50 p-5 sm:p-6">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-600 text-white sm:h-14 sm:w-14">
+              <div className="rounded-[5px] border border-green-100 bg-green-50 p-5 sm:p-6">
+                <div className="flex h-12 w-12 items-center justify-center rounded-[5px] bg-green-600 text-white sm:h-14 sm:w-14">
                   <FaCheckCircle className="text-lg sm:text-xl" />
                 </div>
 
                 <h3 className="mt-4 font-fredoka text-[24px] font-semibold leading-tight text-green-700 sm:text-[28px]">
-                  Tour request submitted
+                  Tour inquiry submitted
                 </h3>
 
                 <p className="mt-2 font-poppins text-[11.5px] font-medium leading-5 text-green-700 sm:text-sm sm:leading-7">
-                  Your tour request has been submitted successfully. TravelEx
-                  admin team can now view it in the CRM dashboard.
+                  Your inquiry has been submitted successfully. TravelEx admin
+                  team can now view it in the CRM dashboard.
                 </p>
 
                 <div className="mt-5 flex flex-col gap-3 sm:flex-row">
@@ -376,6 +343,16 @@ const TourBookingPage = () => {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="grid gap-4">
+                <input
+                  type="text"
+                  name="companyWebsite"
+                  value={formData.companyWebsite}
+                  onChange={handleChange}
+                  className="hidden"
+                  tabIndex="-1"
+                  autoComplete="off"
+                />
+
                 {error && (
                   <p className="rounded-[5px] bg-red-50 px-4 py-3 font-poppins text-[11.5px] font-semibold leading-5 text-red-600 sm:text-sm">
                     {error}
@@ -385,40 +362,30 @@ const TourBookingPage = () => {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className={labelClass}>Selected Tour</label>
-
-                    <input
-                      type="text"
-                      value={tour.title}
-                      readOnly
-                      className="h-11 w-full rounded-[5px] border border-slate-200 bg-slate-50 px-3 font-poppins text-xs font-semibold text-slate-700 outline-none sm:h-12 sm:px-4 sm:text-sm"
-                    />
+                    <input type="text" value={tour.title} readOnly className={inputClass} />
                   </div>
 
                   <div>
-                    <label className={labelClass}>Full Name</label>
-
+                    <label className={labelClass}>Full Name *</label>
                     <div className="relative">
                       <FaUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
                       <input
                         type="text"
                         name="fullName"
                         value={formData.fullName}
                         onChange={handleChange}
-                        placeholder="Enter your full name"
+                        placeholder="Enter full name"
                         className={iconInputClass}
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-3">
                   <div>
-                    <label className={labelClass}>Phone Number</label>
-
+                    <label className={labelClass}>Mobile / WhatsApp *</label>
                     <div className="relative">
                       <FaPhoneAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
                       <input
                         type="tel"
                         name="phone"
@@ -431,214 +398,140 @@ const TourBookingPage = () => {
                   </div>
 
                   <div>
-                    <label className={labelClass}>Email Address</label>
-
+                    <label className={labelClass}>Email Address *</label>
                     <div className="relative">
                       <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
                       <input
                         type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder="Enter your email"
+                        placeholder="your@email.com"
                         className={iconInputClass}
                       />
                     </div>
                   </div>
-                </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className={labelClass}>Departure City</label>
-
+                    <label className={labelClass}>City *</label>
                     <div className="relative">
                       <FaMapMarkerAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
                       <input
                         type="text"
-                        name="departureCity"
-                        value={formData.departureCity}
+                        name="city"
+                        value={formData.city}
                         onChange={handleChange}
-                        placeholder="Karachi, Lahore, Islamabad..."
+                        placeholder="Your city"
                         className={iconInputClass}
                       />
                     </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <label className={labelClass}>Destination *</label>
+                    <input
+                      type="text"
+                      name="destination"
+                      value={formData.destination}
+                      onChange={handleChange}
+                      placeholder="Dubai, Turkey, Baku..."
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <AppDatePicker
+                    label="Travel Date *"
+                    value={formData.travelDate}
+                    onChange={(value) => handleSelectChange("travelDate", value)}
+                    placeholder="Select travel date"
+                  />
+
+                  <AppDatePicker
+                    label="Return Date *"
+                    value={formData.returnDate}
+                    onChange={(value) => handleSelectChange("returnDate", value)}
+                    placeholder="Select return date"
+                  />
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <label className={labelClass}>Number of Adults *</label>
+                    <input type="number" name="adults" min="1" value={formData.adults} onChange={handleChange} className={inputClass} />
                   </div>
 
                   <div>
-                    <label className={labelClass}>Preferred Travel Date</label>
+                    <label className={labelClass}>Number of Children</label>
+                    <input type="number" name="children" min="0" value={formData.children} onChange={handleChange} className={inputClass} />
+                  </div>
 
-                    <div className="relative">
-                      <FaCalendarAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
-
-                      <input
-                        type="text"
-                        name="travelDate"
-                        value={formData.travelDate}
-                        onChange={handleChange}
-                        placeholder="Example: March 2026"
-                        className={iconInputClass}
-                      />
-                    </div>
+                  <div>
+                    <label className={labelClass}>Number of Infants</label>
+                    <input type="number" name="infants" min="0" value={formData.infants} onChange={handleChange} className={inputClass} />
                   </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <AppSelect
-                    label="Travelers"
-                    value={formData.travelers}
-                    onChange={(value) =>
-                      handleSelectChange("travelers", value)
-                    }
-                    placeholder="Select travelers"
-                    options={travelerOptions}
+                    label="Hotel Category *"
+                    value={formData.hotelCategory}
+                    onChange={(value) => handleSelectChange("hotelCategory", value)}
+                    placeholder="Select hotel category"
+                    options={hotelCategoryOptions}
                   />
 
                   <AppSelect
-                    label="Hotel Preference"
-                    value={formData.hotelPreference}
-                    onChange={(value) =>
-                      handleSelectChange("hotelPreference", value)
-                    }
-                    placeholder="Select hotel preference"
-                    options={hotelPreferenceOptions}
-                  />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <AppSelect
-                    label="Budget Range"
-                    value={formData.budgetRange}
-                    onChange={(value) =>
-                      handleSelectChange("budgetRange", value)
-                    }
-                    placeholder="Select budget range"
-                    options={budgetRangeOptions}
-                  />
-
-                  <AppSelect
-                    label="Trip Type"
-                    value={formData.tripType}
-                    onChange={(value) => handleSelectChange("tripType", value)}
-                    placeholder="Select trip type"
-                    options={tripTypeOptions}
+                    label="Interested In *"
+                    value={formData.interestedIn}
+                    onChange={(value) => handleSelectChange("interestedIn", value)}
+                    placeholder="Select tour type"
+                    options={interestedInOptions}
                   />
                 </div>
 
                 <div>
-                  <label className={labelClass}>Special Requirements</label>
-
+                  <label className={labelClass}>Additional Requirements</label>
                   <textarea
                     rows="4"
-                    name="specialRequirements"
-                    value={formData.specialRequirements}
+                    name="additionalRequirements"
+                    value={formData.additionalRequirements}
                     onChange={handleChange}
-                    placeholder="Write hotel preference, sightseeing interest, destination changes, budget, or any special note..."
-                    className="w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] sm:px-4 sm:text-sm"
+                    placeholder="Write any special request, hotel preference, transfers, activities, or family requirement..."
+                    className={`${inputClass} h-auto resize-none py-3 leading-6`}
                   />
                 </div>
 
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-70 sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    {loading ? "Submitting..." : "Submit Tour Request"}
-                    {!loading && (
-                      <FaArrowRight className="text-[10px] sm:text-xs" />
-                    )}
-                  </button>
-
-                  <a
-                    href={getWhatsappLink(tour)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 bg-white px-5 py-2.5 font-poppins text-xs font-semibold text-slate-800 transition hover:border-[#25D366] hover:text-[#25D366] sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    <FaWhatsapp />
-                    WhatsApp Instead
-                  </a>
-                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-6 py-3.5 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {loading ? "Submitting..." : "Submit Tour Inquiry"}
+                  {!loading && <FaArrowRight className="text-xs" />}
+                </button>
               </form>
             )}
           </div>
 
-          {/* Summary Sidebar */}
-          <aside className="h-fit lg:sticky lg:top-24 lg:self-start">
-            <div className="overflow-hidden rounded-[12px] border border-slate-100 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.08)]">
-              <div className="relative h-36 overflow-hidden sm:h-44">
-                <img
-                  src={tour.image}
-                  alt={tour.title}
-                  loading="lazy"
-                  decoding="async"
-                  className="h-full w-full object-cover"
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
-
-                <div className="absolute bottom-3 left-4 right-4 sm:bottom-4">
-                  <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-white/65 sm:text-[10px] sm:tracking-[0.1em]">
-                    Selected Tour
-                  </p>
-
-                  <h3 className="mt-1 font-fredoka text-[21px] font-semibold leading-tight text-white sm:text-[24px]">
-                    {tour.title}
-                  </h3>
-                </div>
-              </div>
-
-              <div className="p-4 sm:p-5">
-                <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:text-[10px] sm:tracking-[0.1em]">
-                  Starting from
-                </p>
-
-                <p className="mt-1 font-poppins text-[24px] font-semibold leading-none text-[#FF6B00] sm:text-[28px]">
-                  {tour.price}
-                </p>
-
-                <div className="mt-4 grid gap-2 sm:mt-5 sm:gap-3">
-                  {[
-                    tour.duration || "Flexible dates",
-                    tour.type || "Custom tour",
-                    "Customizable itinerary",
-                    "Consultant support",
-                  ].map((item) => (
-                    <p
-                      key={item}
-                      className="flex items-center gap-2 font-poppins text-[11.5px] font-semibold text-slate-700 sm:text-sm"
-                    >
-                      <FaCheckCircle className="shrink-0 text-[#00AEEF]" />
-                      {item}
-                    </p>
-                  ))}
-                </div>
-
-                <div className="mt-4 rounded-[5px] bg-[#F8FAFC] p-3.5 sm:mt-5 sm:p-4">
-                  <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-[11px] sm:tracking-[0.1em]">
-                    Important Note
-                  </p>
-
-                  <p className="mt-1.5 font-poppins text-[11px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
-                    This request does not confirm payment. TravelEx will contact
-                    you first to confirm availability, hotel options, itinerary,
-                    and final price.
-                  </p>
-                </div>
-
-                <a
-                  href={getWhatsappLink(tour)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:mt-5 sm:px-6 sm:py-3 sm:text-sm"
-                >
-                  <FaWhatsapp />
-                  Ask on WhatsApp
-                </a>
-              </div>
-            </div>
+          <aside className="h-fit rounded-[5px] border border-slate-100 bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
+            <h3 className="font-fredoka text-[24px] font-semibold text-slate-950">
+              Need quick guidance?
+            </h3>
+            <p className="mt-2 font-poppins text-sm font-medium leading-7 text-slate-600">
+              Submit the form or continue on WhatsApp. TravelEx will confirm the
+              final tour plan and quote.
+            </p>
+            <a
+              href={getWhatsappLink(tour)}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-3 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
+            >
+              <FaWhatsapp />
+              WhatsApp TravelEx
+            </a>
           </aside>
         </div>
       </section>
