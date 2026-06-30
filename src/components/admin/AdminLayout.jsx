@@ -456,10 +456,6 @@ const AdminLayout = () => {
                 <p className="truncate font-fredoka text-lg font-semibold text-slate-950 sm:text-2xl">
                   Admin Dashboard
                 </p>
-
-                <p className="mt-0.5 hidden text-xs font-medium text-slate-500 sm:block">
-                  Manage TravelEx leads, inquiries and CRM activity.
-                </p>
               </div>
             </div>
 
@@ -476,14 +472,10 @@ const AdminLayout = () => {
               </button>
 
               <div className="hidden text-right sm:block">
-                <p className="text-sm font-semibold text-slate-900">
-                  {admin?.name || "Admin"}
-                </p>
-
-                <p className="text-xs font-medium text-slate-500">
-                  {admin?.email || "TravelEx Admin"}
-                </p>
-              </div>
+  <p className="text-sm font-semibold text-slate-900">
+    {admin?.name || "Admin"}
+  </p>
+</div>
             </div>
           </div>
         </header>
