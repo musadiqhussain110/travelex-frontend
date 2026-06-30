@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+@custom-variant hover (&:hover);
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 90px;
