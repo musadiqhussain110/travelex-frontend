@@ -1,6 +1,4 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/v1"
-
+import { API_BASE_URL } from "../config/apiConfig"
 const ADMIN_TOKEN_KEY = "travelex_admin_token"
 const ADMIN_USER_KEY = "travelex_admin"
 
