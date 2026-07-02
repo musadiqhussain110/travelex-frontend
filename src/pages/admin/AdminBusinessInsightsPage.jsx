@@ -4,13 +4,18 @@ import {
   FaArrowDown,
   FaArrowRight,
   FaArrowUp,
+  FaAward,
   FaCalendarAlt,
   FaChartLine,
   FaCheckCircle,
   FaClock,
   FaExclamationTriangle,
   FaFilter,
+  FaGlobeAsia,
   FaPhoneAlt,
+  FaPlane,
+  FaRocket,
+  FaShieldAlt,
   FaSyncAlt,
   FaTable,
   FaTimesCircle,
@@ -22,11 +27,11 @@ import { adminApi } from "../../services/api"
 import { useAdminAuth } from "../../context/AdminAuthContext"
 
 const rangeOptions = [
-  { label: "7D", value: 7 },
-  { label: "15D", value: 15 },
-  { label: "30D", value: 30 },
-  { label: "60D", value: 60 },
-  { label: "90D", value: 90 },
+  { label: "7 Days", value: 7 },
+  { label: "15 Days", value: 15 },
+  { label: "30 Days", value: 30 },
+  { label: "60 Days", value: 60 },
+  { label: "90 Days", value: 90 },
 ]
 
 const serviceBadgeClass = {
@@ -84,82 +89,117 @@ const getChangeTone = (value, reverse = false) => {
   return number > 0 ? "positive" : "negative"
 }
 
-const getFollowUpHealthTone = (rate) => {
-  if (rate >= 50) return "red"
-  if (rate >= 25) return "orange"
-  return "green"
-}
-
-const getRangeLabel = (days) => {
-  return `${days} days`
-}
-
 const getShortDateLabel = (date) => {
   if (!date) return "-"
-  const parsed = new Date(date)
-  return parsed.toLocaleDateString(undefined, {
+
+  return new Date(date).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
   })
 }
 
-const groupTimelineData = (timeline = [], maxBuckets = 10) => {
-  if (!timeline.length) return []
+const getBusinessGrade = (summary = {}) => {
+  const conversionRate = Number(summary.conversionRate || 0)
+  const noFollowUpRate = Number(summary.noFollowUpRate || 0)
+  const overdueFollowUps = Number(summary.overdueFollowUps || 0)
 
-  if (timeline.length <= maxBuckets) {
-    return timeline.map((item) => ({
-      label: getShortDateLabel(item.date),
-      totalLeads: Number(item.totalLeads || 0),
-      convertedLeads: Number(item.convertedLeads || 0),
-      lostLeads: Number(item.lostLeads || 0),
-      noFollowUpLeads: Number(item.noFollowUpLeads || 0),
-      conversionRate: Number(item.conversionRate || 0),
-    }))
+  if (conversionRate >= 35 && noFollowUpRate <= 15 && overdueFollowUps === 0) {
+    return {
+      label: "Excellent",
+      title: "Business flow is healthy",
+      description:
+        "Conversions are strong and follow-up discipline is under control.",
+      className: "bg-emerald-50 text-emerald-700",
+      icon: <FaAward />,
+    }
   }
 
-  const bucketSize = Math.ceil(timeline.length / maxBuckets)
-  const buckets = []
+  if (conversionRate >= 20 && noFollowUpRate <= 35) {
+    return {
+      label: "Stable",
+      title: "Performance is stable",
+      description:
+        "The business is moving, but follow-up improvement can increase conversion.",
+      className: "bg-sky-50 text-[#00AEEF]",
+      icon: <FaShieldAlt />,
+    }
+  }
 
-  for (let index = 0; index < timeline.length; index += bucketSize) {
-    const chunk = timeline.slice(index, index + bucketSize)
-    const first = chunk[0]
-    const last = chunk[chunk.length - 1]
+  if (overdueFollowUps > 0 || noFollowUpRate > 35) {
+    return {
+      label: "Needs Attention",
+      title: "Follow-up risk is affecting growth",
+      description:
+        "A high number of leads need follow-up action before they become cold.",
+      className: "bg-orange-50 text-[#FF6B00]",
+      icon: <FaExclamationTriangle />,
+    }
+  }
 
-    const totalLeads = chunk.reduce(
-      (sum, item) => sum + Number(item.totalLeads || 0),
-      0
-    )
-    const convertedLeads = chunk.reduce(
-      (sum, item) => sum + Number(item.convertedLeads || 0),
-      0
-    )
-    const lostLeads = chunk.reduce(
-      (sum, item) => sum + Number(item.lostLeads || 0),
-      0
-    )
-    const noFollowUpLeads = chunk.reduce(
-      (sum, item) => sum + Number(item.noFollowUpLeads || 0),
-      0
-    )
+  return {
+    label: "Developing",
+    title: "Business activity is building",
+    description:
+      "More qualified leads and timely follow-ups are needed to improve conversion.",
+    className: "bg-slate-100 text-slate-700",
+    icon: <FaRocket />,
+  }
+}
 
-    buckets.push({
-      label:
-        first?.date === last?.date
-          ? getShortDateLabel(first?.date)
-          : `${getShortDateLabel(first?.date)} - ${getShortDateLabel(
-              last?.date
-            )}`,
-      totalLeads,
-      convertedLeads,
-      lostLeads,
-      noFollowUpLeads,
-      conversionRate: totalLeads
-        ? Number(((convertedLeads / totalLeads) * 100).toFixed(1))
-        : 0,
+const getInsightRecommendations = ({
+  summary = {},
+  highlights = {},
+  servicePerformance = [],
+}) => {
+  const recommendations = []
+
+  if (Number(summary.overdueFollowUps || 0) > 0) {
+    recommendations.push({
+      title: "Clear overdue follow-ups first",
+      description: `${formatNumber(
+        summary.overdueFollowUps
+      )} scheduled follow-ups are overdue. These should be handled before new outreach.`,
+      tone: "red",
+      link: "/admin/leads?followUp=overdue",
     })
   }
 
-  return buckets
+  if (Number(summary.noFollowUpLeads || 0) > 0) {
+    recommendations.push({
+      title: "Assign follow-ups to open leads",
+      description: `${formatNumber(
+        summary.noFollowUpLeads
+      )} leads have no follow-up plan. Assigning dates can improve team accountability.`,
+      tone: "orange",
+      link: "/admin/leads?followUp=none",
+    })
+  }
+
+  if (highlights.bestServiceByConversions?.serviceLabel) {
+    recommendations.push({
+      title: `Scale ${highlights.bestServiceByConversions.serviceLabel}`,
+      description: `${highlights.bestServiceByConversions.serviceLabel} is bringing the most conversions in this period. Give it more visibility in campaigns.`,
+      tone: "blue",
+      link: getServicePath(highlights.bestServiceByConversions.serviceType),
+    })
+  }
+
+  const weakConversionService = [...servicePerformance]
+    .filter((item) => Number(item.totalLeads || 0) >= 1)
+    .sort(
+      (a, b) => Number(a.conversionRate || 0) - Number(b.conversionRate || 0)
+    )[0]
+
+  if (weakConversionService?.serviceLabel) {
+    recommendations.push({
+      title: `Review ${weakConversionService.serviceLabel} funnel`,
+      description: `${weakConversionService.serviceLabel} has a low conversion rate. Check pricing, response quality, and follow-up speed.`,
+      tone: "slate",
+      link: getServicePath(weakConversionService.serviceType),
+    })
+  }
+
+  return recommendations.slice(0, 4)
 }
 
 const ChangePill = ({ value, reverse = false }) => {
@@ -185,52 +225,18 @@ const ChangePill = ({ value, reverse = false }) => {
   )
 }
 
-const HeroMetric = ({ label, value, subText, tone = "orange", change, reverse }) => {
-  const toneClass = {
-    orange: "bg-orange-50 text-[#FF6B00]",
-    blue: "bg-sky-50 text-[#00AEEF]",
-    green: "bg-emerald-50 text-emerald-700",
-    red: "bg-red-50 text-red-700",
-    slate: "bg-slate-100 text-slate-700",
-  }
-
-  return (
-    <div className="rounded-[5px] border border-white/20 bg-white p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-          {label}
-        </p>
-
-        {change !== undefined && <ChangePill value={change} reverse={reverse} />}
-      </div>
-
-      <p className="mt-2 font-fredoka text-[36px] font-semibold leading-none text-slate-950">
-        {value}
-      </p>
-
-      <p
-        className={`mt-3 inline-flex rounded-[5px] px-2 py-1 font-poppins text-xs font-bold ${
-          toneClass[tone] || toneClass.orange
-        }`}
-      >
-        {subText}
-      </p>
-    </div>
-  )
-}
-
-const MetricCard = ({
-  icon,
+const ExecutiveMetric = ({
   label,
   value,
-  subText,
-  tone = "blue",
+  description,
+  icon,
+  tone = "orange",
   change,
   reverseChange = false,
 }) => {
   const toneClass = {
-    blue: "bg-sky-50 text-[#00AEEF]",
     orange: "bg-orange-50 text-[#FF6B00]",
+    blue: "bg-sky-50 text-[#00AEEF]",
     green: "bg-emerald-50 text-emerald-700",
     red: "bg-red-50 text-red-700",
     slate: "bg-slate-100 text-slate-700",
@@ -242,7 +248,7 @@ const MetricCard = ({
       <div className="flex items-start justify-between gap-3">
         <div
           className={`flex h-11 w-11 items-center justify-center rounded-[5px] ${
-            toneClass[tone] || toneClass.blue
+            toneClass[tone] || toneClass.orange
           }`}
         >
           {icon}
@@ -257,236 +263,549 @@ const MetricCard = ({
         {label}
       </p>
 
-      <p className="mt-1 font-fredoka text-[34px] font-semibold leading-none text-slate-950">
+      <p className="mt-1 font-fredoka text-[38px] font-semibold leading-none text-slate-950">
         {value}
-      </p>
-
-      {subText && (
-        <p className="mt-2 font-poppins text-xs font-semibold leading-5 text-slate-500">
-          {subText}
-        </p>
-      )}
-    </div>
-  )
-}
-
-const AttentionCard = ({ title, value, description, tone = "orange", link }) => {
-  const toneClass = {
-    orange: "bg-orange-50 text-[#FF6B00]",
-    blue: "bg-sky-50 text-[#00AEEF]",
-    green: "bg-emerald-50 text-emerald-700",
-    red: "bg-red-50 text-red-700",
-  }
-
-  return (
-    <div className="rounded-[5px] border border-slate-100 bg-white p-5 shadow-sm">
-      <p
-        className={`inline-flex rounded-[5px] px-2.5 py-1 font-poppins text-[10px] font-bold uppercase tracking-[0.08em] ${
-          toneClass[tone] || toneClass.orange
-        }`}
-      >
-        {title}
-      </p>
-
-      <p className="mt-3 font-fredoka text-[30px] font-semibold leading-none text-slate-950">
-        {value || "-"}
       </p>
 
       <p className="mt-2 font-poppins text-xs font-semibold leading-5 text-slate-500">
         {description}
       </p>
-
-      {link && (
-        <Link
-          to={link}
-          className="mt-4 inline-flex items-center gap-2 font-poppins text-xs font-bold text-[#FF6B00] transition hover:text-[#00AEEF]"
-        >
-          View related leads
-          <FaArrowRight className="text-[10px]" />
-        </Link>
-      )}
     </div>
   )
 }
 
-const TimelineSummary = ({ timeline = [] }) => {
-  const buckets = groupTimelineData(timeline, 10)
-  const maxLeads = Math.max(
-    ...buckets.map((item) => Number(item.totalLeads || 0)),
-    1
+const BusinessGradePanel = ({ grade, summary }) => {
+  return (
+    <div className="rounded-[5px] border border-slate-800 bg-slate-950 p-5 text-white shadow-sm">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.12em] text-[#00AEEF]">
+            Executive Health Status
+          </p>
+
+          <h2 className="mt-2 font-fredoka text-[34px] font-semibold leading-tight">
+            {grade.title}
+          </h2>
+
+          <p className="mt-2 max-w-xl font-poppins text-sm font-medium leading-6 text-slate-300">
+            {grade.description}
+          </p>
+        </div>
+
+        <div
+          className={`hidden h-14 w-14 shrink-0 items-center justify-center rounded-[5px] text-xl sm:flex ${grade.className}`}
+        >
+          {grade.icon}
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-3">
+        <div className="rounded-[5px] bg-white/5 p-4">
+          <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+            Health Grade
+          </p>
+
+          <p className="mt-1 font-fredoka text-[28px] font-semibold text-white">
+            {grade.label}
+          </p>
+        </div>
+
+        <div className="rounded-[5px] bg-white/5 p-4">
+          <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+            Conversion
+          </p>
+
+          <p className="mt-1 font-fredoka text-[28px] font-semibold text-[#FF6B00]">
+            {formatPercent(summary.conversionRate)}
+          </p>
+        </div>
+
+        <div className="rounded-[5px] bg-white/5 p-4">
+          <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+            Follow-up Gap
+          </p>
+
+          <p className="mt-1 font-fredoka text-[28px] font-semibold text-[#00AEEF]">
+            {formatPercent(summary.noFollowUpRate)}
+          </p>
+        </div>
+      </div>
+    </div>
   )
+}
 
-  const activeBuckets = buckets.filter((item) => item.totalLeads > 0)
-  const hasData = activeBuckets.length > 0
+const FunnelStep = ({ label, value, percent, tone = "blue" }) => {
+  const toneClass = {
+    blue: "from-[#00AEEF] to-sky-300",
+    orange: "from-[#FF6B00] to-orange-300",
+    green: "from-emerald-600 to-emerald-300",
+    red: "from-red-600 to-red-300",
+    slate: "from-slate-900 to-slate-500",
+  }
 
-  if (!hasData) {
-    return (
-      <div className="rounded-[5px] border border-slate-100 bg-[#F8FAFC] p-8 text-center">
-        <FaChartLine className="mx-auto text-2xl text-slate-300" />
+  return (
+    <div className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-poppins text-xs font-bold text-slate-500">
+          {label}
+        </p>
 
-        <p className="mt-3 font-poppins text-sm font-semibold text-slate-500">
-          No timeline data available for this range.
+        <p className="font-poppins text-xs font-bold text-slate-400">
+          {formatPercent(percent)}
         </p>
       </div>
-    )
-  }
 
-  return (
-    <div className="grid gap-3">
-      {buckets.map((item) => {
-        const totalWidth = Math.max(
-          (Number(item.totalLeads || 0) / maxLeads) * 100,
-          item.totalLeads ? 8 : 0
-        )
-        const convertedWidth = item.totalLeads
-          ? Math.max((Number(item.convertedLeads || 0) / item.totalLeads) * 100, 0)
-          : 0
+      <p className="mt-2 font-fredoka text-[30px] font-semibold leading-none text-slate-950">
+        {formatNumber(value)}
+      </p>
 
-        return (
-          <div
-            key={item.label}
-            className="rounded-[5px] border border-slate-100 bg-white p-3"
-          >
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-[140px]">
-                <p className="font-poppins text-xs font-bold text-slate-700">
-                  {item.label}
-                </p>
-
-                <p className="font-poppins text-[11px] font-semibold text-slate-400">
-                  {formatPercent(item.conversionRate)} conversion
-                </p>
-              </div>
-
-              <div className="flex-1">
-                <div className="h-9 overflow-hidden rounded-[5px] bg-[#F8FAFC]">
-                  <div
-                    className="relative h-full rounded-[5px] bg-sky-100"
-                    style={{ width: `${totalWidth}%` }}
-                  >
-                    <div
-                      className="absolute left-0 top-0 h-full rounded-[5px] bg-[#FF6B00]"
-                      style={{ width: `${convertedWidth}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex min-w-[180px] justify-between gap-3 font-poppins text-xs font-bold">
-                <span className="text-[#00AEEF]">
-                  {formatNumber(item.totalLeads)} leads
-                </span>
-
-                <span className="text-[#FF6B00]">
-                  {formatNumber(item.convertedLeads)} converted
-                </span>
-              </div>
-            </div>
-          </div>
-        )
-      })}
-
-      <div className="flex flex-wrap gap-3 rounded-[5px] bg-[#F8FAFC] px-4 py-3">
-        <span className="inline-flex items-center gap-2 font-poppins text-xs font-bold text-slate-500">
-          <span className="h-3 w-3 rounded-[3px] bg-sky-100" />
-          Total leads
-        </span>
-
-        <span className="inline-flex items-center gap-2 font-poppins text-xs font-bold text-slate-500">
-          <span className="h-3 w-3 rounded-[3px] bg-[#FF6B00]" />
-          Converted inside total
-        </span>
+      <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+        <div
+          className={`h-full rounded-full bg-gradient-to-r ${
+            toneClass[tone] || toneClass.blue
+          }`}
+          style={{ width: `${Math.min(Number(percent || 0), 100)}%` }}
+        />
       </div>
     </div>
   )
 }
 
-const ServicePerformanceCard = ({ item }) => {
-  const followUpTone = getFollowUpHealthTone(item.noFollowUpRate)
+const LeadFunnel = ({ summary }) => {
+  const total = Number(summary.totalLeads || 0)
+  const activeOpportunities = Math.max(
+    total - Number(summary.convertedLeads || 0) - Number(summary.lostLeads || 0),
+    0
+  )
 
-  const followUpClass = {
-    green: "bg-emerald-50 text-emerald-700",
-    orange: "bg-orange-50 text-[#FF6B00]",
-    red: "bg-red-50 text-red-700",
-  }
+  const steps = [
+    {
+      label: "Total Leads",
+      value: summary.totalLeads,
+      percent: 100,
+      tone: "blue",
+    },
+    {
+      label: "Active Opportunities",
+      value: activeOpportunities,
+      percent: total ? (activeOpportunities / total) * 100 : 0,
+      tone: "orange",
+    },
+    {
+      label: "Interested",
+      value: summary.interestedLeads,
+      percent: total ? (Number(summary.interestedLeads || 0) / total) * 100 : 0,
+      tone: "slate",
+    },
+    {
+      label: "Converted",
+      value: summary.convertedLeads,
+      percent: total ? (Number(summary.convertedLeads || 0) / total) * 100 : 0,
+      tone: "green",
+    },
+    {
+      label: "Lost / Cancelled",
+      value: summary.lostLeads,
+      percent: total ? (Number(summary.lostLeads || 0) / total) * 100 : 0,
+      tone: "red",
+    },
+  ]
 
   return (
-    <article className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-sm">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+    <section className="rounded-[5px] border border-slate-100 bg-white p-5 shadow-sm">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <Link
-            to={getServicePath(item.serviceType)}
-            className={`inline-flex rounded-[5px] px-2.5 py-1 font-poppins text-[10px] font-bold uppercase ${getServiceBadgeClass(
-              item.serviceType
-            )}`}
-          >
-            {item.serviceLabel || item.serviceType || "General"}
-          </Link>
+          <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-[#00AEEF]">
+            Sales Funnel
+          </p>
 
-          <h3 className="mt-3 font-fredoka text-[30px] font-semibold leading-none text-slate-950">
-            {formatPercent(item.conversionRate)}
-          </h3>
+          <h2 className="mt-1 font-fredoka text-[32px] font-semibold leading-tight text-slate-950">
+            Lead Conversion Flow
+          </h2>
 
-          <p className="mt-1 font-poppins text-xs font-semibold text-slate-500">
-            Conversion rate
+          <p className="mt-1 font-poppins text-sm font-medium leading-6 text-slate-500">
+            See how leads are moving from inquiry to conversion.
           </p>
         </div>
 
         <Link
-          to={getServicePath(item.serviceType)}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-[5px] bg-slate-950 text-white transition hover:bg-[#FF6B00]"
-          title="View leads"
+          to="/admin/leads"
+          className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-slate-950 px-4 py-2.5 font-poppins text-sm font-semibold text-white transition hover:bg-[#FF6B00]"
         >
+          Open Leads
           <FaArrowRight className="text-xs" />
         </Link>
       </div>
 
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-[#00AEEF] to-[#FF6B00]"
-          style={{
-            width: `${Math.min(Number(item.conversionRate || 0), 100)}%`,
-          }}
-        />
+      <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+        {steps.map((step) => (
+          <FunnelStep key={step.label} {...step} />
+        ))}
       </div>
+    </section>
+  )
+}
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <div className="rounded-[5px] bg-[#F8FAFC] p-3">
-          <p className="font-poppins text-[10px] font-bold uppercase text-slate-400">
-            Leads
-          </p>
-          <p className="font-fredoka text-[24px] font-semibold text-slate-950">
-            {formatNumber(item.totalLeads)}
-          </p>
-        </div>
+const ServiceLeaderboard = ({ servicePerformance = [] }) => {
+  const leaderboard = [...servicePerformance]
+    .sort(
+      (a, b) =>
+        Number(b.convertedLeads || 0) - Number(a.convertedLeads || 0) ||
+        Number(b.conversionRate || 0) - Number(a.conversionRate || 0)
+    )
+    .slice(0, 6)
 
-        <div className="rounded-[5px] bg-emerald-50 p-3">
-          <p className="font-poppins text-[10px] font-bold uppercase text-emerald-600">
-            Converted
+  return (
+    <section className="rounded-[5px] border border-slate-100 bg-white p-5 shadow-sm">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-[#FF6B00]">
+            Service Leaderboard
           </p>
-          <p className="font-fredoka text-[24px] font-semibold text-emerald-700">
-            {formatNumber(item.convertedLeads)}
-          </p>
-        </div>
 
-        <div className="rounded-[5px] bg-red-50 p-3">
-          <p className="font-poppins text-[10px] font-bold uppercase text-red-500">
-            Lost
-          </p>
-          <p className="font-fredoka text-[24px] font-semibold text-red-700">
-            {formatNumber(item.lostLeads)}
-          </p>
-        </div>
+          <h2 className="mt-1 font-fredoka text-[32px] font-semibold leading-tight text-slate-950">
+            Services Driving Business
+          </h2>
 
-        <div className={`rounded-[5px] p-3 ${followUpClass[followUpTone]}`}>
-          <p className="font-poppins text-[10px] font-bold uppercase">
-            No Follow-up
-          </p>
-          <p className="font-fredoka text-[24px] font-semibold">
-            {formatNumber(item.noFollowUpLeads)}
+          <p className="mt-1 font-poppins text-sm font-medium leading-6 text-slate-500">
+            Ranking by conversions, service demand, and follow-up quality.
           </p>
         </div>
       </div>
+
+      <div className="mt-5 grid gap-3">
+        {leaderboard.length === 0 ? (
+          <div className="rounded-[5px] bg-[#F8FAFC] p-8 text-center">
+            <FaTable className="mx-auto text-2xl text-slate-300" />
+
+            <p className="mt-3 font-poppins text-sm font-semibold text-slate-500">
+              No service performance data available.
+            </p>
+          </div>
+        ) : (
+          leaderboard.map((item, index) => {
+            const noFollowUpRate = Number(item.noFollowUpRate || 0)
+
+            return (
+              <article
+                key={item.serviceType || index}
+                className="rounded-[5px] border border-slate-100 bg-[#F8FAFC] p-4 transition hover:border-[#00AEEF] hover:bg-white"
+              >
+                <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr_1fr] xl:items-center">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`flex h-11 w-11 items-center justify-center rounded-[5px] font-fredoka text-xl font-semibold ${
+                        index === 0
+                          ? "bg-[#FF6B00] text-white"
+                          : index === 1
+                            ? "bg-[#00AEEF] text-white"
+                            : "bg-slate-950 text-white"
+                      }`}
+                    >
+                      #{index + 1}
+                    </div>
+
+                    <div>
+                      <Link
+                        to={getServicePath(item.serviceType)}
+                        className={`inline-flex rounded-[5px] px-2.5 py-1 font-poppins text-[10px] font-bold uppercase ${getServiceBadgeClass(
+                          item.serviceType
+                        )}`}
+                      >
+                        {item.serviceLabel || item.serviceType || "General"}
+                      </Link>
+
+                      <p className="mt-1 font-poppins text-xs font-semibold text-slate-500">
+                        {formatNumber(item.totalLeads)} leads received
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-poppins text-xs font-bold text-slate-500">
+                        Conversion strength
+                      </p>
+
+                      <p className="font-poppins text-xs font-bold text-slate-950">
+                        {formatPercent(item.conversionRate)}
+                      </p>
+                    </div>
+
+                    <div className="mt-2 h-3 overflow-hidden rounded-full bg-white">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-[#00AEEF] to-[#FF6B00]"
+                        style={{
+                          width: `${Math.min(
+                            Number(item.conversionRate || 0),
+                            100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="rounded-[5px] bg-white p-3">
+                      <p className="font-poppins text-[10px] font-bold uppercase text-slate-400">
+                        Converted
+                      </p>
+
+                      <p className="font-fredoka text-[24px] font-semibold text-emerald-700">
+                        {formatNumber(item.convertedLeads)}
+                      </p>
+                    </div>
+
+                    <div className="rounded-[5px] bg-white p-3">
+                      <p className="font-poppins text-[10px] font-bold uppercase text-slate-400">
+                        Lost
+                      </p>
+
+                      <p className="font-fredoka text-[24px] font-semibold text-red-700">
+                        {formatNumber(item.lostLeads)}
+                      </p>
+                    </div>
+
+                    <div
+                      className={`rounded-[5px] p-3 ${
+                        noFollowUpRate >= 35
+                          ? "bg-red-50"
+                          : noFollowUpRate >= 15
+                            ? "bg-orange-50"
+                            : "bg-emerald-50"
+                      }`}
+                    >
+                      <p className="font-poppins text-[10px] font-bold uppercase text-slate-500">
+                        No Follow-up
+                      </p>
+
+                      <p className="font-fredoka text-[24px] font-semibold text-slate-950">
+                        {formatNumber(item.noFollowUpLeads)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            )
+          })
+        )}
+      </div>
+    </section>
+  )
+}
+
+const TimelineComparison = ({ comparison = {}, days }) => {
+  const current = comparison.current || {}
+  const previous = comparison.previous || {}
+  const changes = comparison.changes || {}
+
+  const items = [
+    {
+      label: "Lead Volume",
+      current: formatNumber(current.totalLeads),
+      previous: formatNumber(previous.totalLeads),
+      change: changes.totalLeadsChange,
+      reverse: false,
+    },
+    {
+      label: "Conversions",
+      current: formatNumber(current.convertedLeads),
+      previous: formatNumber(previous.convertedLeads),
+      change: changes.convertedLeadsChange,
+      reverse: false,
+    },
+    {
+      label: "Conversion Rate",
+      current: formatPercent(current.conversionRate),
+      previous: formatPercent(previous.conversionRate),
+      change: changes.conversionRateChange,
+      reverse: false,
+    },
+    {
+      label: "No Follow-up",
+      current: formatNumber(current.noFollowUpLeads),
+      previous: formatNumber(previous.noFollowUpLeads),
+      change: changes.noFollowUpLeadsChange,
+      reverse: true,
+    },
+  ]
+
+  return (
+    <section className="rounded-[5px] border border-slate-100 bg-white p-5 shadow-sm">
+      <div>
+        <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-[#00AEEF]">
+          Period Comparison
+        </p>
+
+        <h2 className="mt-1 font-fredoka text-[32px] font-semibold leading-tight text-slate-950">
+          Current {days} Days vs Previous {days} Days
+        </h2>
+
+        <p className="mt-1 font-poppins text-sm font-medium leading-6 text-slate-500">
+          Focus on whether the business is improving, slowing down, or creating
+          more follow-up risk.
+        </p>
+      </div>
+
+      <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {items.map((item) => (
+          <div key={item.label} className="rounded-[5px] bg-[#F8FAFC] p-4">
+            <div className="flex items-start justify-between gap-2">
+              <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                {item.label}
+              </p>
+
+              <ChangePill value={item.change} reverse={item.reverse} />
+            </div>
+
+            <p className="mt-3 font-fredoka text-[30px] font-semibold leading-none text-slate-950">
+              {item.current}
+            </p>
+
+            <p className="mt-2 font-poppins text-xs font-semibold text-slate-500">
+              Previous: {item.previous}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+const TimelinePulse = ({ timeline = [] }) => {
+  const activeTimeline = timeline.filter((item) => Number(item.totalLeads || 0) > 0)
+  const recent = activeTimeline.slice(-8)
+
+  if (!recent.length) {
+    return (
+      <section className="rounded-[5px] border border-slate-100 bg-white p-5 shadow-sm">
+        <h2 className="font-fredoka text-[30px] font-semibold text-slate-950">
+          Timeline Pulse
+        </h2>
+
+        <div className="mt-4 rounded-[5px] bg-[#F8FAFC] p-8 text-center">
+          <FaChartLine className="mx-auto text-2xl text-slate-300" />
+
+          <p className="mt-3 font-poppins text-sm font-semibold text-slate-500">
+            No lead movement available for this range.
+          </p>
+        </div>
+      </section>
+    )
+  }
+
+  const maxLeads = Math.max(
+    ...recent.map((item) => Number(item.totalLeads || 0)),
+    1
+  )
+
+  return (
+    <section className="rounded-[5px] border border-slate-100 bg-white p-5 shadow-sm">
+      <div>
+        <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-[#FF6B00]">
+          Timeline Pulse
+        </p>
+
+        <h2 className="mt-1 font-fredoka text-[32px] font-semibold leading-tight text-slate-950">
+          Recent Business Movement
+        </h2>
+
+        <p className="mt-1 font-poppins text-sm font-medium leading-6 text-slate-500">
+          Recent active days only, so the section stays useful instead of showing
+          a flat empty graph.
+        </p>
+      </div>
+
+      <div className="mt-5 grid gap-3">
+        {recent.map((item) => {
+          const totalLeads = Number(item.totalLeads || 0)
+          const convertedLeads = Number(item.convertedLeads || 0)
+          const totalWidth = Math.max((totalLeads / maxLeads) * 100, 8)
+          const convertedWidth = totalLeads
+            ? Math.max((convertedLeads / totalLeads) * 100, 0)
+            : 0
+
+          return (
+            <div key={item.date} className="rounded-[5px] bg-[#F8FAFC] p-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="min-w-[100px]">
+                  <p className="font-poppins text-xs font-bold text-slate-700">
+                    {getShortDateLabel(item.date)}
+                  </p>
+
+                  <p className="font-poppins text-[11px] font-semibold text-slate-400">
+                    {formatPercent(item.conversionRate)}
+                  </p>
+                </div>
+
+                <div className="flex-1">
+                  <div className="h-9 overflow-hidden rounded-[5px] bg-white">
+                    <div
+                      className="relative h-full rounded-[5px] bg-sky-100"
+                      style={{ width: `${totalWidth}%` }}
+                    >
+                      <div
+                        className="absolute left-0 top-0 h-full rounded-[5px] bg-[#FF6B00]"
+                        style={{ width: `${convertedWidth}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex min-w-[180px] justify-between gap-3 font-poppins text-xs font-bold">
+                  <span className="text-[#00AEEF]">
+                    {formatNumber(totalLeads)} leads
+                  </span>
+
+                  <span className="text-[#FF6B00]">
+                    {formatNumber(convertedLeads)} converted
+                  </span>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+const RecommendationCard = ({ item }) => {
+  const toneClass = {
+    red: "bg-red-50 text-red-700",
+    orange: "bg-orange-50 text-[#FF6B00]",
+    blue: "bg-sky-50 text-[#00AEEF]",
+    green: "bg-emerald-50 text-emerald-700",
+    slate: "bg-slate-100 text-slate-700",
+  }
+
+  return (
+    <article className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-sm">
+      <span
+        className={`inline-flex rounded-[5px] px-2.5 py-1 font-poppins text-[10px] font-bold uppercase tracking-[0.08em] ${
+          toneClass[item.tone] || toneClass.slate
+        }`}
+      >
+        Action Insight
+      </span>
+
+      <h3 className="mt-3 font-fredoka text-[24px] font-semibold leading-tight text-slate-950">
+        {item.title}
+      </h3>
+
+      <p className="mt-2 font-poppins text-xs font-semibold leading-5 text-slate-500">
+        {item.description}
+      </p>
+
+      {item.link && (
+        <Link
+          to={item.link}
+          className="mt-4 inline-flex items-center gap-2 font-poppins text-xs font-bold text-[#FF6B00] transition hover:text-[#00AEEF]"
+        >
+          Take action
+          <FaArrowRight className="text-[10px]" />
+        </Link>
+      )}
     </article>
   )
 }
@@ -560,13 +879,137 @@ const MiniLeadList = ({ title, icon, leads = [], emptyText, type = "normal" }) =
                   <span>Follow-up: {formatDate(lead.followUpDate)}</span>
                 )}
 
-                {lead.createdAt && <span>Created: {formatDate(lead.createdAt)}</span>}
+                {lead.createdAt && (
+                  <span>Created: {formatDate(lead.createdAt)}</span>
+                )}
               </div>
             </Link>
           ))
         )}
       </div>
     </div>
+  )
+}
+
+const ServiceHealthTable = ({ servicePerformance = [] }) => {
+  return (
+    <section className="rounded-[5px] border border-slate-100 bg-white shadow-sm">
+      <div className="border-b border-slate-100 p-5">
+        <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-[#00AEEF]">
+          Service Health
+        </p>
+
+        <h2 className="mt-1 font-fredoka text-[32px] font-semibold leading-tight text-slate-950">
+          Detailed Service Comparison
+        </h2>
+
+        <p className="mt-1 font-poppins text-sm font-medium leading-6 text-slate-500">
+          Use this table to identify which travel services need sales attention.
+        </p>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[980px] border-collapse">
+          <thead className="bg-[#F8FAFC]">
+            <tr>
+              <th className="px-4 py-3 text-left font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                Service
+              </th>
+              <th className="px-4 py-3 text-left font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                Leads
+              </th>
+              <th className="px-4 py-3 text-left font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                Converted
+              </th>
+              <th className="px-4 py-3 text-left font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                Conversion Rate
+              </th>
+              <th className="px-4 py-3 text-left font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                Lost
+              </th>
+              <th className="px-4 py-3 text-left font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                Scheduled
+              </th>
+              <th className="px-4 py-3 text-left font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                No Follow-up
+              </th>
+              <th className="px-4 py-3 text-right font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                Action
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {servicePerformance.map((item) => (
+              <tr
+                key={item.serviceType}
+                className="border-t border-slate-100 transition hover:bg-[#F8FAFC]"
+              >
+                <td className="px-4 py-4">
+                  <span
+                    className={`rounded-[5px] px-2.5 py-1 font-poppins text-[10px] font-bold uppercase ${getServiceBadgeClass(
+                      item.serviceType
+                    )}`}
+                  >
+                    {item.serviceLabel}
+                  </span>
+                </td>
+
+                <td className="px-4 py-4 font-poppins text-sm font-bold text-slate-700">
+                  {formatNumber(item.totalLeads)}
+                </td>
+
+                <td className="px-4 py-4 font-poppins text-sm font-bold text-emerald-700">
+                  {formatNumber(item.convertedLeads)}
+                </td>
+
+                <td className="px-4 py-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        className="h-full rounded-full bg-[#FF6B00]"
+                        style={{
+                          width: `${Math.min(
+                            Number(item.conversionRate || 0),
+                            100
+                          )}%`,
+                        }}
+                      />
+                    </div>
+
+                    <span className="font-poppins text-sm font-bold text-slate-700">
+                      {formatPercent(item.conversionRate)}
+                    </span>
+                  </div>
+                </td>
+
+                <td className="px-4 py-4 font-poppins text-sm font-bold text-red-700">
+                  {formatNumber(item.lostLeads)}
+                </td>
+
+                <td className="px-4 py-4 font-poppins text-sm font-bold text-[#00AEEF]">
+                  {formatNumber(item.scheduledFollowUps)}
+                </td>
+
+                <td className="px-4 py-4 font-poppins text-sm font-bold text-[#FF6B00]">
+                  {formatNumber(item.noFollowUpLeads)}
+                </td>
+
+                <td className="px-4 py-4 text-right">
+                  <Link
+                    to={getServicePath(item.serviceType)}
+                    className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-slate-950 px-3 py-2 font-poppins text-xs font-bold text-white transition hover:bg-[#FF6B00]"
+                  >
+                    View Leads
+                    <FaArrowRight className="text-[10px]" />
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   )
 }
 
@@ -591,42 +1034,24 @@ const AdminBusinessInsightsPage = () => {
   const followUps = insights?.followUps || {}
   const recentConvertedLeads = insights?.recentConvertedLeads || []
 
-  const topServices = useMemo(() => {
-    return [...servicePerformance]
-      .sort(
-        (a, b) =>
-          Number(b.convertedLeads || 0) - Number(a.convertedLeads || 0)
-      )
-      .slice(0, 6)
-  }, [servicePerformance])
+  const activeOpportunities = Math.max(
+    Number(summary.totalLeads || 0) -
+      Number(summary.convertedLeads || 0) -
+      Number(summary.lostLeads || 0),
+    0
+  )
 
-  const focusMessage = useMemo(() => {
-    if (summary.overdueFollowUps > 0) {
-      return {
-        title: "Follow-up risk",
-        message: `${formatNumber(
-          summary.overdueFollowUps
-        )} overdue follow-ups need attention today.`,
-        tone: "red",
-      }
-    }
+  const businessGrade = useMemo(() => {
+    return getBusinessGrade(summary)
+  }, [summary])
 
-    if (summary.noFollowUpLeads > 0) {
-      return {
-        title: "Missing follow-ups",
-        message: `${formatNumber(
-          summary.noFollowUpLeads
-        )} leads still have no follow-up assigned.`,
-        tone: "orange",
-      }
-    }
-
-    return {
-      title: "CRM health looks good",
-      message: "No urgent follow-up gap found in this selected range.",
-      tone: "green",
-    }
-  }, [summary.noFollowUpLeads, summary.overdueFollowUps])
+  const recommendations = useMemo(() => {
+    return getInsightRecommendations({
+      summary,
+      highlights,
+      servicePerformance,
+    })
+  }, [summary, highlights, servicePerformance])
 
   const loadInsights = async (selectedDays = days) => {
     if (!canViewDashboard) {
@@ -653,10 +1078,6 @@ const AdminBusinessInsightsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [days, canViewDashboard])
 
-  const handleRangeChange = (value) => {
-    setDays(value)
-  }
-
   if (!canViewDashboard) {
     return (
       <div className="rounded-[5px] border border-red-100 bg-red-50 p-8 text-center">
@@ -678,137 +1099,152 @@ const AdminBusinessInsightsPage = () => {
   return (
     <div className="grid gap-5">
       <section className="overflow-hidden rounded-[5px] border border-slate-100 bg-white shadow-sm">
-        <div className="grid gap-5 p-5 xl:grid-cols-[1.1fr_0.9fr]">
-          <div>
-            <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-[#00AEEF] sm:text-xs">
-              Business Analytics
-            </p>
+        <div className="relative overflow-hidden bg-slate-950 p-5 text-white sm:p-6">
+          <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[#00AEEF]/20 blur-3xl" />
+          <div className="absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-[#FF6B00]/20 blur-3xl" />
 
-            <h1 className="mt-1 font-fredoka text-[34px] font-semibold leading-tight text-slate-950 sm:text-[44px]">
-              Business Insights
-            </h1>
+          <div className="relative z-10 grid gap-6 xl:grid-cols-[1.1fr_0.9fr] xl:items-end">
+            <div>
+              <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.14em] text-[#00AEEF] sm:text-xs">
+                TravelEx Business Intelligence
+              </p>
 
-            <p className="mt-2 max-w-3xl font-poppins text-sm font-medium leading-6 text-slate-500">
-              A clear view of conversion rate, follow-up gaps, and service-wise
-              CRM performance for TravelEx leads.
-            </p>
+              <h1 className="mt-2 max-w-4xl font-fredoka text-[38px] font-semibold leading-[0.95] text-white sm:text-[52px]">
+                Executive Business Insights
+              </h1>
 
-            <div className="mt-5 flex flex-wrap gap-2">
-              {rangeOptions.map((item) => (
+              <p className="mt-4 max-w-3xl font-poppins text-sm font-medium leading-7 text-slate-300">
+                A decision-focused view of lead conversion, service growth,
+                follow-up discipline, and travel business performance.
+              </p>
+
+              <div className="mt-5 flex flex-wrap gap-2">
+                {rangeOptions.map((item) => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => setDays(item.value)}
+                    className={`rounded-[5px] px-4 py-2 font-poppins text-xs font-bold transition ${
+                      days === item.value
+                        ? "bg-[#FF6B00] text-white shadow-[0_12px_28px_rgba(255,107,0,0.28)]"
+                        : "bg-white/10 text-slate-200 hover:bg-white hover:text-slate-950"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+
                 <button
-                  key={item.value}
                   type="button"
-                  onClick={() => handleRangeChange(item.value)}
-                  className={`rounded-[5px] px-4 py-2 font-poppins text-xs font-bold transition ${
-                    days === item.value
-                      ? "bg-[#FF6B00] text-white shadow-[0_12px_24px_rgba(255,107,0,0.18)]"
-                      : "bg-[#F8FAFC] text-slate-600 hover:bg-[#00AEEF] hover:text-white"
-                  }`}
+                  onClick={() => loadInsights(days)}
+                  disabled={loading}
+                  className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-white/10 px-4 py-2 font-poppins text-xs font-bold text-slate-200 transition hover:bg-white hover:text-slate-950 disabled:opacity-50"
                 >
-                  {item.label}
+                  <FaSyncAlt className={loading ? "animate-spin" : ""} />
+                  Refresh
                 </button>
-              ))}
-            </div>
-          </div>
-
-          <div
-            className={`rounded-[5px] p-5 ${
-              focusMessage.tone === "red"
-                ? "bg-red-50"
-                : focusMessage.tone === "orange"
-                  ? "bg-orange-50"
-                  : "bg-emerald-50"
-            }`}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p
-                  className={`font-poppins text-[10px] font-bold uppercase tracking-[0.1em] ${
-                    focusMessage.tone === "red"
-                      ? "text-red-700"
-                      : focusMessage.tone === "orange"
-                        ? "text-[#FF6B00]"
-                        : "text-emerald-700"
-                  }`}
-                >
-                  What needs attention
-                </p>
-
-                <h2 className="mt-2 font-fredoka text-[30px] font-semibold leading-tight text-slate-950">
-                  {focusMessage.title}
-                </h2>
-
-                <p className="mt-2 font-poppins text-sm font-semibold leading-6 text-slate-600">
-                  {focusMessage.message}
-                </p>
               </div>
-
-              <button
-                type="button"
-                onClick={() => loadInsights(days)}
-                disabled={loading}
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[5px] bg-white text-slate-700 transition hover:text-[#FF6B00] disabled:opacity-50"
-                title="Refresh"
-              >
-                <FaSyncAlt className={loading ? "animate-spin" : ""} />
-              </button>
             </div>
 
-            <div className="mt-5 grid grid-cols-2 gap-3">
-              <div className="rounded-[5px] bg-white p-3">
-                <p className="font-poppins text-[10px] font-bold uppercase text-slate-400">
-                  Range
-                </p>
-                <p className="mt-1 font-fredoka text-[22px] font-semibold text-slate-950">
-                  {getRangeLabel(days)}
-                </p>
+            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+              <div className="rounded-[5px] border border-white/10 bg-white/10 p-4 backdrop-blur-xl">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[5px] bg-[#FF6B00] text-white">
+                    <FaCalendarAlt />
+                  </div>
+
+                  <div>
+                    <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                      Selected Period
+                    </p>
+
+                    <p className="font-fredoka text-[24px] font-semibold leading-none text-white">
+                      Last {days} Days
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              <div className="rounded-[5px] bg-white p-3">
-                <p className="font-poppins text-[10px] font-bold uppercase text-slate-400">
-                  Date
-                </p>
-                <p className="mt-1 font-fredoka text-[22px] font-semibold text-slate-950">
-                  {formatDate(insights?.range?.from)} -{" "}
-                  {formatDate(insights?.range?.to)}
-                </p>
+              <div className="rounded-[5px] border border-white/10 bg-white/10 p-4 backdrop-blur-xl">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[5px] bg-[#00AEEF] text-white">
+                    <FaGlobeAsia />
+                  </div>
+
+                  <div>
+                    <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                      Date Range
+                    </p>
+
+                    <p className="font-fredoka text-[20px] font-semibold leading-none text-white">
+                      {formatDate(insights?.range?.from)} -{" "}
+                      {formatDate(insights?.range?.to)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[5px] border border-white/10 bg-white/10 p-4 backdrop-blur-xl">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-[5px] bg-white text-slate-950">
+                    <FaPlane />
+                  </div>
+
+                  <div>
+                    <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                      Travel CRM
+                    </p>
+
+                    <p className="font-fredoka text-[24px] font-semibold leading-none text-white">
+                      Live Performance
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         {!loading && (
-          <div className="grid gap-4 border-t border-slate-100 bg-[#F8FAFC] p-5 md:grid-cols-2 xl:grid-cols-4">
-            <HeroMetric
+          <div className="grid gap-4 bg-[#F8FAFC] p-5 md:grid-cols-2 xl:grid-cols-4">
+            <ExecutiveMetric
+              icon={<FaChartLine />}
               label="Conversion Rate"
               value={formatPercent(summary.conversionRate)}
-              subText="Confirmed + Booked"
+              description="Confirmed + booked leads from total inquiries."
               tone="orange"
               change={changes.conversionRateChange}
             />
 
-            <HeroMetric
+            <ExecutiveMetric
+              icon={<FaCheckCircle />}
               label="Converted Leads"
               value={formatNumber(summary.convertedLeads)}
-              subText={`${formatNumber(summary.totalLeads)} total leads`}
+              description={`${formatNumber(
+                summary.totalLeads
+              )} total leads in this period.`}
               tone="green"
               change={changes.convertedLeadsChange}
             />
 
-            <HeroMetric
-              label="No Follow-up"
-              value={formatNumber(summary.noFollowUpLeads)}
-              subText={`${formatPercent(summary.noFollowUpRate)} missing`}
-              tone="red"
-              change={changes.noFollowUpLeadsChange}
-              reverse
+            <ExecutiveMetric
+              icon={<FaRocket />}
+              label="Active Opportunities"
+              value={formatNumber(activeOpportunities)}
+              description="Open leads that can still convert."
+              tone="blue"
             />
 
-            <HeroMetric
-              label="Overdue Follow-ups"
-              value={formatNumber(summary.overdueFollowUps)}
-              subText={`${formatNumber(summary.todayFollowUps)} due today`}
-              tone="blue"
+            <ExecutiveMetric
+              icon={<FaUserClock />}
+              label="Follow-up Risk"
+              value={formatNumber(summary.noFollowUpLeads)}
+              description={`${formatPercent(
+                summary.noFollowUpRate
+              )} leads have no follow-up.`}
+              tone="red"
+              change={changes.noFollowUpLeadsChange}
+              reverseChange
             />
           </div>
         )}
@@ -825,332 +1261,96 @@ const AdminBusinessInsightsPage = () => {
           {[1, 2, 3, 4].map((item) => (
             <div
               key={item}
-              className="h-40 animate-pulse rounded-[5px] bg-white shadow-sm"
+              className="h-44 animate-pulse rounded-[5px] bg-white shadow-sm"
             />
           ))}
         </div>
       ) : (
         <>
-          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <MetricCard
-              icon={<FaUsers />}
-              label="Total Leads"
-              value={formatNumber(summary.totalLeads)}
-              subText={`Current ${days} days`}
-              tone="blue"
-              change={changes.totalLeadsChange}
-            />
+          <section className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
+            <BusinessGradePanel grade={businessGrade} summary={summary} />
 
-            <MetricCard
-              icon={<FaClock />}
-              label="Scheduled Follow-ups"
-              value={formatNumber(summary.scheduledFollowUps)}
-              subText="Follow-ups currently planned"
-              tone="purple"
-            />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <ExecutiveMetric
+                icon={<FaClock />}
+                label="Scheduled Follow-ups"
+                value={formatNumber(summary.scheduledFollowUps)}
+                description="Follow-ups currently planned."
+                tone="purple"
+              />
 
-            <MetricCard
-              icon={<FaExclamationTriangle />}
-              label="Overdue Follow-ups"
-              value={formatNumber(summary.overdueFollowUps)}
-              subText="Needs immediate action"
-              tone="red"
-            />
+              <ExecutiveMetric
+                icon={<FaExclamationTriangle />}
+                label="Overdue Follow-ups"
+                value={formatNumber(summary.overdueFollowUps)}
+                description="Needs immediate sales action."
+                tone="red"
+              />
 
-            <MetricCard
-              icon={<FaTimesCircle />}
-              label="Lost / Cancelled"
-              value={formatNumber(summary.lostLeads)}
-              subText={`${formatPercent(summary.lostRate)} lost rate`}
-              tone="slate"
-              change={changes.lostLeadsChange}
-              reverseChange
-            />
+              <ExecutiveMetric
+                icon={<FaTimesCircle />}
+                label="Lost / Cancelled"
+                value={formatNumber(summary.lostLeads)}
+                description={`${formatPercent(summary.lostRate)} lost rate.`}
+                tone="slate"
+                change={changes.lostLeadsChange}
+                reverseChange
+              />
+
+              <ExecutiveMetric
+                icon={<FaCalendarAlt />}
+                label="Today Follow-ups"
+                value={formatNumber(summary.todayFollowUps)}
+                description="Due today for the CRM team."
+                tone="blue"
+              />
+            </div>
           </section>
 
-          <section className="grid gap-5 xl:grid-cols-3">
-            <AttentionCard
-              title="Most Conversions"
-              value={highlights.bestServiceByConversions?.serviceLabel}
-              description={`${formatNumber(
-                highlights.bestServiceByConversions?.convertedLeads
-              )} converted leads in selected range.`}
-              tone="orange"
-              link={getServicePath(
-                highlights.bestServiceByConversions?.serviceType
-              )}
-            />
+          <LeadFunnel summary={summary} />
 
-            <AttentionCard
-              title="Best Conversion Rate"
-              value={highlights.bestServiceByRate?.serviceLabel}
-              description={`${formatPercent(
-                highlights.bestServiceByRate?.conversionRate
-              )} conversion rate based on current range.`}
-              tone="green"
-              link={getServicePath(highlights.bestServiceByRate?.serviceType)}
-            />
+          <section className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
+            <ServiceLeaderboard servicePerformance={servicePerformance} />
 
-            <AttentionCard
-              title="Weak Follow-up Area"
-              value={highlights.weakestFollowUpService?.serviceLabel}
-              description={`${formatPercent(
-                highlights.weakestFollowUpService?.noFollowUpRate
-              )} leads have no follow-up assigned.`}
-              tone="red"
-              link={getServicePath(
-                highlights.weakestFollowUpService?.serviceType
-              )}
-            />
-          </section>
+            <div className="grid gap-5">
+              <TimelineComparison comparison={comparison} days={days} />
 
-          <section className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
-            <div className="rounded-[5px] border border-slate-100 bg-white p-5 shadow-sm">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <section className="rounded-[5px] border border-slate-100 bg-white p-5 shadow-sm">
                 <div>
-                  <h2 className="font-fredoka text-[30px] font-semibold text-slate-950">
-                    Timeline Summary
+                  <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-[#FF6B00]">
+                    Executive Recommendations
+                  </p>
+
+                  <h2 className="mt-1 font-fredoka text-[32px] font-semibold leading-tight text-slate-950">
+                    What To Do Next
                   </h2>
 
-                  <p className="font-poppins text-sm font-medium text-slate-500">
-                    Clean range-wise comparison of total leads and conversions.
+                  <p className="mt-1 font-poppins text-sm font-medium leading-6 text-slate-500">
+                    Practical next actions based on CRM performance.
                   </p>
                 </div>
 
-                <span className="rounded-[5px] bg-[#F8FAFC] px-3 py-2 font-poppins text-xs font-bold text-slate-500">
-                  {formatDate(insights?.range?.from)} -{" "}
-                  {formatDate(insights?.range?.to)}
-                </span>
-              </div>
-
-              <div className="mt-5">
-                <TimelineSummary timeline={timeline} />
-              </div>
-            </div>
-
-            <div className="rounded-[5px] border border-slate-100 bg-white p-5 shadow-sm">
-              <h2 className="font-fredoka text-[30px] font-semibold text-slate-950">
-                Follow-up Discipline
-              </h2>
-
-              <p className="mt-1 font-poppins text-sm font-medium text-slate-500">
-                This section shows whether leads are being handled properly.
-              </p>
-
-              <div className="mt-5 grid gap-3">
-                <div className="rounded-[5px] bg-red-50 p-4">
-                  <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-red-700">
-                    No Follow-up
-                  </p>
-
-                  <div className="mt-2 flex items-end justify-between gap-3">
-                    <p className="font-fredoka text-[36px] font-semibold leading-none text-slate-950">
-                      {formatNumber(followUps.noFollowUpCount)}
-                    </p>
-
-                    <Link
-                      to="/admin/leads?followUp=none"
-                      className="font-poppins text-xs font-bold text-red-700 hover:text-[#FF6B00]"
-                    >
-                      View
-                    </Link>
-                  </div>
+                <div className="mt-5 grid gap-3">
+                  {recommendations.length === 0 ? (
+                    <div className="rounded-[5px] bg-emerald-50 p-5">
+                      <p className="font-poppins text-sm font-bold text-emerald-700">
+                        Business health looks stable. Keep tracking service
+                        performance and follow-up discipline.
+                      </p>
+                    </div>
+                  ) : (
+                    recommendations.map((item) => (
+                      <RecommendationCard key={item.title} item={item} />
+                    ))
+                  )}
                 </div>
-
-                <div className="rounded-[5px] bg-orange-50 p-4">
-                  <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-[#FF6B00]">
-                    Overdue Follow-ups
-                  </p>
-
-                  <div className="mt-2 flex items-end justify-between gap-3">
-                    <p className="font-fredoka text-[36px] font-semibold leading-none text-slate-950">
-                      {formatNumber(followUps.overdueCount)}
-                    </p>
-
-                    <Link
-                      to="/admin/leads?followUp=overdue"
-                      className="font-poppins text-xs font-bold text-[#FF6B00] hover:text-[#00AEEF]"
-                    >
-                      View
-                    </Link>
-                  </div>
-                </div>
-
-                <div className="rounded-[5px] bg-sky-50 p-4">
-                  <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-[#00AEEF]">
-                    Today Follow-ups
-                  </p>
-
-                  <div className="mt-2 flex items-end justify-between gap-3">
-                    <p className="font-fredoka text-[36px] font-semibold leading-none text-slate-950">
-                      {formatNumber(followUps.todayCount)}
-                    </p>
-
-                    <Link
-                      to="/admin/leads?followUp=today"
-                      className="font-poppins text-xs font-bold text-[#00AEEF] hover:text-[#FF6B00]"
-                    >
-                      View
-                    </Link>
-                  </div>
-                </div>
-              </div>
+              </section>
             </div>
           </section>
 
-          <section className="rounded-[5px] border border-slate-100 bg-white p-5 shadow-sm">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="font-fredoka text-[30px] font-semibold text-slate-950">
-                  Service Performance
-                </h2>
+          <TimelinePulse timeline={timeline} />
 
-                <p className="font-poppins text-sm font-medium text-slate-500">
-                  See which services are converting well and which need stronger
-                  follow-up.
-                </p>
-              </div>
-
-              <Link
-                to="/admin/leads"
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-slate-950 px-4 py-2.5 font-poppins text-sm font-semibold text-white transition hover:bg-[#FF6B00]"
-              >
-                View All Leads
-                <FaArrowRight className="text-xs" />
-              </Link>
-            </div>
-
-            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {topServices.length === 0 ? (
-                <div className="rounded-[5px] border border-slate-100 bg-[#F8FAFC] p-8 text-center md:col-span-2 xl:col-span-3">
-                  <FaTable className="mx-auto text-2xl text-slate-300" />
-
-                  <p className="mt-3 font-poppins text-sm font-semibold text-slate-500">
-                    No service performance data available.
-                  </p>
-                </div>
-              ) : (
-                topServices.map((item) => (
-                  <ServicePerformanceCard key={item.serviceType} item={item} />
-                ))
-              )}
-            </div>
-          </section>
-
-          <section className="rounded-[5px] border border-slate-100 bg-white shadow-sm">
-            <div className="border-b border-slate-100 p-5">
-              <h2 className="font-fredoka text-[30px] font-semibold text-slate-950">
-                Service Health Table
-              </h2>
-
-              <p className="font-poppins text-sm font-medium text-slate-500">
-                Detailed service comparison for conversions, losses, and
-                follow-up gaps.
-              </p>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[980px] border-collapse">
-                <thead className="bg-[#F8FAFC]">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-                      Service
-                    </th>
-                    <th className="px-4 py-3 text-left font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-                      Leads
-                    </th>
-                    <th className="px-4 py-3 text-left font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-                      Converted
-                    </th>
-                    <th className="px-4 py-3 text-left font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-                      Conversion Rate
-                    </th>
-                    <th className="px-4 py-3 text-left font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-                      Lost
-                    </th>
-                    <th className="px-4 py-3 text-left font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-                      Scheduled
-                    </th>
-                    <th className="px-4 py-3 text-left font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-                      No Follow-up
-                    </th>
-                    <th className="px-4 py-3 text-right font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {servicePerformance.map((item) => (
-                    <tr
-                      key={item.serviceType}
-                      className="border-t border-slate-100 transition hover:bg-[#F8FAFC]"
-                    >
-                      <td className="px-4 py-4">
-                        <span
-                          className={`rounded-[5px] px-2.5 py-1 font-poppins text-[10px] font-bold uppercase ${getServiceBadgeClass(
-                            item.serviceType
-                          )}`}
-                        >
-                          {item.serviceLabel}
-                        </span>
-                      </td>
-
-                      <td className="px-4 py-4 font-poppins text-sm font-bold text-slate-700">
-                        {formatNumber(item.totalLeads)}
-                      </td>
-
-                      <td className="px-4 py-4 font-poppins text-sm font-bold text-emerald-700">
-                        {formatNumber(item.convertedLeads)}
-                      </td>
-
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-2">
-                          <div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100">
-                            <div
-                              className="h-full rounded-full bg-[#FF6B00]"
-                              style={{
-                                width: `${Math.min(
-                                  Number(item.conversionRate || 0),
-                                  100
-                                )}%`,
-                              }}
-                            />
-                          </div>
-
-                          <span className="font-poppins text-sm font-bold text-slate-700">
-                            {formatPercent(item.conversionRate)}
-                          </span>
-                        </div>
-                      </td>
-
-                      <td className="px-4 py-4 font-poppins text-sm font-bold text-red-700">
-                        {formatNumber(item.lostLeads)}
-                      </td>
-
-                      <td className="px-4 py-4 font-poppins text-sm font-bold text-[#00AEEF]">
-                        {formatNumber(item.scheduledFollowUps)}
-                      </td>
-
-                      <td className="px-4 py-4 font-poppins text-sm font-bold text-[#FF6B00]">
-                        {formatNumber(item.noFollowUpLeads)}
-                      </td>
-
-                      <td className="px-4 py-4 text-right">
-                        <Link
-                          to={getServicePath(item.serviceType)}
-                          className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-slate-950 px-3 py-2 font-poppins text-xs font-bold text-white transition hover:bg-[#FF6B00]"
-                        >
-                          View Leads
-                          <FaArrowRight className="text-[10px]" />
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+          <ServiceHealthTable servicePerformance={servicePerformance} />
 
           <section className="grid gap-5 xl:grid-cols-3">
             <MiniLeadList
