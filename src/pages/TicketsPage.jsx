@@ -185,7 +185,7 @@ const TicketsPage = () => {
       await publicApi.createLead(payload)
 
       setSuccess(
-        "Your air ticket inquiry has been submitted successfully. TravelEx admin team can now view it in the CRM dashboard."
+        "Your air ticket inquiry has been submitted successfully. Team will contact you shortly."
       )
 
       setFormData(initialForm)

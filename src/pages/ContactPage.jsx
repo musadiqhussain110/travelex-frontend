@@ -144,7 +144,7 @@ ${formData.message.trim()}
       await publicApi.createContactInquiry(payload)
 
       setSuccess(
-        "Your inquiry has been submitted successfully. TravelEx admin team can now view it in the CRM dashboard."
+        "Your inquiry has been submitted successfully. Team will contact you shortly."
       )
 
       setFormData(initialForm)
