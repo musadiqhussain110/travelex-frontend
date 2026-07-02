@@ -383,8 +383,7 @@ ${formData.additionalRequirements || "No additional information"}
                     </h3>
 
                     <p className="mt-1.5 font-poppins text-[11.5px] font-medium leading-5 text-green-700 sm:text-sm sm:leading-7">
-                      Your visa application inquiry has been saved in the
-                      TravelEx CRM dashboard. Our consultant will contact you
+                      Your visa application inquiry has been saved. Our consultant will contact you
                       soon.
                     </p>
 

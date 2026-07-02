@@ -470,8 +470,7 @@ const HotelBookingPage = () => {
                     </h3>
 
                     <p className="mt-1 font-poppins text-xs font-semibold leading-5 text-green-700 sm:text-sm">
-                      Booking Reference: {bookingRef}. TravelEx admin team can
-                      now view this request in CRM.
+                      Booking Reference: {bookingRef}. Team will contact you shortly.
                     </p>
                   </div>
                 </div>

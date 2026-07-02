@@ -318,8 +318,7 @@ const TourBookingPage = () => {
                 </h3>
 
                 <p className="mt-2 font-poppins text-[11.5px] font-medium leading-5 text-green-700 sm:text-sm sm:leading-7">
-                  Your inquiry has been submitted successfully. TravelEx admin
-                  team can now view it in the CRM dashboard.
+                  Your inquiry has been submitted successfully. Team will contact you shortly.
                 </p>
 
                 <div className="mt-5 flex flex-col gap-3 sm:flex-row">

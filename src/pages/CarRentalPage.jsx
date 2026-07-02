@@ -516,8 +516,7 @@ const CarRentalPage = () => {
                     </h3>
 
                     <p className="mt-1 font-poppins text-xs font-semibold leading-5 text-green-700 sm:text-sm">
-                      TravelEx team can now view your airport transfer inquiry
-                      in CRM and will contact you soon.
+                      Our team will contact you soon.
                     </p>
                   </div>
                 </div>
