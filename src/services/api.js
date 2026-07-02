@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../config/apiConfig"
+
 const ADMIN_TOKEN_KEY = "travelex_admin_token"
 const ADMIN_USER_KEY = "travelex_admin"
 
@@ -8,7 +9,8 @@ const getAdminToken = () => {
 
 const buildQueryString = (params = {}) => {
   if (typeof params === "string") {
-    return params
+    if (!params.trim()) return ""
+    return params.startsWith("?") ? params : `?${params}`
   }
 
   const query = new URLSearchParams()
@@ -47,12 +49,62 @@ export const apiRequest = async (endpoint, options = {}) => {
     const message =
       data?.message ||
       data?.error ||
+      data?.errors?.[0]?.message ||
+      data?.errors?.[0]?.path?.join?.(".") ||
       "Something went wrong. Please try again."
 
     throw new Error(message)
   }
 
   return data
+}
+
+export const apiDownload = async (
+  endpoint,
+  fallbackFilename = "download.csv"
+) => {
+  const token = getAdminToken()
+  const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`
+
+  const response = await fetch(`${API_BASE_URL}${normalizedEndpoint}`, {
+    method: "GET",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  })
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}))
+
+    const message =
+      data?.message ||
+      data?.error ||
+      data?.errors?.[0]?.message ||
+      "Download failed. Please try again."
+
+    throw new Error(message)
+  }
+
+  const blob = await response.blob()
+  const contentDisposition = response.headers.get("Content-Disposition") || ""
+  const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/)
+  const filename = filenameMatch?.[1] || fallbackFilename
+
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+
+  URL.revokeObjectURL(url)
+
+  return {
+    success: true,
+    filename,
+  }
 }
 
 export const adminStorage = {
@@ -103,8 +155,13 @@ export const adminApi = {
 
   getLeadStats: () => apiRequest("/leads/stats"),
 
-  getLeads: (params = "") =>
-    apiRequest(`/leads${buildQueryString(params)}`),
+  getLeads: (params = {}) => apiRequest(`/leads${buildQueryString(params)}`),
+
+  exportLeadsCsv: (params = {}) =>
+    apiDownload(
+      `/leads/export${buildQueryString(params)}`,
+      "travelex-leads.csv"
+    ),
 
   getLeadById: (id) => apiRequest(`/leads/${id}`),
 
@@ -112,6 +169,12 @@ export const adminApi = {
     apiRequest(`/leads/${id}/status`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
+    }),
+
+  updateLeadFollowUp: (id, payload) =>
+    apiRequest(`/leads/${id}/follow-up`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
     }),
 
   addLeadNote: (id, text) =>
@@ -152,7 +215,7 @@ export const adminApi = {
       method: "PATCH",
     }),
 
-  getContactInquiries: (params = "") =>
+  getContactInquiries: (params = {}) =>
     apiRequest(`/contact-inquiries${buildQueryString(params)}`),
 
   getContactInquiryStats: () =>

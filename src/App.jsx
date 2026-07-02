@@ -43,6 +43,11 @@ import AdminWhatsappLogsPage from "./pages/admin/AdminWhatsappLogsPage"
 import AdminContactInquiriesPage from "./pages/admin/AdminContactInquiriesPage"
 import AdminNotificationsPage from "./pages/admin/AdminNotificationsPage"
 import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute"
+import AdminContactInquiryDetailPage from "./pages/admin/AdminContactInquiryDetailPage"
+import AdminLeadKanbanPage from "./pages/admin/AdminLeadKanbanPage"
+import AdminConsultantWorkbenchPage from "./pages/admin/AdminConsultantWorkbenchPage"
+import AdminFollowUpsPage from "./pages/admin/AdminFollowUpsPage"
+import AdminCommandCenterPage from "./pages/admin/AdminCommandCenterPage"
 const AppContent = () => {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith("/admin")
@@ -64,6 +69,12 @@ const AppContent = () => {
         <Routes>
           {/* Admin Login */}
           <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin/workbench" element={<AdminConsultantWorkbenchPage />} />
+<Route
+  path="/admin/contact-inquiries/:id"
+  element={<AdminContactInquiryDetailPage />}
+/>
+<Route path="/admin/leads/kanban" element={<AdminLeadKanbanPage />} />
 
           {/* Protected Admin Routes */}
           <Route element={<AdminProtectedRoute />}>
@@ -78,6 +89,8 @@ const AppContent = () => {
               <Route index element={<AdminDashboardPage />} />
               <Route path="dashboard" element={<AdminDashboardPage />} />
 <Route path="notifications" element={<AdminNotificationsPage />} />
+<Route path="/admin/follow-ups" element={<AdminFollowUpsPage />} />
+<Route path="/admin/command-center" element={<AdminCommandCenterPage />} />
               {/* Admin Lead Pages */}
               <Route path="leads" element={<AdminLeadsPage />} />
               <Route

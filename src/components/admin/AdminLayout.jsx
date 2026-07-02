@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom"
 import {
   FaBars,
   FaBell,
+  FaBriefcase,
   FaCar,
   FaChartLine,
   FaEnvelopeOpenText,
@@ -14,6 +15,8 @@ import {
   FaSignOutAlt,
   FaTicketAlt,
   FaTimes,
+  FaCrown,
+  FaCalendarAlt,
   FaUsers,
 } from "react-icons/fa"
 
@@ -29,6 +32,21 @@ const mainNavItems = [
     end: true,
   },
   {
+    label: "Consultant Workbench",
+    path: "/admin/workbench",
+    icon: <FaBriefcase />,
+  },
+  {
+  label: "Command Center",
+  path: "/admin/command-center",
+  icon: <FaCrown />,
+},
+  {
+  label: "Follow-up Calendar",
+  path: "/admin/follow-ups",
+  icon: <FaCalendarAlt />,
+},
+  {
     label: "Notifications",
     path: "/admin/notifications",
     icon: <FaBell />,
@@ -41,6 +59,11 @@ const leadNavItems = [
     path: "/admin/leads",
     icon: <FaUsers />,
     end: true,
+  },
+  {
+    label: "Pipeline Board",
+    path: "/admin/leads/kanban",
+    icon: <FaChartLine />,
   },
   {
     label: "Umrah Leads",
@@ -68,7 +91,7 @@ const leadNavItems = [
     icon: <FaHotel />,
   },
   {
-    label: "Car Rental Leads",
+    label: "Airport Transfer Leads",
     path: "/admin/leads/car-rental",
     icon: <FaCar />,
   },
@@ -199,7 +222,7 @@ const AdminLayout = () => {
     ))
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-poppins text-slate-900">
+    <div className="min-h-screen overflow-x-hidden bg-[#F8FAFC] font-poppins text-slate-900">
       <style>
         {`
           .admin-sidebar-scroll {
@@ -472,15 +495,15 @@ const AdminLayout = () => {
               </button>
 
               <div className="hidden text-right sm:block">
-  <p className="text-sm font-semibold text-slate-900">
-    {admin?.name || "Admin"}
-  </p>
-</div>
+                <p className="text-sm font-semibold text-slate-900">
+                  {admin?.name || "Admin"}
+                </p>
+              </div>
             </div>
           </div>
         </header>
 
-        <main className="px-4 py-5 sm:px-6 lg:px-8">
+        <main className="max-w-full overflow-x-hidden px-4 py-5 sm:px-6 lg:px-8">
           <Outlet />
         </main>
       </div>
