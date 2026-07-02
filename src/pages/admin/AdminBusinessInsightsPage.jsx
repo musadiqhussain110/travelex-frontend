@@ -593,9 +593,126 @@ const ServiceLeaderboard = ({ servicePerformance = [] }) => {
     </section>
   )
 }
+const ComparisonMetric = ({ label, current, previous, change, reverse = false }) => {
+  const number = Number(change || 0)
+  const tone = getChangeTone(number, reverse)
+
+  const changeClass =
+    tone === "positive"
+      ? "bg-emerald-50 text-emerald-700"
+      : tone === "negative"
+        ? "bg-red-50 text-red-700"
+        : "bg-slate-100 text-slate-600"
+
+  return (
+    <div className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+            {label}
+          </p>
+
+          <p className="mt-2 font-fredoka text-[30px] font-semibold leading-none text-slate-950">
+            {current}
+          </p>
+        </div>
+
+        <span
+          className={`inline-flex shrink-0 items-center gap-1 rounded-[5px] px-2.5 py-1 font-poppins text-[11px] font-bold ${changeClass}`}
+        >
+          {number > 0 && <FaArrowUp className="text-[10px]" />}
+          {number < 0 && <FaArrowDown className="text-[10px]" />}
+          {number > 0 ? "+" : ""}
+          {number.toFixed(1)}%
+        </span>
+      </div>
+
+      <div className="mt-4 rounded-[5px] bg-[#F8FAFC] px-3 py-2">
+        <p className="font-poppins text-[11px] font-semibold text-slate-400">
+          Previous period
+        </p>
+
+        <p className="mt-0.5 font-poppins text-sm font-bold text-slate-700">
+          {previous}
+        </p>
+      </div>
+    </div>
+  )
+}
 
 const TimelineComparison = ({ comparison = {}, days }) => {
   const current = comparison.current || {}
+  const previous = comparison.previous || {}
+  const changes = comparison.changes || {}
+
+  const comparisonItems = [
+    {
+      label: "Lead Volume",
+      current: formatNumber(current.totalLeads),
+      previous: formatNumber(previous.totalLeads),
+      change: changes.totalLeadsChange,
+    },
+    {
+      label: "Conversions",
+      current: formatNumber(current.convertedLeads),
+      previous: formatNumber(previous.convertedLeads),
+      change: changes.convertedLeadsChange,
+    },
+    {
+      label: "Conversion Rate",
+      current: formatPercent(current.conversionRate),
+      previous: formatPercent(previous.conversionRate),
+      change: changes.conversionRateChange,
+    },
+    {
+      label: "No Follow-up",
+      current: formatNumber(current.noFollowUpLeads),
+      previous: formatNumber(previous.noFollowUpLeads),
+      change: changes.noFollowUpLeadsChange,
+      reverse: true,
+    },
+  ]
+
+  return (
+    <section className="overflow-hidden rounded-[5px] border border-slate-100 bg-white shadow-sm">
+      <div className="border-b border-slate-100 bg-slate-950 p-5 text-white">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.14em] text-[#00AEEF]">
+              Period Comparison
+            </p>
+
+            <h2 className="mt-2 font-fredoka text-[30px] font-semibold leading-tight text-white sm:text-[34px]">
+              Current {days} Days vs Previous {days} Days
+            </h2>
+
+            <p className="mt-2 max-w-2xl font-poppins text-sm font-medium leading-6 text-slate-300">
+              Compare business movement, conversions, and follow-up discipline
+              against the previous period.
+            </p>
+          </div>
+
+          <div className="rounded-[5px] bg-white/10 px-4 py-3">
+            <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+              Selected Range
+            </p>
+
+            <p className="font-fredoka text-[24px] font-semibold leading-none text-white">
+              {days} Days
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 bg-[#F8FAFC] p-5 sm:grid-cols-2">
+        {comparisonItems.map((item) => (
+          <ComparisonMetric key={item.label} {...item} />
+        ))}
+      </div>
+    </section>
+  )
+}
+const current = comparison.current || {}
   const previous = comparison.previous || {}
   const changes = comparison.changes || {}
 
