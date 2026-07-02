@@ -20,7 +20,9 @@ import {
   FaUserClock,
   FaWhatsapp,
 } from "react-icons/fa"
+
 import { adminApi } from "../../services/api"
+import { useAdminAuth } from "../../context/AdminAuthContext"
 import SmartLeadScore from "../../components/admin/SmartLeadScore"
 import { getSmartLeadScore } from "../../utils/leadScoring"
 
@@ -557,6 +559,7 @@ const LeadMobileCard = ({
   lead,
   serviceType,
   actionLoading,
+  canUpdateLeads,
   onQuickStatusUpdate,
   onMarkFollowUpCompleted,
 }) => {
@@ -657,54 +660,67 @@ const LeadMobileCard = ({
         </Link>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
-        <button
-          type="button"
-          onClick={() => onQuickStatusUpdate(lead, "Contacted")}
-          disabled={
-            contactedLoading ||
-            lead.status === "Contacted" ||
-            lead.status === "Confirmed" ||
-            lead.status === "Booked"
-          }
-          className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-sky-50 px-3 py-2 font-poppins text-xs font-bold text-[#00AEEF] transition hover:bg-[#00AEEF] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <FaUserCheck />
-          {contactedLoading ? "Updating..." : "Contacted"}
-        </button>
+      {canUpdateLeads && (
+        <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
+          <button
+            type="button"
+            onClick={() => onQuickStatusUpdate(lead, "Contacted")}
+            disabled={
+              contactedLoading ||
+              lead.status === "Contacted" ||
+              lead.status === "Confirmed" ||
+              lead.status === "Booked"
+            }
+            className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-sky-50 px-3 py-2 font-poppins text-xs font-bold text-[#00AEEF] transition hover:bg-[#00AEEF] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <FaUserCheck />
+            {contactedLoading ? "Updating..." : "Contacted"}
+          </button>
 
-        <button
-          type="button"
-          onClick={() => onQuickStatusUpdate(lead, "Interested")}
-          disabled={
-            interestedLoading ||
-            lead.status === "Interested" ||
-            lead.status === "Confirmed" ||
-            lead.status === "Booked"
-          }
-          className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-emerald-50 px-3 py-2 font-poppins text-xs font-bold text-emerald-700 transition hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <FaCheckCircle />
-          {interestedLoading ? "Updating..." : "Interested"}
-        </button>
+          <button
+            type="button"
+            onClick={() => onQuickStatusUpdate(lead, "Interested")}
+            disabled={
+              interestedLoading ||
+              lead.status === "Interested" ||
+              lead.status === "Confirmed" ||
+              lead.status === "Booked"
+            }
+            className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-emerald-50 px-3 py-2 font-poppins text-xs font-bold text-emerald-700 transition hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <FaCheckCircle />
+            {interestedLoading ? "Updating..." : "Interested"}
+          </button>
 
-        <button
-          type="button"
-          onClick={() => onMarkFollowUpCompleted(lead)}
-          disabled={
-            followUpCompletedLoading || lead.followUpStatus !== "Scheduled"
-          }
-          className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-orange-50 px-3 py-2 font-poppins text-xs font-bold text-[#FF6B00] transition hover:bg-[#FF6B00] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <FaClock />
-          {followUpCompletedLoading ? "Completing..." : "Complete Follow-up"}
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={() => onMarkFollowUpCompleted(lead)}
+            disabled={
+              followUpCompletedLoading || lead.followUpStatus !== "Scheduled"
+            }
+            className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-orange-50 px-3 py-2 font-poppins text-xs font-bold text-[#FF6B00] transition hover:bg-[#FF6B00] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <FaClock />
+            {followUpCompletedLoading ? "Completing..." : "Complete Follow-up"}
+          </button>
+        </div>
+      )}
     </article>
   )
 }
 
 const AdminLeadsPage = ({ serviceType = "all" }) => {
+  const { admin } = useAdminAuth()
+
+  const canViewLeads =
+    admin?.role === "superAdmin" || Boolean(admin?.permissions?.leads?.view)
+
+  const canUpdateLeads =
+    admin?.role === "superAdmin" || Boolean(admin?.permissions?.leads?.update)
+
+  const canExportLeads =
+    admin?.role === "superAdmin" || Boolean(admin?.permissions?.leads?.export)
+
   const [searchParams, setSearchParams] = useSearchParams()
   const searchParamsString = searchParams.toString()
 
@@ -783,6 +799,12 @@ const AdminLeadsPage = ({ serviceType = "all" }) => {
   }
 
   const loadLeads = async (override = {}) => {
+    if (!canViewLeads) {
+      setLoading(false)
+      setLeads([])
+      return
+    }
+
     setLoading(true)
     setError("")
 
@@ -879,7 +901,7 @@ const AdminLeadsPage = ({ serviceType = "all" }) => {
     })
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serviceType, searchParamsString])
+  }, [serviceType, searchParamsString, canViewLeads])
 
   const handleSearch = (event) => {
     event.preventDefault()
@@ -955,6 +977,11 @@ const AdminLeadsPage = ({ serviceType = "all" }) => {
   }
 
   const handleQuickStatusUpdate = async (lead, nextStatus) => {
+    if (!canUpdateLeads) {
+      setError("You do not have permission to update leads.")
+      return
+    }
+
     if (!lead?._id || lead.status === nextStatus) return
 
     const loadingKey = `${lead._id}-${nextStatus}`
@@ -977,6 +1004,11 @@ const AdminLeadsPage = ({ serviceType = "all" }) => {
   }
 
   const handleMarkFollowUpCompleted = async (lead) => {
+    if (!canUpdateLeads) {
+      setError("You do not have permission to update follow-ups.")
+      return
+    }
+
     if (!lead?._id || lead.followUpStatus === "Completed") return
 
     const loadingKey = `${lead._id}-followup-completed`
@@ -1008,6 +1040,11 @@ const AdminLeadsPage = ({ serviceType = "all" }) => {
   }
 
   const exportAllMatchingLeadsCsv = async () => {
+    if (!canExportLeads) {
+      setError("You do not have permission to export leads.")
+      return
+    }
+
     if (!pagination.total) return
 
     setExportLoading(true)
@@ -1040,6 +1077,25 @@ const AdminLeadsPage = ({ serviceType = "all" }) => {
     }
   }
 
+  if (!canViewLeads) {
+    return (
+      <div className="rounded-[5px] border border-red-100 bg-red-50 p-8 text-center">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[5px] bg-white text-red-600">
+          <FaEye />
+        </div>
+
+        <h1 className="mt-5 font-fredoka text-[32px] font-semibold text-slate-950">
+          Access Restricted
+        </h1>
+
+        <p className="mx-auto mt-2 max-w-xl font-poppins text-sm font-semibold leading-7 text-red-600">
+          You do not have permission to view CRM leads. Please contact a Super
+          Admin or Admin to update your access.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="grid gap-5">
       <section className="rounded-[5px] border border-slate-100 bg-white p-5 shadow-sm">
@@ -1059,26 +1115,35 @@ const AdminLeadsPage = ({ serviceType = "all" }) => {
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row">
-            <button
-              type="button"
-              onClick={exportAllMatchingLeadsCsv}
-              disabled={exportLoading || !pagination.total}
-              className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 bg-white px-4 py-2.5 font-poppins text-sm font-semibold text-slate-700 transition hover:border-[#00AEEF] hover:text-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <FaDownload />
-              {exportLoading ? "Exporting..." : "Export All Matching"}
-            </button>
+            {canExportLeads && (
+              <button
+                type="button"
+                onClick={exportAllMatchingLeadsCsv}
+                disabled={exportLoading || !pagination.total}
+                className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 bg-white px-4 py-2.5 font-poppins text-sm font-semibold text-slate-700 transition hover:border-[#00AEEF] hover:text-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <FaDownload />
+                {exportLoading ? "Exporting..." : "Export All Matching"}
+              </button>
+            )}
 
             <Link
-              to="/admin/command-center"
+              to="/admin/control-room"
               className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-4 py-2.5 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
             >
-              Command Center
+              Control Room
               <FaArrowRight className="text-xs" />
             </Link>
           </div>
         </div>
       </section>
+
+      {!canUpdateLeads && (
+        <div className="rounded-[5px] border border-sky-100 bg-sky-50 px-5 py-4 font-poppins text-sm font-semibold text-[#00AEEF]">
+          Read-only access active. You can view leads, but update/export actions
+          are hidden based on your permissions.
+        </div>
+      )}
 
       {success && (
         <div className="rounded-[5px] border border-emerald-100 bg-emerald-50 px-5 py-4 font-poppins text-sm font-semibold text-emerald-700">
@@ -1229,7 +1294,9 @@ const AdminLeadsPage = ({ serviceType = "all" }) => {
           </p>
 
           <p className="font-poppins text-xs font-semibold text-slate-400">
-            Export downloads all matching leads from backend.
+            {canExportLeads
+              ? "Export downloads all matching leads from backend."
+              : "Export disabled for your current role."}
           </p>
         </div>
       </section>
@@ -1468,54 +1535,56 @@ const AdminLeadsPage = ({ serviceType = "all" }) => {
                             </Link>
                           </div>
 
-                          <div className="mt-2 flex justify-end gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleQuickStatusUpdate(lead, "Contacted")
-                              }
-                              disabled={
-                                contactedLoading ||
-                                lead.status === "Contacted" ||
-                                lead.status === "Confirmed" ||
-                                lead.status === "Booked"
-                              }
-                              className="inline-flex items-center justify-center gap-1 rounded-[5px] bg-sky-50 px-2.5 py-1.5 font-poppins text-[10px] font-bold text-[#00AEEF] transition hover:bg-[#00AEEF] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              <FaUserCheck />
-                              {contactedLoading ? "..." : "Contacted"}
-                            </button>
+                          {canUpdateLeads && (
+                            <div className="mt-2 flex justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleQuickStatusUpdate(lead, "Contacted")
+                                }
+                                disabled={
+                                  contactedLoading ||
+                                  lead.status === "Contacted" ||
+                                  lead.status === "Confirmed" ||
+                                  lead.status === "Booked"
+                                }
+                                className="inline-flex items-center justify-center gap-1 rounded-[5px] bg-sky-50 px-2.5 py-1.5 font-poppins text-[10px] font-bold text-[#00AEEF] transition hover:bg-[#00AEEF] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                <FaUserCheck />
+                                {contactedLoading ? "..." : "Contacted"}
+                              </button>
 
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleQuickStatusUpdate(lead, "Interested")
-                              }
-                              disabled={
-                                interestedLoading ||
-                                lead.status === "Interested" ||
-                                lead.status === "Confirmed" ||
-                                lead.status === "Booked"
-                              }
-                              className="inline-flex items-center justify-center gap-1 rounded-[5px] bg-emerald-50 px-2.5 py-1.5 font-poppins text-[10px] font-bold text-emerald-700 transition hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              <FaCheckCircle />
-                              {interestedLoading ? "..." : "Interested"}
-                            </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleQuickStatusUpdate(lead, "Interested")
+                                }
+                                disabled={
+                                  interestedLoading ||
+                                  lead.status === "Interested" ||
+                                  lead.status === "Confirmed" ||
+                                  lead.status === "Booked"
+                                }
+                                className="inline-flex items-center justify-center gap-1 rounded-[5px] bg-emerald-50 px-2.5 py-1.5 font-poppins text-[10px] font-bold text-emerald-700 transition hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                <FaCheckCircle />
+                                {interestedLoading ? "..." : "Interested"}
+                              </button>
 
-                            <button
-                              type="button"
-                              onClick={() => handleMarkFollowUpCompleted(lead)}
-                              disabled={
-                                followUpCompletedLoading ||
-                                lead.followUpStatus !== "Scheduled"
-                              }
-                              className="inline-flex items-center justify-center gap-1 rounded-[5px] bg-orange-50 px-2.5 py-1.5 font-poppins text-[10px] font-bold text-[#FF6B00] transition hover:bg-[#FF6B00] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              <FaClock />
-                              {followUpCompletedLoading ? "..." : "Done"}
-                            </button>
-                          </div>
+                              <button
+                                type="button"
+                                onClick={() => handleMarkFollowUpCompleted(lead)}
+                                disabled={
+                                  followUpCompletedLoading ||
+                                  lead.followUpStatus !== "Scheduled"
+                                }
+                                className="inline-flex items-center justify-center gap-1 rounded-[5px] bg-orange-50 px-2.5 py-1.5 font-poppins text-[10px] font-bold text-[#FF6B00] transition hover:bg-[#FF6B00] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                <FaClock />
+                                {followUpCompletedLoading ? "..." : "Done"}
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     )
@@ -1540,6 +1609,7 @@ const AdminLeadsPage = ({ serviceType = "all" }) => {
                 lead={lead}
                 serviceType={serviceType}
                 actionLoading={actionLoading}
+                canUpdateLeads={canUpdateLeads}
                 onQuickStatusUpdate={handleQuickStatusUpdate}
                 onMarkFollowUpCompleted={handleMarkFollowUpCompleted}
               />
