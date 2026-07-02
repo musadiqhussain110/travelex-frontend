@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { NavLink, Outlet, useNavigate } from "react-router-dom"
 import {
   FaBars,
@@ -15,9 +15,9 @@ import {
   FaSignOutAlt,
   FaTicketAlt,
   FaTimes,
-  FaCrown,
   FaCalendarAlt,
   FaUsers,
+  FaUserShield,
 } from "react-icons/fa"
 
 import AdminNotificationBell from "./AdminNotificationBell"
@@ -32,20 +32,21 @@ const mainNavItems = [
     end: true,
   },
   {
+    label: "Control Room",
+    path: "/admin/control-room",
+    icon: <FaUserShield />,
+    roles: ["superAdmin", "admin"],
+  },
+  {
     label: "Consultant Workbench",
     path: "/admin/workbench",
     icon: <FaBriefcase />,
   },
   {
-  label: "Command Center",
-  path: "/admin/command-center",
-  icon: <FaCrown />,
-},
-  {
-  label: "Follow-up Calendar",
-  path: "/admin/follow-ups",
-  icon: <FaCalendarAlt />,
-},
+    label: "Follow-up Calendar",
+    path: "/admin/follow-ups",
+    icon: <FaCalendarAlt />,
+  },
   {
     label: "Notifications",
     path: "/admin/notifications",
@@ -140,6 +141,27 @@ const AdminLayout = () => {
   const { admin, logout } = useAdminAuth()
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const hasRoleAccess = (item) => {
+    if (!item.roles?.length) return true
+
+    // Keeps old admin accounts working until role-based backend is fully connected.
+    if (!admin?.role) return true
+
+    return item.roles.includes(admin.role)
+  }
+
+  const visibleMainNavItems = useMemo(() => {
+    return mainNavItems.filter(hasRoleAccess)
+  }, [admin?.role])
+
+  const visibleLeadNavItems = useMemo(() => {
+    return leadNavItems.filter(hasRoleAccess)
+  }, [admin?.role])
+
+  const visibleCommunicationNavItems = useMemo(() => {
+    return communicationNavItems.filter(hasRoleAccess)
+  }, [admin?.role])
 
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -292,18 +314,24 @@ const AdminLayout = () => {
 
         <div className="px-4 py-4">
           <nav className="grid gap-4">
-            <div className="grid gap-1.5">
-              {mainNavItems.map((item) => (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  end={item.end}
-                  className={navClass}
-                >
-                  <span className="text-[15px]">{item.icon}</span>
-                  {item.label}
-                </NavLink>
-              ))}
+            <div>
+              <p className="mb-2 px-4 font-poppins text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                Main
+              </p>
+
+              <div className="grid gap-1.5">
+                {visibleMainNavItems.map((item) => (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    end={item.end}
+                    className={navClass}
+                  >
+                    <span className="text-[15px]">{item.icon}</span>
+                    {item.label}
+                  </NavLink>
+                ))}
+              </div>
             </div>
 
             <div>
@@ -312,7 +340,7 @@ const AdminLayout = () => {
               </p>
 
               <div className="grid gap-1">
-                {leadNavItems.map((item) => (
+                {visibleLeadNavItems.map((item) => (
                   <NavLink
                     key={item.path}
                     to={item.path}
@@ -332,7 +360,7 @@ const AdminLayout = () => {
               </p>
 
               <div className="grid gap-1.5">
-                {communicationNavItems.map((item) => (
+                {visibleCommunicationNavItems.map((item) => (
                   <NavLink key={item.path} to={item.path} className={navClass}>
                     <span className="text-[15px]">{item.icon}</span>
                     {item.label}
@@ -409,6 +437,12 @@ const AdminLayout = () => {
             <p className="mt-0.5 break-words font-poppins text-xs font-medium text-slate-500">
               {admin?.email || "TravelEx Admin"}
             </p>
+
+            {admin?.role && (
+              <p className="mt-2 inline-flex rounded-[5px] bg-[#00AEEF]/10 px-2 py-1 font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-[#00AEEF]">
+                {admin.role}
+              </p>
+            )}
           </div>
 
           <nav className="grid gap-5">
@@ -418,7 +452,7 @@ const AdminLayout = () => {
               </p>
 
               <div className="grid gap-2">
-                {renderMobileLinks(mainNavItems, mobileDrawerNavClass)}
+                {renderMobileLinks(visibleMainNavItems, mobileDrawerNavClass)}
               </div>
             </div>
 
@@ -428,7 +462,10 @@ const AdminLayout = () => {
               </p>
 
               <div className="grid gap-2">
-                {renderMobileLinks(leadNavItems, mobileDrawerServiceClass)}
+                {renderMobileLinks(
+                  visibleLeadNavItems,
+                  mobileDrawerServiceClass
+                )}
               </div>
             </div>
 
@@ -438,7 +475,10 @@ const AdminLayout = () => {
               </p>
 
               <div className="grid gap-2">
-                {renderMobileLinks(communicationNavItems, mobileDrawerNavClass)}
+                {renderMobileLinks(
+                  visibleCommunicationNavItems,
+                  mobileDrawerNavClass
+                )}
               </div>
             </div>
 
@@ -477,7 +517,7 @@ const AdminLayout = () => {
 
               <div className="min-w-0">
                 <p className="truncate font-fredoka text-lg font-semibold text-slate-950 sm:text-2xl">
-                  Admin Dashboard
+                  Admin CRM
                 </p>
               </div>
             </div>
@@ -498,6 +538,12 @@ const AdminLayout = () => {
                 <p className="text-sm font-semibold text-slate-900">
                   {admin?.name || "Admin"}
                 </p>
+
+                {admin?.role && (
+                  <p className="text-xs font-semibold capitalize text-slate-400">
+                    {admin.role}
+                  </p>
+                )}
               </div>
             </div>
           </div>

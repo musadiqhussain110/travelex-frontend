@@ -194,6 +194,42 @@ export const adminApi = {
       method: "PATCH",
     }),
 
+  syncLeadPriorities: () =>
+    apiRequest("/leads/sync-priorities", {
+      method: "PATCH",
+    }),
+
+  getTeamAccessOptions: () => apiRequest("/team/access-options"),
+
+  getTeamMembers: (params = {}) =>
+    apiRequest(`/team${buildQueryString(params)}`),
+
+  getTeamMemberById: (id) => apiRequest(`/team/${id}`),
+
+  createTeamMember: (payload) =>
+    apiRequest("/team", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+  updateTeamMember: (id, payload) =>
+    apiRequest(`/team/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+
+  updateTeamMemberStatus: (id, isActive) =>
+    apiRequest(`/team/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ isActive }),
+    }),
+
+  resetTeamMemberPassword: (id, password) =>
+    apiRequest(`/team/${id}/reset-password`, {
+      method: "PATCH",
+      body: JSON.stringify({ password }),
+    }),
+
   getNotifications: (params = {}) =>
     apiRequest(`/notifications${buildQueryString(params)}`),
 
@@ -221,8 +257,7 @@ export const adminApi = {
   getContactInquiryStats: () =>
     apiRequest("/contact-inquiries/stats/summary"),
 
-  getContactInquiryById: (id) =>
-    apiRequest(`/contact-inquiries/${id}`),
+  getContactInquiryById: (id) => apiRequest(`/contact-inquiries/${id}`),
 
   updateContactInquiryStatus: (id, status) =>
     apiRequest(`/contact-inquiries/${id}/status`, {

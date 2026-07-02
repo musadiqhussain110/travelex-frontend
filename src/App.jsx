@@ -34,20 +34,22 @@ import NotFoundPage from "./pages/NotFoundPage"
 import TicketsPage from "./pages/TicketsPage"
 
 import AdminProtectedRoute from "./components/admin/AdminProtectedRoute"
+import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute"
 import AdminLayout from "./components/admin/AdminLayout"
+
 import AdminLoginPage from "./pages/admin/AdminLoginPage"
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage"
 import AdminLeadsPage from "./pages/admin/AdminLeadsPage"
 import AdminLeadDetailPage from "./pages/admin/AdminLeadDetailPage"
-import AdminWhatsappLogsPage from "./pages/admin/AdminWhatsappLogsPage"
-import AdminContactInquiriesPage from "./pages/admin/AdminContactInquiriesPage"
-import AdminNotificationsPage from "./pages/admin/AdminNotificationsPage"
-import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute"
-import AdminContactInquiryDetailPage from "./pages/admin/AdminContactInquiryDetailPage"
 import AdminLeadKanbanPage from "./pages/admin/AdminLeadKanbanPage"
 import AdminConsultantWorkbenchPage from "./pages/admin/AdminConsultantWorkbenchPage"
 import AdminFollowUpsPage from "./pages/admin/AdminFollowUpsPage"
-import AdminCommandCenterPage from "./pages/admin/AdminCommandCenterPage"
+import AdminControlRoomPage from "./pages/admin/AdminControlRoomPage"
+import AdminWhatsappLogsPage from "./pages/admin/AdminWhatsappLogsPage"
+import AdminContactInquiriesPage from "./pages/admin/AdminContactInquiriesPage"
+import AdminContactInquiryDetailPage from "./pages/admin/AdminContactInquiryDetailPage"
+import AdminNotificationsPage from "./pages/admin/AdminNotificationsPage"
+
 const AppContent = () => {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith("/admin")
@@ -69,30 +71,33 @@ const AppContent = () => {
         <Routes>
           {/* Admin Login */}
           <Route path="/admin/login" element={<AdminLoginPage />} />
-          <Route path="/admin/workbench" element={<AdminConsultantWorkbenchPage />} />
-<Route
-  path="/admin/contact-inquiries/:id"
-  element={<AdminContactInquiryDetailPage />}
-/>
-<Route path="/admin/leads/kanban" element={<AdminLeadKanbanPage />} />
 
           {/* Protected Admin Routes */}
           <Route element={<AdminProtectedRoute />}>
             <Route
-  path="/admin"
-  element={
-    <ProtectedAdminRoute>
-      <AdminLayout />
-    </ProtectedAdminRoute>
-  }
->
+              path="/admin"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminLayout />
+                </ProtectedAdminRoute>
+              }
+            >
               <Route index element={<AdminDashboardPage />} />
               <Route path="dashboard" element={<AdminDashboardPage />} />
-<Route path="notifications" element={<AdminNotificationsPage />} />
-<Route path="/admin/follow-ups" element={<AdminFollowUpsPage />} />
-<Route path="/admin/command-center" element={<AdminCommandCenterPage />} />
+
+              {/* Admin Main Pages */}
+              <Route path="control-room" element={<AdminControlRoomPage />} />
+              <Route
+                path="workbench"
+                element={<AdminConsultantWorkbenchPage />}
+              />
+              <Route path="follow-ups" element={<AdminFollowUpsPage />} />
+              <Route path="notifications" element={<AdminNotificationsPage />} />
+
               {/* Admin Lead Pages */}
               <Route path="leads" element={<AdminLeadsPage />} />
+              <Route path="leads/kanban" element={<AdminLeadKanbanPage />} />
+
               <Route
                 path="leads/umrah"
                 element={<AdminLeadsPage serviceType="umrah" />}
@@ -121,11 +126,18 @@ const AppContent = () => {
               {/* Keep dynamic lead detail after service-specific routes */}
               <Route path="leads/:id" element={<AdminLeadDetailPage />} />
 
-              <Route path="whatsapp" element={<AdminWhatsappLogsPage />} />
+              {/* Communication */}
               <Route
                 path="contact-inquiries"
                 element={<AdminContactInquiriesPage />}
               />
+              <Route
+                path="contact-inquiries/:id"
+                element={<AdminContactInquiryDetailPage />}
+              />
+
+              {/* Legacy route - not shown in sidebar */}
+              <Route path="whatsapp" element={<AdminWhatsappLogsPage />} />
             </Route>
           </Route>
 
