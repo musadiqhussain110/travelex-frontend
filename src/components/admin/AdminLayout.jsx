@@ -28,8 +28,14 @@ const mainNavItems = [
   {
     label: "Dashboard",
     path: "/admin/dashboard",
-    icon: <FaChartLine />,
+    icon: <FaHome />,
     end: true,
+  },
+  {
+    label: "Business Insights",
+    path: "/admin/business-insights",
+    icon: <FaChartLine />,
+    roles: ["superAdmin", "admin"],
   },
   {
     label: "Control Room",
@@ -145,7 +151,6 @@ const AdminLayout = () => {
   const hasRoleAccess = (item) => {
     if (!item.roles?.length) return true
 
-    // Keeps old admin accounts working until role-based backend is fully connected.
     if (!admin?.role) return true
 
     return item.roles.includes(admin.role)
@@ -298,7 +303,6 @@ const AdminLayout = () => {
         `}
       </style>
 
-      {/* Desktop Sidebar */}
       <aside
         ref={sidebarRef}
         onWheel={handleSidebarWheel}
@@ -391,7 +395,6 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-      {/* Mobile Drawer Overlay */}
       {mobileMenuOpen && (
         <button
           type="button"
@@ -401,7 +404,6 @@ const AdminLayout = () => {
         />
       )}
 
-      {/* Mobile Right Drawer */}
       <aside
         className={`fixed right-0 top-0 z-[60] h-screen w-[86vw] max-w-[360px] border-l border-slate-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.24)] transition-transform duration-300 ease-out lg:hidden ${
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"

@@ -39,6 +39,7 @@ import AdminLayout from "./components/admin/AdminLayout"
 
 import AdminLoginPage from "./pages/admin/AdminLoginPage"
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage"
+import AdminBusinessInsightsPage from "./pages/admin/AdminBusinessInsightsPage"
 import AdminLeadsPage from "./pages/admin/AdminLeadsPage"
 import AdminLeadDetailPage from "./pages/admin/AdminLeadDetailPage"
 import AdminLeadKanbanPage from "./pages/admin/AdminLeadKanbanPage"
@@ -86,6 +87,10 @@ const AppContent = () => {
               <Route path="dashboard" element={<AdminDashboardPage />} />
 
               {/* Admin Main Pages */}
+              <Route
+                path="business-insights"
+                element={<AdminBusinessInsightsPage />}
+              />
               <Route path="control-room" element={<AdminControlRoomPage />} />
               <Route
                 path="workbench"

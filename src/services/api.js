@@ -153,6 +153,9 @@ export const adminApi = {
   getDashboardOverview: (params = {}) =>
     apiRequest(`/dashboard/overview${buildQueryString(params)}`),
 
+  getBusinessInsights: (params = {}) =>
+    apiRequest(`/dashboard/business-insights${buildQueryString(params)}`),
+
   getLeadStats: () => apiRequest("/leads/stats"),
 
   getLeads: (params = {}) => apiRequest(`/leads${buildQueryString(params)}`),
@@ -233,8 +236,7 @@ export const adminApi = {
   getNotifications: (params = {}) =>
     apiRequest(`/notifications${buildQueryString(params)}`),
 
-  getUnreadNotificationCount: () =>
-    apiRequest("/notifications/unread-count"),
+  getUnreadNotificationCount: () => apiRequest("/notifications/unread-count"),
 
   markNotificationAsRead: (id) =>
     apiRequest(`/notifications/${id}/read`, {
