@@ -55,6 +55,21 @@ const servicePaths = {
   general: "/admin/leads",
 }
 
+const marketingSourceLabels = {
+  instagram: "Instagram",
+  facebook: "Facebook",
+  whatsapp: "WhatsApp",
+  google: "Google",
+  youtube: "YouTube",
+  tiktok: "TikTok",
+  linkedin: "LinkedIn",
+  email: "Email",
+  referral: "Referral",
+  direct: "Direct",
+  unknown: "Unknown / Legacy",
+  Unknown: "Unknown / Legacy",
+}
+
 const statusColor = {
   New: "bg-[#FF6B00]",
   Contacted: "bg-[#00AEEF]",
@@ -69,6 +84,10 @@ const statusColor = {
 }
 
 const formatService = (service = "") => serviceLabels[service] || service || "-"
+
+const formatMarketingSource = (source = "") => {
+  return marketingSourceLabels[source] || source || "Unknown / Legacy"
+}
 
 const getServicePath = (service = "") => servicePaths[service] || "/admin/leads"
 
@@ -187,6 +206,25 @@ const ServiceRow = ({ service, count, percent }) => (
   </Link>
 )
 
+const SourceRow = ({ source, count, percent }) => (
+  <div className="grid grid-cols-[1fr_110px_2rem] items-center gap-3 rounded-md px-2 py-2 hover:bg-slate-50">
+    <span className="truncate text-sm text-slate-700">
+      {formatMarketingSource(source)}
+    </span>
+
+    <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+      <div
+        className="h-full rounded-full bg-[#FF6B00]"
+        style={{ width: percent + "%" }}
+      />
+    </div>
+
+    <span className="text-right text-sm font-semibold tabular-nums text-slate-900">
+      {count}
+    </span>
+  </div>
+)
+
 const ActionRow = ({ to, label, count, tone }) => (
   <Link
     to={to}
@@ -220,6 +258,7 @@ const HealthRow = ({ label, value }) => (
 const AdminDashboardPage = () => {
   const [leadStats, setLeadStats] = useState(null)
   const [contactStats, setContactStats] = useState(null)
+  const [marketingSourceStats, setMarketingSourceStats] = useState({})
   const [unreadNotifications, setUnreadNotifications] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -230,12 +269,17 @@ const AdminDashboardPage = () => {
       setError("")
 
       try {
-        const [leadResult, contactResult, notificationResult] =
-          await Promise.allSettled([
-            adminApi.getLeadStats(),
-            adminApi.getContactInquiryStats(),
-            adminApi.getUnreadNotificationCount(),
-          ])
+        const [
+          leadResult,
+          contactResult,
+          notificationResult,
+          dashboardOverviewResult,
+        ] = await Promise.allSettled([
+          adminApi.getLeadStats(),
+          adminApi.getContactInquiryStats(),
+          adminApi.getUnreadNotificationCount(),
+          adminApi.getDashboardOverview({ days: 30 }),
+        ])
 
         if (leadResult.status === "fulfilled") {
           const data = leadResult.value
@@ -266,10 +310,25 @@ const AdminDashboardPage = () => {
           )
         }
 
+        if (dashboardOverviewResult.status === "fulfilled") {
+          const data = dashboardOverviewResult.value
+
+          const dashboard =
+            data.dashboard ||
+            data.data?.dashboard ||
+            data.data ||
+            data
+
+          setMarketingSourceStats(
+            dashboard?.crm?.leadsByMarketingSource || {}
+          )
+        }
+
         if (
           leadResult.status === "rejected" &&
           contactResult.status === "rejected" &&
-          notificationResult.status === "rejected"
+          notificationResult.status === "rejected" &&
+          dashboardOverviewResult.status === "rejected"
         ) {
           setError("Failed to load dashboard stats.")
         }
@@ -339,6 +398,12 @@ const AdminDashboardPage = () => {
       (a, b) => Number(b[1]) - Number(a[1])
     )
   }, [leadStats])
+
+  const sourceEntries = useMemo(() => {
+    return Object.entries(marketingSourceStats || {})
+      .filter(([, count]) => Number(count) > 0)
+      .sort((a, b) => Number(b[1]) - Number(a[1]))
+  }, [marketingSourceStats])
 
   if (loading) {
     return (
@@ -481,6 +546,25 @@ const AdminDashboardPage = () => {
             ) : (
               <p className="px-2 py-8 text-center text-sm text-slate-400">
                 Service data appears after inquiries are received.
+              </p>
+            )}
+          </Panel>
+
+          <Panel title="Leads by source">
+            {sourceEntries.length ? (
+              <div className="divide-y divide-slate-50">
+                {sourceEntries.map(([source, count]) => (
+                  <SourceRow
+                    key={source}
+                    source={source}
+                    count={Number(count)}
+                    percent={getPercent(count, totalLeads)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="px-2 py-8 text-center text-sm text-slate-400">
+                Marketing source data appears after tracked inquiries are received.
               </p>
             )}
           </Panel>
