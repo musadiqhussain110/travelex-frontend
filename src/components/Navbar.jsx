@@ -2,58 +2,13 @@ import { useEffect, useRef, useState } from "react"
 import { HiX } from "react-icons/hi"
 import {
   FaArrowRight,
-  FaCar,
   FaChevronDown,
-  FaGlobeAsia,
-  FaHotel,
-  FaKaaba,
-  FaPassport,
   FaSearch,
-  FaTicketAlt,
   FaWhatsapp,
 } from "react-icons/fa"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 
 import logo from "../assets/logo.webp"
-
-const services = [
-  {
-    label: "Umrah Packages",
-    link: "/umrah",
-    icon: <FaKaaba />,
-    desc: "Visa, hotel and travel support",
-  },
-  {
-    label: "International Tours",
-    link: "/tours",
-    icon: <FaGlobeAsia />,
-    desc: "Customized international trips",
-  },
-  {
-    label: "Tickets",
-    link: "/tickets",
-    icon: <FaTicketAlt />,
-    desc: "Domestic & international air tickets",
-  },
-  {
-    label: "Visa Assistance",
-    link: "/visa",
-    icon: <FaPassport />,
-    desc: "Visa process and documents",
-  },
-  {
-    label: "Hotel Booking",
-    link: "/hotels",
-    icon: <FaHotel />,
-    desc: "Hotel options and stays",
-  },
-  {
-    label: "Transport Services",
-    link: "/car-rental",
-    icon: <FaCar />,
-    desc: "Cars, vans and transfers",
-  },
-]
 
 const navLinks = [
   ["Home", "/"],
@@ -61,6 +16,8 @@ const navLinks = [
   ["Tours", "/tours"],
   ["Tickets", "/tickets"],
   ["Visa", "/visa"],
+  ["Hotels", "/hotels"],
+  ["Transport", "/car-rental"],
   ["Contact", "/contact"],
 ]
 
@@ -84,7 +41,6 @@ const Navbar = () => {
   const location = useLocation()
 
   const [menuOpen, setMenuOpen] = useState(false)
-  const [servicesOpen, setServicesOpen] = useState(false)
   const [resourcesOpen, setResourcesOpen] = useState(false)
   const [activeMobileDropdown, setActiveMobileDropdown] = useState(null)
   const [searchQuery, setSearchQuery] = useState("")
@@ -103,7 +59,6 @@ const Navbar = () => {
 
   useEffect(() => {
     setMenuOpen(false)
-    setServicesOpen(false)
     setResourcesOpen(false)
     setActiveMobileDropdown(null)
     setShowNavbar(true)
@@ -122,7 +77,6 @@ const Navbar = () => {
             currentScrollY > 90
           ) {
             setShowNavbar(false)
-            setServicesOpen(false)
             setResourcesOpen(false)
           } else if (currentScrollY < lastScrollY.current) {
             setShowNavbar(true)
@@ -153,7 +107,6 @@ const Navbar = () => {
 
   const closeMenus = () => {
     setMenuOpen(false)
-    setServicesOpen(false)
     setResourcesOpen(false)
     setActiveMobileDropdown(null)
   }
@@ -236,88 +189,7 @@ const Navbar = () => {
 
         {/* Desktop Nav */}
         <nav className="hidden items-center gap-6 font-poppins text-[14px] font-semibold text-slate-800 lg:flex xl:gap-7">
-          <Link to="/" onClick={closeMenus} className={navLinkClass}>
-            Home
-            <span className={underline} />
-          </Link>
-
-          <div
-            className="relative"
-            onMouseEnter={() => setServicesOpen(true)}
-            onMouseLeave={() => setServicesOpen(false)}
-          >
-            <button
-              type="button"
-              onClick={() => setServicesOpen((prev) => !prev)}
-              className="group relative flex items-center gap-1.5 py-1 transition-colors duration-300 hover:text-[#00AEEF]"
-            >
-              Services
-              <FaChevronDown
-                className={`text-[10px] transition-transform duration-300 ${
-                  servicesOpen ? "rotate-180" : ""
-                }`}
-              />
-              <span className={underline} />
-            </button>
-
-            <div
-              className={`absolute left-1/2 top-full z-[1200] w-[720px] -translate-x-1/2 pt-5 transition-all duration-200 ${
-                servicesOpen
-                  ? "visible translate-y-0 opacity-100"
-                  : "invisible translate-y-2 opacity-0"
-              }`}
-            >
-              <div className="rounded-[5px] border border-slate-100 bg-white p-5 text-slate-900 shadow-[0_24px_70px_rgba(15,23,42,0.16)]">
-                <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-4">
-                  <div>
-                    <p className="font-poppins text-[11px] font-bold uppercase tracking-[0.12em] text-[#00AEEF]">
-                      TravelEx Services
-                    </p>
-
-                    <h3 className="mt-1 font-fredoka text-2xl font-semibold text-slate-950">
-                      Plan every part of your journey
-                    </h3>
-                  </div>
-
-                  <Link
-                    to="/contact"
-                    onClick={closeMenus}
-                    className="inline-flex items-center gap-2 rounded-[5px] bg-[#FF6B00] px-4 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF]"
-                  >
-                    Talk to Expert
-                    <FaArrowRight className="text-[10px]" />
-                  </Link>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {services.map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.link}
-                      onClick={closeMenus}
-                      className="group flex gap-4 rounded-[5px] border border-slate-100 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-[#00AEEF]/30 hover:shadow-md"
-                    >
-                      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[5px] bg-sky-50 text-lg text-[#00AEEF] transition group-hover:bg-[#FF6B00] group-hover:text-white">
-                        {item.icon}
-                      </span>
-
-                      <span>
-                        <span className="block font-poppins text-sm font-bold text-slate-950">
-                          {item.label}
-                        </span>
-
-                        <span className="mt-1 block font-poppins text-xs font-medium leading-5 text-slate-500">
-                          {item.desc}
-                        </span>
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {navLinks.slice(1).map(([label, link]) => (
+          {navLinks.map(([label, link]) => (
             <Link
               key={label}
               to={link}
@@ -468,57 +340,6 @@ const Navbar = () => {
                   </Link>
                 )
               })}
-            </div>
-
-            {/* Services Dropdown */}
-            <div className="mt-2.5 rounded-[10px] border border-slate-100 bg-white">
-              <button
-                type="button"
-                onClick={() => toggleMobileDropdown("services")}
-                className="flex w-full items-center justify-between px-3.5 py-2.5 font-poppins text-[12px] font-semibold text-slate-900"
-              >
-                Services
-                <FaChevronDown
-                  className={`text-[10px] text-slate-400 transition-transform duration-300 ${
-                    activeMobileDropdown === "services" ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-
-              <div
-                className={`grid overflow-hidden transition-all duration-300 ${
-                  activeMobileDropdown === "services"
-                    ? "grid-rows-[1fr]"
-                    : "grid-rows-[0fr]"
-                }`}
-              >
-                <div className="overflow-hidden">
-                  <div className="grid gap-1.5 border-t border-slate-100 p-2">
-                    {services.map((item) => (
-                      <Link
-                        key={item.label}
-                        to={item.link}
-                        onClick={closeMenus}
-                        className="flex items-center gap-2.5 rounded-[7px] bg-[#F8FAFC] px-2.5 py-2"
-                      >
-                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px] bg-white text-[12px] text-[#00AEEF] shadow-sm">
-                          {item.icon}
-                        </span>
-
-                        <span className="min-w-0">
-                          <span className="block font-poppins text-[11.5px] font-semibold leading-4 text-slate-900">
-                            {item.label}
-                          </span>
-
-                          <span className="mt-0.5 block truncate font-poppins text-[9.5px] font-medium text-slate-500">
-                            {item.desc}
-                          </span>
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Resources Dropdown */}

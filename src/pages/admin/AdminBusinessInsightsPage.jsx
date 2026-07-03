@@ -10,7 +10,6 @@ import {
   FaCheckCircle,
   FaClock,
   FaExclamationTriangle,
-  FaFilter,
   FaGlobeAsia,
   FaPhoneAlt,
   FaPlane,
@@ -20,7 +19,6 @@ import {
   FaTable,
   FaTimesCircle,
   FaUserClock,
-  FaUsers,
 } from "react-icons/fa"
 
 import { adminApi } from "../../services/api"
@@ -63,7 +61,14 @@ const formatNumber = (value) => {
 const formatPercent = (value) => {
   return `${Number(value || 0).toFixed(1)}%`
 }
+const getConversionRate = (value, total) => {
+  const safeValue = Number(value || 0)
+  const safeTotal = Number(total || 0)
 
+  if (!safeTotal) return 0
+
+  return Number(((safeValue / safeTotal) * 100).toFixed(1))
+}
 const formatDate = (date) => {
   if (!date) return "-"
   return new Date(date).toLocaleDateString()
@@ -373,9 +378,10 @@ const FunnelStep = ({ label, value, percent, tone = "blue" }) => {
 
 const LeadFunnel = ({ summary }) => {
   const total = Number(summary.totalLeads || 0)
-  const activeOpportunities = Math.max(
-    total - Number(summary.convertedLeads || 0) - Number(summary.lostLeads || 0),
-    0
+  const converted = Number(summary.convertedLeads || 0)
+  const lost = Number(summary.lostLeads || 0)
+  const activeOpportunities = Number(
+    summary.activeSalesLeads ?? Math.max(total - converted - lost, 0)
   )
 
   const steps = [
@@ -712,83 +718,6 @@ const TimelineComparison = ({ comparison = {}, days }) => {
     </section>
   )
 }
-const current = comparison.current || {}
-  const previous = comparison.previous || {}
-  const changes = comparison.changes || {}
-
-  const items = [
-    {
-      label: "Lead Volume",
-      current: formatNumber(current.totalLeads),
-      previous: formatNumber(previous.totalLeads),
-      change: changes.totalLeadsChange,
-      reverse: false,
-    },
-    {
-      label: "Conversions",
-      current: formatNumber(current.convertedLeads),
-      previous: formatNumber(previous.convertedLeads),
-      change: changes.convertedLeadsChange,
-      reverse: false,
-    },
-    {
-      label: "Conversion Rate",
-      current: formatPercent(current.conversionRate),
-      previous: formatPercent(previous.conversionRate),
-      change: changes.conversionRateChange,
-      reverse: false,
-    },
-    {
-      label: "No Follow-up",
-      current: formatNumber(current.noFollowUpLeads),
-      previous: formatNumber(previous.noFollowUpLeads),
-      change: changes.noFollowUpLeadsChange,
-      reverse: true,
-    },
-  ]
-
-  return (
-    <section className="rounded-[5px] border border-slate-100 bg-white p-5 shadow-sm">
-      <div>
-        <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-[#00AEEF]">
-          Period Comparison
-        </p>
-
-        <h2 className="mt-1 font-fredoka text-[32px] font-semibold leading-tight text-slate-950">
-          Current {days} Days vs Previous {days} Days
-        </h2>
-
-        <p className="mt-1 font-poppins text-sm font-medium leading-6 text-slate-500">
-          Focus on whether the business is improving, slowing down, or creating
-          more follow-up risk.
-        </p>
-      </div>
-
-      <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-        {items.map((item) => (
-          <div key={item.label} className="rounded-[5px] bg-[#F8FAFC] p-4">
-            <div className="flex items-start justify-between gap-2">
-              <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                {item.label}
-              </p>
-
-              <ChangePill value={item.change} reverse={item.reverse} />
-            </div>
-
-            <p className="mt-3 font-fredoka text-[30px] font-semibold leading-none text-slate-950">
-              {item.current}
-            </p>
-
-            <p className="mt-2 font-poppins text-xs font-semibold text-slate-500">
-              Previous: {item.previous}
-            </p>
-          </div>
-        ))}
-      </div>
-    </section>
-  )
-}
-
 const TimelinePulse = ({ timeline = [] }) => {
   const activeTimeline = timeline.filter((item) => Number(item.totalLeads || 0) > 0)
   const recent = activeTimeline.slice(-8)
@@ -1151,11 +1080,19 @@ const AdminBusinessInsightsPage = () => {
   const followUps = insights?.followUps || {}
   const recentConvertedLeads = insights?.recentConvertedLeads || []
 
-  const activeOpportunities = Math.max(
-    Number(summary.totalLeads || 0) -
-      Number(summary.convertedLeads || 0) -
-      Number(summary.lostLeads || 0),
-    0
+  const totalLeadsValue = Number(summary.totalLeads || 0)
+  const convertedLeadsValue = Number(summary.convertedLeads || 0)
+  const lostLeadsValue = Number(summary.lostLeads || 0)
+
+  const activeOpportunities = Number(
+    summary.activeSalesLeads ??
+      Math.max(totalLeadsValue - convertedLeadsValue - lostLeadsValue, 0)
+  )
+
+  const convertedShare = getConversionRate(convertedLeadsValue, totalLeadsValue)
+  const activeOpportunityShare = getConversionRate(
+    activeOpportunities,
+    totalLeadsValue
   )
 
   const businessGrade = useMemo(() => {
@@ -1328,27 +1265,29 @@ const AdminBusinessInsightsPage = () => {
               icon={<FaChartLine />}
               label="Conversion Rate"
               value={formatPercent(summary.conversionRate)}
-              description="Confirmed + booked leads from total inquiries."
+              description={`${formatNumber(
+                summary.convertedLeads
+              )} converted out of ${formatNumber(summary.totalLeads)} total leads.`}
               tone="orange"
-              change={changes.conversionRateChange}
             />
 
             <ExecutiveMetric
               icon={<FaCheckCircle />}
               label="Converted Leads"
               value={formatNumber(summary.convertedLeads)}
-              description={`${formatNumber(
-                summary.totalLeads
-              )} total leads in this period.`}
+              description={`${formatPercent(
+                convertedShare
+              )} of total leads are confirmed or booked.`}
               tone="green"
-              change={changes.convertedLeadsChange}
             />
 
             <ExecutiveMetric
               icon={<FaRocket />}
               label="Active Opportunities"
               value={formatNumber(activeOpportunities)}
-              description="Open leads that can still convert."
+              description={`${formatPercent(
+                activeOpportunityShare
+              )} of total leads are still open for conversion.`}
               tone="blue"
             />
 
@@ -1358,10 +1297,8 @@ const AdminBusinessInsightsPage = () => {
               value={formatNumber(summary.noFollowUpLeads)}
               description={`${formatPercent(
                 summary.noFollowUpRate
-              )} leads have no follow-up.`}
+              )} active sales leads have no follow-up plan.`}
               tone="red"
-              change={changes.noFollowUpLeadsChange}
-              reverseChange
             />
           </div>
         )}
@@ -1410,8 +1347,6 @@ const AdminBusinessInsightsPage = () => {
                 value={formatNumber(summary.lostLeads)}
                 description={`${formatPercent(summary.lostRate)} lost rate.`}
                 tone="slate"
-                change={changes.lostLeadsChange}
-                reverseChange
               />
 
               <ExecutiveMetric

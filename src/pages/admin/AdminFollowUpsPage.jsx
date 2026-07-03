@@ -17,6 +17,15 @@ import {
 import { adminApi } from "../../services/api"
 import SmartLeadScore from "../../components/admin/SmartLeadScore"
 
+const openSalesStatuses = [
+  "New",
+  "Contacted",
+  "Interested",
+  "Awaiting Documents",
+  "Quoted",
+  "Payment Pending",
+]
+
 const followUpSections = [
   {
     key: "overdue",
@@ -89,14 +98,65 @@ const formatService = (serviceType = "") => {
   return serviceLabels[serviceType] || serviceType || "-"
 }
 
+const padDatePart = (value) => {
+  return String(value).padStart(2, "0")
+}
+
+const getLocalDateKey = (date) => {
+  return [
+    date.getFullYear(),
+    padDatePart(date.getMonth() + 1),
+    padDatePart(date.getDate()),
+  ].join("-")
+}
+
+const getDateKey = (date) => {
+  if (!date) return ""
+
+  const parsedDate = new Date(date)
+
+  if (Number.isNaN(parsedDate.getTime())) return ""
+
+  return getLocalDateKey(parsedDate)
+}
+
+const getTodayKey = () => {
+  return getLocalDateKey(new Date())
+}
+
+const getTomorrowKey = () => {
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+
+  return getLocalDateKey(tomorrow)
+}
+
+const getFollowUpDateValue = (offsetDays = 0) => {
+  const date = new Date()
+  date.setDate(date.getDate() + offsetDays)
+
+  return getLocalDateKey(date)
+}
+
 const formatDate = (date) => {
-  if (!date) return "-"
-  return new Date(date).toLocaleDateString()
+  const dateKey = getDateKey(date)
+
+  if (!dateKey) return "-"
+
+  const [year, month, day] = dateKey.split("-").map(Number)
+  const localDate = new Date(year, month - 1, day)
+
+  return localDate.toLocaleDateString()
 }
 
 const formatDateTime = (date) => {
   if (!date) return "-"
-  return new Date(date).toLocaleString()
+
+  const parsedDate = new Date(date)
+
+  if (Number.isNaN(parsedDate.getTime())) return "-"
+
+  return parsedDate.toLocaleString()
 }
 
 const getWhatsappUrl = (phone = "") => {
@@ -132,6 +192,54 @@ const getStatusBadgeClass = (status = "") => {
   }
 
   return classes[status] || "bg-slate-100 text-slate-700"
+}
+
+const isOpenSalesLead = (lead = {}) => {
+  return openSalesStatuses.includes(lead.status || "New")
+}
+
+const isScheduledFollowUp = (lead = {}) => {
+  return lead.followUpStatus === "Scheduled" && Boolean(lead.followUpDate)
+}
+
+const hasNoFollowUp = (lead = {}) => {
+  return (
+    isOpenSalesLead(lead) &&
+    (!lead.followUpDate ||
+      !lead.followUpStatus ||
+      lead.followUpStatus === "Not Set" ||
+      lead.followUpStatus === "")
+  )
+}
+
+const normalizeFollowUpLists = ({ today = [], overdue = [], upcoming = [], none = [] }) => {
+  const todayKey = getTodayKey()
+  const tomorrowKey = getTomorrowKey()
+
+  return {
+    today: today
+      .filter(isOpenSalesLead)
+      .filter(isScheduledFollowUp)
+      .filter((lead) => getDateKey(lead.followUpDate) === todayKey),
+
+    overdue: overdue
+      .filter(isOpenSalesLead)
+      .filter(isScheduledFollowUp)
+      .filter((lead) => {
+        const dateKey = getDateKey(lead.followUpDate)
+        return dateKey && dateKey < todayKey
+      }),
+
+    upcoming: upcoming
+      .filter(isOpenSalesLead)
+      .filter(isScheduledFollowUp)
+      .filter((lead) => {
+        const dateKey = getDateKey(lead.followUpDate)
+        return dateKey && dateKey >= tomorrowKey
+      }),
+
+    none: none.filter(hasNoFollowUp),
+  }
 }
 
 const getLeadSubtitle = (lead = {}) => {
@@ -198,19 +306,6 @@ const getLeadSubtitle = (lead = {}) => {
   }
 
   return [lead.city, lead.destination].filter(Boolean).join(" • ")
-}
-
-const getTodayIso = () => {
-  const today = new Date()
-  today.setHours(12, 0, 0, 0)
-  return today.toISOString()
-}
-
-const getTomorrowIso = () => {
-  const tomorrow = new Date()
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  tomorrow.setHours(12, 0, 0, 0)
-  return tomorrow.toISOString()
 }
 
 const MetricCard = ({ label, value, icon, tone, onClick, active }) => {
@@ -432,12 +527,14 @@ const AdminFollowUpsPage = () => {
         requestFor("none"),
       ])
 
-      setLists({
-        today,
-        overdue,
-        upcoming,
-        none,
-      })
+      setLists(
+        normalizeFollowUpLists({
+          today,
+          overdue,
+          upcoming,
+          none,
+        })
+      )
     } catch (err) {
       setError(err.message || "Failed to load follow-up calendar.")
     } finally {
@@ -498,15 +595,15 @@ const AdminFollowUpsPage = () => {
 
   const patchLeadEverywhere = (leadId, patch) => {
     setLists((prev) => {
-      const next = {}
+      const patchedLists = {}
 
       Object.keys(prev).forEach((key) => {
-        next[key] = prev[key].map((lead) =>
+        patchedLists[key] = prev[key].map((lead) =>
           lead._id === leadId ? { ...lead, ...patch } : lead
         )
       })
 
-      return next
+      return normalizeFollowUpLists(patchedLists)
     })
   }
 
@@ -541,7 +638,8 @@ const AdminFollowUpsPage = () => {
     if (!lead?._id) return
 
     const loadingKey = `${lead._id}-${type}`
-    const date = type === "today" ? getTodayIso() : getTomorrowIso()
+    const date =
+      type === "today" ? getFollowUpDateValue(0) : getFollowUpDateValue(1)
 
     setActionLoading(loadingKey)
     setSuccess("")

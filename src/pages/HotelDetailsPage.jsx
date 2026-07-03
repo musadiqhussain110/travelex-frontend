@@ -1,21 +1,28 @@
+import { useMemo, useRef, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import {
   FaArrowLeft,
   FaArrowRight,
   FaBed,
+  FaCalendarAlt,
   FaCheckCircle,
   FaClock,
+  FaEnvelope,
   FaHotel,
   FaInfoCircle,
   FaMapMarkerAlt,
   FaPhoneAlt,
   FaStar,
   FaTag,
+  FaUser,
   FaUsers,
   FaWhatsapp,
 } from "react-icons/fa"
 
 import Footer from "../components/Footer"
+import AppSelect from "../components/common/AppSelect"
+import AppDatePicker from "../components/common/AppDatePicker"
+import { publicApi } from "../services/publicApi"
 
 import hotelHero2 from "../assets/Hotels/Hotel6.jpg"
 import hotelHero3 from "../assets/Hotels/Hotel5.jpg"
@@ -41,8 +48,6 @@ const hotels = [
       "Final quote based on travel dates",
     ],
     facilities: ["WiFi", "Breakfast", "Laundry", "Room Service"],
-    roomOptions: ["Standard Room", "Deluxe Room", "Family Room"],
-    suitableFor: ["Business travel", "Family stay", "City stay"],
     note:
       "Final hotel price may vary based on travel dates, room category, number of guests, meal plan, availability, and supplier policy.",
   },
@@ -65,8 +70,6 @@ const hotels = [
       "Near Haram options on request",
     ],
     facilities: ["Family Rooms", "Near Haram Options", "Flexible Stay"],
-    roomOptions: ["Quad Room", "Triple Room", "Double Room", "Family Room"],
-    suitableFor: ["Families", "Umrah travelers", "Group stay"],
     note:
       "Hotel distance, room type, and price depend on selected dates, availability, and preferred hotel category.",
   },
@@ -89,69 +92,335 @@ const hotels = [
       "Quote based on destination and dates",
     ],
     facilities: ["Breakfast Options", "Consultant Support", "Flexible Budget"],
-    roomOptions: ["Budget Room", "Standard Room", "Deluxe Room"],
-    suitableFor: ["International tours", "Budget trips", "Family travel"],
     note:
       "Final price depends on destination, travel season, room type, hotel category, number of guests, and supplier availability.",
   },
 ]
 
-const bookingSteps = [
-  {
-    title: "Share stay details",
-    description:
-      "Tell us your destination, travel dates, number of guests, room preference, and budget.",
-  },
-  {
-    title: "Check availability",
-    description:
-      "TravelEx checks suitable hotel options according to destination, dates, and comfort level.",
-  },
-  {
-    title: "Get final quote",
-    description:
-      "You receive a quote based on hotel category, room type, meal plan, and availability.",
-  },
-  {
-    title: "Confirm booking",
-    description:
-      "After confirmation, TravelEx guides you with payment, documents, and booking support.",
-  },
-]
+const roomTypeOptions = ["Standard", "Suite", "Apartment"]
 
-const faqs = [
-  {
-    question: "Is the hotel price fixed?",
-    answer:
-      "Hotel prices may change based on travel dates, room type, destination, season, number of guests, and availability.",
-  },
-  {
-    question: "Can TravelEx suggest hotels according to my budget?",
-    answer:
-      "Yes. TravelEx can suggest suitable hotel options according to your destination, budget, travel dates, and comfort preference.",
-  },
-  {
-    question: "Can I request family rooms?",
-    answer:
-      "Yes. You can request family rooms, quad rooms, triple rooms, or custom room sharing options depending on hotel availability.",
-  },
-]
+const hotelCategoryOptions = ["3 Star", "4 Star", "5 Star"]
+
+const labelClass =
+  "mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs"
+
+const inputClass =
+  "h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:h-12 sm:px-4 sm:text-sm"
+
+const iconInputClass =
+  "h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
+
+const getInitialBooking = () => ({
+  fullName: "",
+  phone: "",
+  email: "",
+  city: "",
+
+  destination: "",
+  hotelName: "",
+
+  checkInDate: "",
+  checkOutDate: "",
+
+  adults: "",
+  children: "",
+  infants: "",
+
+  rooms: "",
+  roomType: "",
+  hotelCategory: "",
+
+  breakfastIncluded: false,
+  airportTransfer: false,
+
+  additionalRequirements: "",
+  companyWebsite: "",
+})
+
+const parseDateInput = (value) => {
+  if (!value) return null
+
+  const cleanValue = value.trim()
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(cleanValue)) {
+    const date = new Date(`${cleanValue}T00:00:00`)
+    return Number.isNaN(date.getTime()) ? null : date
+  }
+
+  const match = cleanValue.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/)
+
+  if (!match) return null
+
+  const [, day, month, year] = match
+  const date = new Date(Number(year), Number(month) - 1, Number(day))
+
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+const getDateIso = (value) => {
+  const date = parseDateInput(value)
+  return date ? date.toISOString() : undefined
+}
+
+const getNights = (checkIn, checkOut) => {
+  const startDate = parseDateInput(checkIn)
+  const endDate = parseDateInput(checkOut)
+
+  if (!startDate || !endDate) return "-"
+
+  const difference = Math.ceil(
+    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+  )
+
+  return difference > 0 ? difference : "-"
+}
 
 const getHotelWhatsappLink = (hotel) =>
   `https://wa.me/923111444192?text=${encodeURIComponent(
     `Assalamualaikum TravelEx, I need guidance about ${hotel.name} in ${hotel.location}.`
   )}`
 
+const getHotelBookingWhatsappLink = (hotel) =>
+  `https://wa.me/923111444192?text=${encodeURIComponent(
+    `Assalamualaikum TravelEx, I want to request hotel booking for ${
+      hotel?.name || "selected hotel"
+    }. Please guide me.`
+  )}`
+
 const HotelDetailsPage = () => {
   const { id } = useParams()
+  const bookingFormRef = useRef(null)
+
   const hotel = hotels.find((item) => item.id === id)
+
+  const [formError, setFormError] = useState("")
+  const [success, setSuccess] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [bookingRef] = useState(
+    () => `TXH-${Math.floor(100000 + Math.random() * 900000)}`
+  )
+  const [booking, setBooking] = useState(() => getInitialBooking())
+
+  const nights = useMemo(() => {
+    return getNights(booking.checkInDate, booking.checkOutDate)
+  }, [booking.checkInDate, booking.checkOutDate])
+
+  const scrollToBookingForm = () => {
+    bookingFormRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    })
+  }
+
+  const handleChange = (event) => {
+    const { name, value, type, checked } = event.target
+
+    setBooking((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }))
+
+    setFormError("")
+    setSuccess(false)
+  }
+
+  const handleSelectChange = (name, value) => {
+    setBooking((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+
+    setFormError("")
+    setSuccess(false)
+  }
+
+  const validateForm = () => {
+    if (!booking.fullName.trim()) return "Please enter full name."
+    if (!booking.phone.trim()) return "Please enter mobile / WhatsApp number."
+    if (!booking.email.trim()) return "Please enter email address."
+    if (!booking.city.trim()) return "Please enter your city."
+    if (!booking.destination.trim()) return "Please enter destination city/country."
+    if (!booking.checkInDate) return "Please select check-in date."
+    if (!booking.checkOutDate) return "Please select check-out date."
+
+    if (nights === "-") {
+      return "Check-out date must be after check-in date."
+    }
+
+    if (!booking.adults || Number(booking.adults) < 1) {
+      return "Please enter number of adults."
+    }
+
+    if (Number(booking.children) < 0) {
+      return "Children cannot be negative."
+    }
+
+    if (Number(booking.infants) < 0) {
+      return "Infants cannot be negative."
+    }
+
+    if (!booking.rooms || Number(booking.rooms) < 1) {
+      return "Please enter number of rooms."
+    }
+
+    if (!booking.roomType) return "Please select room type."
+    if (!booking.hotelCategory) return "Please select hotel category."
+
+    return ""
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setFormError("")
+    setSuccess(false)
+
+    const validationError = validateForm()
+
+    if (validationError) {
+      setFormError(validationError)
+      return
+    }
+
+    try {
+      setLoading(true)
+
+      const adults = Math.max(1, Number(booking.adults) || 1)
+      const children = Math.max(0, Number(booking.children) || 0)
+      const infants = Math.max(0, Number(booking.infants) || 0)
+      const rooms = Math.max(1, Number(booking.rooms) || 1)
+      const guests = adults + children + infants
+
+      const selectedHotelName =
+        booking.hotelName.trim() || hotel?.name || "Not specified"
+
+      const specialRequests = [
+        booking.breakfastIncluded ? "Breakfast Included" : "",
+        booking.airportTransfer ? "Airport Transfer" : "",
+      ]
+        .filter(Boolean)
+        .join(", ")
+
+      const finalAdditionalRequirements = [
+        specialRequests,
+        booking.additionalRequirements.trim(),
+      ]
+        .filter(Boolean)
+        .join("\n")
+
+      const message = [
+        "Hotel Booking Inquiry",
+        `Booking Reference: ${bookingRef}`,
+        "",
+        "Selected Hotel Page",
+        `Hotel Page: ${hotel?.name || "Not specified"}`,
+        `Hotel Location: ${hotel?.location || "Not specified"}`,
+        `Hotel Type: ${hotel?.type || "Not specified"}`,
+        `Hotel Category From Page: ${
+          hotel?.stars ? `${hotel.stars} Star` : "Not specified"
+        }`,
+        `Displayed Quote: ${hotel?.price || "Not specified"}`,
+        "",
+        "Personal Information",
+        `Full Name: ${booking.fullName}`,
+        `Mobile / WhatsApp: ${booking.phone}`,
+        `Email Address: ${booking.email}`,
+        `City: ${booking.city}`,
+        "",
+        "Hotel Requirements",
+        `Destination: ${booking.destination}`,
+        `Hotel Name If Any: ${booking.hotelName || "Not provided"}`,
+        `Check-in Date: ${booking.checkInDate}`,
+        `Check-out Date: ${booking.checkOutDate}`,
+        `Number of Nights: ${nights}`,
+        "",
+        "Guests",
+        `Adults: ${adults}`,
+        `Children: ${children}`,
+        `Infants: ${infants}`,
+        `Total Guests: ${guests}`,
+        "",
+        "Room Requirements",
+        `Number of Rooms: ${rooms}`,
+        `Room Type: ${booking.roomType}`,
+        `Hotel Category: ${booking.hotelCategory}`,
+        "",
+        `Special Requests: ${specialRequests || "None"}`,
+        "",
+        booking.additionalRequirements
+          ? `Additional Requirements: ${booking.additionalRequirements}`
+          : "Additional Requirements: Not provided",
+      ].join("\n")
+
+      const payload = {
+        name: booking.fullName.trim(),
+        phone: booking.phone.trim(),
+        email: booking.email.trim(),
+
+        serviceType: "hotel",
+source: "hotel-page",
+        pageUrl: window.location.href,
+
+        city: booking.city.trim(),
+        destination: booking.destination.trim(),
+        destinationCity: booking.destination.trim(),
+
+        preferredHotel: selectedHotelName,
+        hotelCategory: booking.hotelCategory,
+
+        checkInDate: getDateIso(booking.checkInDate),
+        checkOutDate: getDateIso(booking.checkOutDate),
+        travelDate: getDateIso(booking.checkInDate),
+        returnDate: getDateIso(booking.checkOutDate),
+
+        durationOfStay: `${nights} nights`,
+
+        travelers: {
+          adults,
+          children,
+          infants,
+        },
+
+        numberOfGuests: guests,
+        numberOfRooms: rooms,
+
+        roomType: booking.roomType,
+        mealPlan: booking.breakfastIncluded ? "Breakfast Included" : "Room Only",
+
+        bookingReference: bookingRef,
+        additionalRequirements: finalAdditionalRequirements,
+
+        message,
+        priority: "high",
+        companyWebsite: booking.companyWebsite,
+      }
+
+      await publicApi.createLead(payload)
+
+      setSuccess(true)
+
+      bookingFormRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+
+      setBooking(getInitialBooking())
+    } catch (err) {
+      console.error("Hotel booking lead error:", err)
+      setFormError(
+        err.message ||
+          "We could not submit your hotel booking request right now. Please try again."
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (!hotel) {
     return (
       <main className="bg-[#F8FAFC]">
         <section className="bg-[#F8FAFC] px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
           <div className="mx-auto max-w-[1180px]">
-            <div className="rounded-[12px] border border-slate-100 bg-white p-5 text-center shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-8">
+            <div className="rounded-[5px] border border-slate-100 bg-white p-5 text-center shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-8">
               <h1 className="font-fredoka text-[24px] font-semibold text-slate-950 sm:text-[34px]">
                 Hotel not found
               </h1>
@@ -200,6 +469,8 @@ const HotelDetailsPage = () => {
     },
   ]
 
+  const compactHighlights = [...hotel.highlights, ...hotel.facilities].slice(0, 6)
+
   return (
     <main className="bg-[#F8FAFC]">
       {/* Detail Hero */}
@@ -244,243 +515,402 @@ const HotelDetailsPage = () => {
 
               <span className="hidden sm:inline">{hotel.shortDescription}</span>
             </p>
-
-            <div className="mt-3 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:gap-3">
-              <Link
-  to={`/booking/hotels/${hotel.id}`}
-  className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
->
-  Book Now
-  <FaArrowRight className="text-[10px] sm:text-xs" />
-</Link>
-
-              <a
-                href={getHotelWhatsappLink(hotel)}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-              >
-                <FaWhatsapp />
-                Ask on WhatsApp
-              </a>
-            </div>
           </div>
         </div>
       </section>
-
-      {/* Quick Facts */}
-      <section className="relative z-20 -mt-4 bg-transparent sm:-mt-8">
-        <div className="mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-2 rounded-[12px] border border-slate-100 bg-white p-2.5 shadow-[0_14px_36px_rgba(15,23,42,0.09)] sm:grid-cols-2 sm:gap-3 sm:p-4 lg:grid-cols-4">
-            {quickFacts.map((item) => {
-              const Icon = item.icon
-
-              return (
-                <div
-                  key={item.label}
-                  className="rounded-[5px] bg-[#F8FAFC] p-2.5 sm:p-4"
-                >
-                  <Icon className="text-[13px] text-[#00AEEF] sm:text-xl" />
-
-                  <p className="mt-1.5 font-poppins text-[7px] font-bold uppercase tracking-[0.14em] text-slate-400 sm:mt-3 sm:text-[10px] sm:tracking-[0.16em]">
-                    {item.label}
-                  </p>
-
-                  <p className="mt-0.5 line-clamp-2 font-poppins text-[9px] font-semibold leading-3.5 text-slate-950 sm:mt-1 sm:text-sm sm:leading-6">
-                    {item.value}
-                  </p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Main Details */}
+      {/* Merged Booking + Details */}
       <section className="bg-[#F8FAFC] py-8 sm:py-14">
-        <div className="mx-auto grid max-w-[1440px] gap-5 px-4 sm:px-6 lg:grid-cols-[1fr_360px] lg:gap-6 lg:px-8">
-          {/* Detail Content */}
-          <div className="grid gap-4 sm:gap-6">
-            {/* Overview */}
-            <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
-              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
-                Hotel Overview
+        <div className="mx-auto grid max-w-[1440px] gap-5 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-6 lg:px-8">
+          {/* Booking Form Left */}
+          <form
+            ref={bookingFormRef}
+            id="hotel-booking-form"
+            onSubmit={handleSubmit}
+            className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_16px_45px_rgba(15,23,42,0.08)] sm:p-7"
+          >
+            <input
+              type="text"
+              name="companyWebsite"
+              value={booking.companyWebsite}
+              onChange={handleChange}
+              className="hidden"
+              tabIndex="-1"
+              autoComplete="off"
+            />
+
+            <div className="mb-5">
+              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.1em]">
+                Hotel Booking Inquiry Form
               </p>
 
-              <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[36px]">
-                Comfortable stay with TravelEx support
+              <h2 className="font-fredoka text-[22px] font-semibold leading-tight text-slate-950 sm:text-[36px]">
+                Request this hotel
               </h2>
 
-              <p className="mt-2 font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:mt-3 sm:text-base sm:leading-8">
-                {hotel.overview}
+              <p className="mt-2 font-poppins text-[11.5px] font-medium leading-6 text-slate-600 sm:text-sm sm:leading-7">
+                Fill the form and TravelEx consultant will confirm room
+                availability, final quote, and booking process.
               </p>
-
-              <div className="mt-4 grid gap-2 sm:mt-5 sm:grid-cols-3 sm:gap-3">
-                {hotel.suitableFor.map((item) => (
-                  <p
-                    key={item}
-                    className="flex items-center gap-2 rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 font-poppins text-[11.5px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-sm"
-                  >
-                    <FaUsers className="shrink-0 text-[#00AEEF]" />
-                    {item}
-                  </p>
-                ))}
-              </div>
             </div>
 
-            {/* Highlights and Facilities */}
-            <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
-              <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-6">
-                <h2 className="font-fredoka text-[21px] font-semibold text-slate-950 sm:text-[26px]">
-                  Hotel Highlights
-                </h2>
+            {success && (
+              <div className="mb-5 rounded-[5px] border border-green-200 bg-green-50 p-4">
+                <div className="flex items-start gap-3">
+                  <FaCheckCircle className="mt-1 shrink-0 text-green-600" />
 
-                <div className="mt-3 grid gap-2 sm:mt-5 sm:gap-3">
-                  {hotel.highlights.map((item) => (
-                    <p
-                      key={item}
-                      className="flex items-start gap-2.5 rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 font-poppins text-[11px] font-semibold leading-5 text-slate-700 sm:gap-3 sm:px-4 sm:py-3 sm:text-sm sm:leading-6"
-                    >
-                      <FaCheckCircle className="mt-1 shrink-0 text-[12px] text-[#00AEEF] sm:text-base" />
-                      {item}
-                    </p>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-6">
-                <h2 className="font-fredoka text-[21px] font-semibold text-slate-950 sm:text-[26px]">
-                  Facilities
-                </h2>
-
-                <div className="mt-3 grid gap-2 sm:mt-5 sm:gap-3">
-                  {hotel.facilities.map((item) => (
-                    <p
-                      key={item}
-                      className="flex items-start gap-2.5 rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 font-poppins text-[11px] font-semibold leading-5 text-slate-700 sm:gap-3 sm:px-4 sm:py-3 sm:text-sm sm:leading-6"
-                    >
-                      <FaCheckCircle className="mt-1 shrink-0 text-[12px] text-[#FF6B00] sm:text-base" />
-                      {item}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Room Options */}
-            <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
-              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
-                Room Options
-              </p>
-
-              <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[30px]">
-                Available room preferences
-              </h2>
-
-              <div className="mt-4 grid gap-2 sm:mt-5 sm:grid-cols-3 sm:gap-4">
-                {hotel.roomOptions.map((room) => (
-                  <div
-                    key={room}
-                    className="rounded-[5px] bg-[#F8FAFC] p-3.5 sm:p-5"
-                  >
-                    <FaBed className="text-lg text-[#00AEEF] sm:text-xl" />
-
-                    <p className="mt-2 font-poppins text-xs font-semibold text-slate-950 sm:mt-3 sm:text-sm">
-                      {room}
-                    </p>
-
-                    <p className="mt-1 font-poppins text-[10.5px] font-medium leading-5 text-slate-500 sm:text-xs sm:leading-6">
-                      Subject to availability and hotel policy.
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Booking Process */}
-            <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
-              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
-                Booking Process
-              </p>
-
-              <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[30px]">
-                How hotel booking works
-              </h2>
-
-              <div className="mt-4 grid gap-2 sm:mt-5 sm:gap-4">
-                {bookingSteps.map((step, index) => (
-                  <div
-                    key={step.title}
-                    className="grid gap-2 rounded-[5px] border border-slate-100 bg-[#F8FAFC] p-3.5 sm:grid-cols-[auto_1fr] sm:gap-3 sm:p-4"
-                  >
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF6B00]/10 font-poppins text-xs font-bold text-[#FF6B00] sm:h-10 sm:w-10 sm:text-sm">
-                      {index + 1}
-                    </span>
-
-                    <div>
-                      <h3 className="font-fredoka text-[17px] font-semibold text-slate-950 sm:text-[20px]">
-                        {step.title}
-                      </h3>
-
-                      <p className="mt-1 font-poppins text-[11px] font-medium leading-5 text-slate-600 sm:text-sm sm:leading-7">
-                        {step.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Important Note */}
-            <div className="rounded-[12px] border border-[#FF6B00]/15 bg-orange-50 p-4 sm:p-6">
-              <div className="flex gap-2.5 sm:gap-3">
-                <FaInfoCircle className="mt-1 shrink-0 text-sm text-[#FF6B00] sm:text-base" />
-
-                <div>
-                  <h3 className="font-fredoka text-[20px] font-semibold leading-tight text-slate-950 sm:text-[22px]">
-                    Important pricing note
-                  </h3>
-
-                  <p className="mt-1.5 font-poppins text-[11px] font-semibold leading-5 text-orange-800 sm:mt-2 sm:text-sm sm:leading-7">
-                    {hotel.note}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* FAQ */}
-            <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
-              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
-                Common Questions
-              </p>
-
-              <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[30px]">
-                Before you request a hotel quote
-              </h2>
-
-              <div className="mt-4 grid gap-2 sm:mt-5 sm:gap-3">
-                {faqs.map((faq) => (
-                  <div
-                    key={faq.question}
-                    className="rounded-[5px] bg-[#F8FAFC] p-3.5 sm:p-4"
-                  >
-                    <h3 className="font-poppins text-[12px] font-bold text-slate-950 sm:text-sm">
-                      {faq.question}
+                  <div>
+                    <h3 className="font-poppins text-sm font-bold text-green-800">
+                      Hotel inquiry submitted successfully.
                     </h3>
 
-                    <p className="mt-1.5 font-poppins text-[11px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
-                      {faq.answer}
+                    <p className="mt-1 font-poppins text-xs font-semibold leading-5 text-green-700 sm:text-sm">
+                      Booking Reference: {bookingRef}. Team will contact you shortly.
                     </p>
                   </div>
-                ))}
+                </div>
+              </div>
+            )}
+
+            {formError && (
+              <p className="mb-5 rounded-[5px] border border-red-200 bg-red-50 px-4 py-3 font-poppins text-[11.5px] font-semibold leading-5 text-red-600 sm:text-sm">
+                {formError}
+              </p>
+            )}
+
+            <div className="grid gap-6">
+              {/* Personal Information */}
+              <div>
+                <h3 className="font-fredoka text-[22px] font-semibold text-slate-950">
+                  Personal Information
+                </h3>
+
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass}>Full Name</label>
+
+                    <div className="relative">
+                      <FaUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="text"
+                        name="fullName"
+                        value={booking.fullName}
+                        onChange={handleChange}
+                        placeholder="Enter full name"
+                        className={iconInputClass}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Mobile / WhatsApp</label>
+
+                    <div className="relative">
+                      <FaPhoneAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={booking.phone}
+                        onChange={handleChange}
+                        placeholder="03XXXXXXXXX"
+                        className={iconInputClass}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass}>Email Address</label>
+
+                    <div className="relative">
+                      <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="email"
+                        name="email"
+                        value={booking.email}
+                        onChange={handleChange}
+                        placeholder="your@email.com"
+                        className={iconInputClass}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>City</label>
+
+                    <input
+                      type="text"
+                      name="city"
+                      value={booking.city}
+                      onChange={handleChange}
+                      placeholder="Karachi, Lahore, Hyderabad..."
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Hotel Requirements */}
+              <div>
+                <h3 className="font-fredoka text-[22px] font-semibold text-slate-950">
+                  Hotel Requirements
+                </h3>
+
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass}>Destination City / Country</label>
+
+                    <div className="relative">
+                      <FaMapMarkerAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="text"
+                        name="destination"
+                        value={booking.destination}
+                        onChange={handleChange}
+                        placeholder="Makkah, Madinah, Dubai, Turkey..."
+                        className={iconInputClass}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Hotel Name If Any</label>
+
+                    <div className="relative">
+                      <FaHotel className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="text"
+                        name="hotelName"
+                        value={booking.hotelName}
+                        onChange={handleChange}
+                        placeholder="Hotel name or leave blank"
+                        className={iconInputClass}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <AppDatePicker
+                    label="Check-in Date"
+                    value={booking.checkInDate}
+                    onChange={(value) =>
+                      handleSelectChange("checkInDate", value)
+                    }
+                    placeholder="Select check-in date"
+                  />
+
+                  <AppDatePicker
+                    label="Check-out Date"
+                    value={booking.checkOutDate}
+                    onChange={(value) =>
+                      handleSelectChange("checkOutDate", value)
+                    }
+                    placeholder="Select check-out date"
+                  />
+                </div>
+
+                <div className="mt-4">
+                  <label className={labelClass}>Number of Nights</label>
+
+                  <div className="relative">
+                    <FaCalendarAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                    <input
+                      type="text"
+                      value={nights}
+                      readOnly
+                      className={`${iconInputClass} cursor-not-allowed bg-slate-50 text-slate-500`}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Guests */}
+              <div>
+                <h3 className="font-fredoka text-[22px] font-semibold text-slate-950">
+                  Guests
+                </h3>
+
+                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <label className={labelClass}>Adults</label>
+
+                    <div className="relative">
+                      <FaUsers className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="number"
+                        name="adults"
+                        min="1"
+                        value={booking.adults}
+                        onChange={handleChange}
+                        placeholder="1"
+                        className={iconInputClass}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Children</label>
+
+                    <input
+                      type="number"
+                      name="children"
+                      min="0"
+                      value={booking.children}
+                      onChange={handleChange}
+                      placeholder="0"
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Infants</label>
+
+                    <input
+                      type="number"
+                      name="infants"
+                      min="0"
+                      value={booking.infants}
+                      onChange={handleChange}
+                      placeholder="0"
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Room Requirements */}
+              <div>
+                <h3 className="font-fredoka text-[22px] font-semibold text-slate-950">
+                  Room Requirements
+                </h3>
+
+                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <label className={labelClass}>Number of Rooms</label>
+
+                    <div className="relative">
+                      <FaBed className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                      <input
+                        type="number"
+                        name="rooms"
+                        min="1"
+                        value={booking.rooms}
+                        onChange={handleChange}
+                        placeholder="1"
+                        className={iconInputClass}
+                      />
+                    </div>
+                  </div>
+
+                  <AppSelect
+                    label="Room Type"
+                    value={booking.roomType}
+                    onChange={(value) => handleSelectChange("roomType", value)}
+                    placeholder="Select room type"
+                    options={roomTypeOptions}
+                  />
+
+                  <AppSelect
+                    label="Hotel Category"
+                    value={booking.hotelCategory}
+                    onChange={(value) =>
+                      handleSelectChange("hotelCategory", value)
+                    }
+                    placeholder="Select hotel category"
+                    options={hotelCategoryOptions}
+                  />
+                </div>
+              </div>
+
+              {/* Special Requests */}
+              <div>
+                <h3 className="font-fredoka text-[22px] font-semibold text-slate-950">
+                  Special Requests
+                </h3>
+
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-[5px] border border-slate-200 bg-white px-4 py-3 font-poppins text-sm font-semibold text-slate-700 transition hover:border-[#00AEEF] hover:bg-[#00AEEF]/5">
+                    <input
+                      type="checkbox"
+                      name="breakfastIncluded"
+                      checked={booking.breakfastIncluded}
+                      onChange={handleChange}
+                      className="h-4 w-4 accent-[#FF6B00]"
+                    />
+                    Breakfast Included
+                  </label>
+
+                  <label className="flex cursor-pointer items-center gap-3 rounded-[5px] border border-slate-200 bg-white px-4 py-3 font-poppins text-sm font-semibold text-slate-700 transition hover:border-[#00AEEF] hover:bg-[#00AEEF]/5">
+                    <input
+                      type="checkbox"
+                      name="airportTransfer"
+                      checked={booking.airportTransfer}
+                      onChange={handleChange}
+                      className="h-4 w-4 accent-[#FF6B00]"
+                    />
+                    Airport Transfer
+                  </label>
+                </div>
+
+                <div className="mt-4">
+                  <label className={labelClass}>Additional Requirements</label>
+
+                  <textarea
+                    name="additionalRequirements"
+                    rows="4"
+                    placeholder="Write early check-in, late check-out, family room, Haram distance, room sharing, view preference, or any special request..."
+                    value={booking.additionalRequirements}
+                    onChange={handleChange}
+                    className="w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:px-4 sm:text-sm"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Sticky Quote Sidebar */}
-          <aside className="h-fit lg:sticky lg:top-24 lg:self-start">
-            <div className="overflow-hidden rounded-[12px] border border-slate-100 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.08)]">
-              <div className="relative h-36 overflow-hidden sm:h-44">
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-6 py-3.5 font-poppins text-xs font-semibold uppercase tracking-[0.04em] text-white transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-70 sm:text-sm"
+            >
+              {loading ? "Submitting Inquiry..." : "Submit Hotel Inquiry"}
+              {!loading && <FaArrowRight className="text-[10px] sm:text-xs" />}
+            </button>
+
+            <div className="mt-4 rounded-[5px] bg-orange-50 p-3.5 sm:p-4">
+              <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-[#FF6B00] sm:text-[11px] sm:tracking-[0.1em]">
+                Request Based Booking
+              </p>
+
+              <p className="mt-1.5 font-poppins text-[11px] font-medium leading-5 text-orange-800 sm:mt-2 sm:text-sm sm:leading-7">
+                No online payment is charged here. TravelEx consultant will
+                verify availability and final price before confirmation.
+              </p>
+            </div>
+
+            <a
+              href={getHotelBookingWhatsappLink(hotel)}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-3 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
+            >
+              <FaWhatsapp />
+              Ask on WhatsApp
+            </a>
+          </form>
+
+          {/* Necessary Details Right */}
+          <aside className="grid h-fit gap-5 lg:sticky lg:top-24">
+            <div className="overflow-hidden rounded-[5px] border border-slate-100 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.08)]">
+              <div className="relative h-44 overflow-hidden sm:h-56">
                 <img
                   src={hotel.image}
                   alt={hotel.name}
@@ -489,84 +919,101 @@ const HotelDetailsPage = () => {
 
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
 
-                <div className="absolute bottom-3 left-4 right-4 sm:bottom-4">
-                  <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.16em] text-white/65 sm:text-[10px]">
+                <div className="absolute bottom-4 left-4 right-4">
+                  <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-white/70">
                     Selected Hotel
                   </p>
 
-                  <h3 className="mt-1 font-fredoka text-[21px] font-semibold leading-tight text-white sm:text-[24px]">
+                  <h3 className="mt-1 font-fredoka text-[26px] font-semibold leading-tight text-white">
                     {hotel.name}
                   </h3>
+
+                  <p className="mt-1 font-poppins text-xs font-semibold text-white/80">
+                    {hotel.location} • {hotel.type} • {hotel.stars} Star
+                  </p>
                 </div>
               </div>
 
               <div className="p-4 sm:p-5">
-                <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.16em] text-slate-400 sm:text-[10px]">
-                  Starting / Quote
+                <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-[#00AEEF]">
+                  Quote
                 </p>
 
-                <p className="mt-1 font-poppins text-[22px] font-semibold leading-tight text-[#FF6B00] sm:text-[24px]">
+                <p className="mt-1 font-fredoka text-[28px] font-semibold leading-tight text-[#FF6B00]">
                   {hotel.price}
                 </p>
 
-                <p className="mt-2 font-poppins text-[11px] font-medium leading-5 text-slate-500 sm:text-xs sm:leading-6">
-                  Final price depends on travel dates, guests, room type, meal
-                  plan, hotel category, and availability.
+                <p className="mt-2 font-poppins text-sm font-medium leading-7 text-slate-600">
+                  Final price depends on dates, room type, meal plan, guests,
+                  and availability.
                 </p>
 
-                <div className="mt-4 grid gap-2 sm:mt-5 sm:gap-3">
-                  <Link
-  to={`/booking/hotels/${hotel.id}`}
-  className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
->
-  Book Now
-  <FaArrowRight className="text-[10px] sm:text-xs" />
-</Link>
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  {quickFacts.map((item) => {
+                    const Icon = item.icon
 
-                  <a
-                    href={getHotelWhatsappLink(hotel)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    <FaWhatsapp />
-                    WhatsApp Inquiry
-                  </a>
+                    return (
+                      <div key={item.label} className="rounded-[5px] bg-[#F8FAFC] p-3">
+                        <Icon className="text-sm text-[#00AEEF]" />
 
-                  <a
-                    href="tel:03111444192"
-                    className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 bg-white px-5 py-2.5 font-poppins text-xs font-semibold text-slate-900 transition hover:border-[#00AEEF] hover:text-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    <FaPhoneAlt />
-                    Call Now
-                  </a>
+                        <p className="mt-2 font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                          {item.label}
+                        </p>
+
+                        <p className="mt-1 line-clamp-2 font-poppins text-xs font-bold leading-5 text-slate-950">
+                          {item.value}
+                        </p>
+                      </div>
+                    )
+                  })}
                 </div>
+              </div>
+            </div>
 
-                <div className="mt-4 rounded-[5px] bg-[#F8FAFC] p-3.5 sm:mt-5 sm:p-4">
-                  <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.16em] text-[#00AEEF] sm:text-[11px]">
-                    Need custom hotel help?
+            <div className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-5">
+              <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-[#00AEEF]">
+                Hotel Overview
+              </p>
+
+              <h2 className="mt-1 font-fredoka text-[28px] font-semibold leading-tight text-slate-950">
+                Stay support by TravelEx
+              </h2>
+
+              <p className="mt-2 font-poppins text-sm font-medium leading-7 text-slate-600">
+                {hotel.overview}
+              </p>
+            </div>
+
+            <div className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-5">
+              <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-[#FF6B00]">
+                Key Details
+              </p>
+
+              <div className="mt-4 grid gap-2">
+                {compactHighlights.map((item) => (
+                  <p
+                    key={item}
+                    className="flex items-start gap-2 rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 font-poppins text-sm font-semibold leading-6 text-slate-700"
+                  >
+                    <FaCheckCircle className="mt-1 shrink-0 text-[#00AEEF]" />
+                    {item}
                   </p>
+                ))}
+              </div>
+            </div>
 
-                  <p className="mt-1.5 font-poppins text-[11px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
-                    Share your destination, dates, guests, room preference, and
-                    budget. TravelEx can guide you with suitable hotel options.
+            <div className="rounded-[5px] border border-[#FF6B00]/15 bg-orange-50 p-4 sm:p-5">
+              <div className="flex gap-3">
+                <FaInfoCircle className="mt-1 shrink-0 text-[#FF6B00]" />
+
+                <div>
+                  <h3 className="font-fredoka text-[22px] font-semibold leading-tight text-slate-950">
+                    Important pricing note
+                  </h3>
+
+                  <p className="mt-2 font-poppins text-sm font-semibold leading-7 text-orange-800">
+                    {hotel.note}
                   </p>
-                </div>
-
-                <div className="mt-4 grid gap-2 sm:mt-5 sm:gap-3">
-                  {[
-                    "Hotel quote support",
-                    "Family stay guidance",
-                    "WhatsApp consultation",
-                  ].map((item) => (
-                    <p
-                      key={item}
-                      className="flex items-center gap-2 font-poppins text-[11.5px] font-semibold text-slate-700 sm:text-sm"
-                    >
-                      <FaCheckCircle className="text-[#00AEEF]" />
-                      {item}
-                    </p>
-                  ))}
                 </div>
               </div>
             </div>
