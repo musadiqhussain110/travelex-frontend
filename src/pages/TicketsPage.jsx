@@ -471,7 +471,7 @@ const TicketsPage = () => {
                 value={formData.additionalRequirements}
                 onChange={handleChange}
                 placeholder="Write baggage needs, flexible dates, preferred timings, or any other ticket requirement..."
-                className={`${inputClass} h-auto resize-none py-3 leading-6`}
+                className="min-h-[120px] w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:min-h-[135px] sm:px-4 sm:text-sm"
               />
             </div>
 

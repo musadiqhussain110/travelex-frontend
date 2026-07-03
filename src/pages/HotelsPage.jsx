@@ -12,7 +12,7 @@ import {
 import Footer from "../components/Footer"
 import { hotels } from "../data/hotelsData"
 
-const starFilters = ["All", "5", "4", "3"]
+const starFilters = ["All", "Custom", "5", "4", "3"]
 
 const whatsappLink =
   "https://wa.me/923111444192?text=Assalamualaikum%20TravelEx%2C%20I%20need%20hotel%20booking%20guidance."
@@ -20,20 +20,56 @@ const whatsappLink =
 const cardRowClass =
   "-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-5 sm:overflow-visible sm:px-0 lg:grid-cols-3 xl:grid-cols-4"
 
+const customHotelDetails = {
+  name: "Custom Hotel Request",
+  location: "Choose any city, hotel, or destination",
+  price: "Custom quote available",
+  stars: "Custom",
+  type: "Custom Hotel",
+  shortDescription:
+    "Tell TravelEx your preferred city, hotel name, budget, dates, guests, and room type. Our team will check availability and share the best possible quote.",
+}
+
+const getDisplayHotels = () => {
+  return hotels.map((hotel, index) => {
+    if (hotel.id === "marriott-hotel" || index === 0) {
+      return {
+        ...hotel,
+        ...customHotelDetails,
+        id: hotel.id || "marriott-hotel",
+        image: hotel.image,
+        isCustomHotel: true,
+      }
+    }
+
+    return {
+      ...hotel,
+      isCustomHotel: false,
+    }
+  })
+}
+
 const HotelsPage = () => {
   const [selectedStar, setSelectedStar] = useState("All")
 
+  const displayHotels = getDisplayHotels()
+
   const filteredHotels =
     selectedStar === "All"
-      ? hotels
-      : hotels.filter((hotel) => hotel.stars === Number(selectedStar))
+      ? displayHotels
+      : selectedStar === "Custom"
+        ? displayHotels.filter((hotel) => hotel.isCustomHotel)
+        : displayHotels.filter(
+            (hotel) =>
+              !hotel.isCustomHotel && hotel.stars === Number(selectedStar)
+          )
 
   return (
     <main className="relative bg-[#F8FAFC]">
       {/* Hero */}
       <section className="relative overflow-hidden bg-slate-950">
         <img
-          src={hotels[1]?.image || hotels[0]?.image}
+          src={displayHotels[0]?.image || displayHotels[1]?.image}
           alt="Hotel booking by TravelEx"
           loading="eager"
           decoding="async"
@@ -50,20 +86,21 @@ const HotelsPage = () => {
             </p>
 
             <h1 className="mt-1 font-fredoka text-[17px] font-semibold leading-[1.08] text-white sm:mt-2 sm:text-[46px] sm:uppercase sm:leading-[1.1] lg:text-[54px]">
-              <span className="sm:hidden">Hotel Stay Options</span>
+              <span className="sm:hidden">Custom Hotel Options</span>
               <span className="hidden sm:inline">
-                Search hotel options for your next stay
+                Request hotels based on your own choice
               </span>
             </h1>
 
             <p className="mt-1 max-w-3xl font-poppins text-[9px] font-medium leading-4 text-white/85 sm:mt-3 sm:text-base sm:leading-7">
               <span className="sm:hidden">
-                Comfort stays with booking support.
+                Share your hotel choice and get a quote.
               </span>
 
               <span className="hidden sm:inline">
-                Find hotel options for Umrah, family trips, business travel, and
-                international destinations with TravelEx support.
+                Select from available hotel options or request a custom hotel by
+                sharing your preferred city, hotel name, dates, guests, and
+                budget with TravelEx.
               </span>
             </p>
           </div>
@@ -83,20 +120,21 @@ const HotelsPage = () => {
               </p>
 
               <h2 className="max-w-3xl font-fredoka text-[18px] font-semibold leading-[1.08] text-slate-950 sm:text-[44px]">
-                <span className="sm:hidden">Choose Your Hotel</span>
+                <span className="sm:hidden">Choose Your Stay</span>
                 <span className="hidden sm:inline">
-                  Hotel options available
+                  Hotel booking options available
                 </span>
               </h2>
 
               <p className="mt-1 max-w-2xl font-poppins text-[10px] font-medium leading-4 text-slate-600 sm:mt-1.5 sm:text-base sm:leading-7">
                 <span className="sm:hidden">
-                  View stays, prices and booking details.
+                  Choose listed hotels or request your own.
                 </span>
 
                 <span className="hidden sm:inline">
-                  Select a hotel to view details, room options, booking process,
-                  and payment flow.
+                  Choose a hotel option or send a custom hotel request. TravelEx
+                  will check availability, room options, and final price before
+                  confirmation.
                 </span>
               </p>
             </div>
@@ -125,7 +163,11 @@ const HotelsPage = () => {
                     : "bg-white text-slate-700 shadow-sm hover:bg-sky-50 hover:text-[#00AEEF]"
                 }`}
               >
-                {star === "All" ? "All Hotels" : `${star} Star`}
+                {star === "All"
+                  ? "All Hotels"
+                  : star === "Custom"
+                    ? "Custom Request"
+                    : `${star} Star`}
               </button>
             ))}
           </div>
@@ -153,14 +195,14 @@ const HotelsPage = () => {
 
                     <div className="absolute left-4 top-4 inline-flex h-[29px] items-center gap-1.5 rounded-full border border-white/25 bg-slate-950/30 px-3 font-poppins text-[8px] font-bold uppercase tracking-[0.08em] text-white backdrop-blur-md sm:left-5 sm:top-5 sm:h-[36px] sm:gap-2 sm:px-4 sm:text-[10px] sm:tracking-[0.12em]">
                       <FaTag className="text-[8.5px] text-[#00AEEF] sm:text-[10px]" />
-                      {hotel.stars} Star
+                      {hotel.isCustomHotel ? "Custom" : `${hotel.stars} Star`}
                     </div>
 
                     <div className="absolute right-4 top-4 inline-flex h-[29px] items-center gap-1.5 rounded-full border border-white/20 bg-slate-950/25 px-2.5 backdrop-blur-md sm:right-5 sm:top-5 sm:h-[36px] sm:px-3">
                       <FaStar className="text-[9.5px] text-[#FF6B00] sm:text-[11px]" />
 
                       <span className="font-poppins text-[10px] font-bold leading-none text-white sm:text-[12px]">
-                        Hotel
+                        {hotel.isCustomHotel ? "Request" : "Hotel"}
                       </span>
                     </div>
 
@@ -170,14 +212,14 @@ const HotelsPage = () => {
                         {hotel.name}
                       </p>
 
-                      <p className="mt-1 font-poppins text-[10px] font-semibold leading-4 text-white/65 sm:text-xs sm:leading-5">
+                      <p className="mt-1 line-clamp-2 font-poppins text-[10px] font-semibold leading-4 text-white/65 sm:text-xs sm:leading-5">
                         {hotel.location}
                       </p>
 
                       <div className="mt-2 flex items-end justify-between gap-3 sm:mt-3 sm:gap-4">
                         <div>
                           <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.08em] text-white/45 sm:text-[9px] sm:tracking-[0.1em]">
-                            Starting
+                            {hotel.isCustomHotel ? "Quote" : "Starting"}
                           </p>
 
                           <p className="mt-1 font-poppins text-[17px] font-medium leading-none tracking-[-0.03em] !text-[#FF6B00] sm:text-[18px]">
@@ -201,8 +243,8 @@ const HotelsPage = () => {
               </h3>
 
               <p className="mx-auto mt-2 max-w-2xl font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:text-sm sm:leading-7">
-                Try selecting another star category or contact TravelEx for a
-                custom hotel recommendation.
+                Try selecting another category or contact TravelEx for a custom
+                hotel recommendation.
               </p>
             </div>
           )}
@@ -228,19 +270,20 @@ const HotelsPage = () => {
             <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
               <div>
                 <h3 className="font-fredoka text-[21px] font-semibold leading-tight text-slate-950 sm:text-[32px]">
-                  Need help choosing the right hotel?
+                  Want a hotel of your own choice?
                 </h3>
 
                 <p className="mt-1.5 max-w-3xl font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:text-sm sm:leading-7">
-                  Share your destination, travel date, number of guests and
-                  budget. TravelEx can guide you with suitable hotel options.
+                  Share your preferred hotel name, destination, dates, number of
+                  guests, room type, and budget. TravelEx will check
+                  availability and share a custom quote.
                 </p>
 
                 <div className="mt-3 grid gap-2 sm:grid-cols-3">
                   {[
-                    "Hotel guidance",
+                    "Custom hotel quote",
                     "Family stay options",
-                    "Secure booking flow",
+                    "Availability check",
                   ].map((item) => (
                     <p
                       key={item}
@@ -265,10 +308,10 @@ const HotelsPage = () => {
                 </a>
 
                 <Link
-                  to="/contact"
+                  to="/hotels/marriott-hotel"
                   className="inline-flex items-center justify-center rounded-[5px] border border-slate-200 bg-white px-5 py-2.5 font-poppins text-xs font-semibold text-slate-800 transition hover:border-[#00AEEF] hover:text-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
                 >
-                  Send Inquiry
+                  Send Custom Request
                 </Link>
               </div>
             </div>

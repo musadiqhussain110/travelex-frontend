@@ -10,23 +10,41 @@ import {
   FaTicketAlt,
 } from "react-icons/fa"
 
+import { umrahPackages } from "../data/umrahPackagesData"
+import { tours } from "../data/tours"
+import { hotels } from "../data/hotelsData"
+
+const getIndexedPath = (items = [], index, pathTemplate, fallbackPath) => {
+  const selectedItem = items?.[index]
+
+  return selectedItem?.id
+    ? pathTemplate.replace(":id", selectedItem.id)
+    : fallbackPath
+}
+
+const getFirstPath = (items = [], pathTemplate, fallbackPath) => {
+  return items?.[0]?.id ? pathTemplate.replace(":id", items[0].id) : fallbackPath
+}
+
 const services = [
   {
     name: "Umrah",
     icon: <FaKaaba />,
-    path: "/umrah",
+    // 4th Umrah card = index 3
+    path: getIndexedPath(umrahPackages, 3, "/package/:id", "/umrah"),
     buttonLabel: "Book Umrah Package",
   },
   {
-    name: "Visa Assistance",
-    icon: <FaPassport />,
-    path: "/visa",
-    buttonLabel: "Apply for Visa Assistance",
-  },
+  name: "Visa Assistance",
+  icon: <FaPassport />,
+  path: "/visa-application",
+  buttonLabel: "Apply for Visa Assistance",
+},
   {
     name: "International Tours",
     icon: <FaGlobeAsia />,
-    path: "/tours",
+    // 4th Tours card = index 3
+    path: getIndexedPath(tours, 3, "/tours/:id", "/tours"),
     buttonLabel: "Book International Tour",
   },
   {
@@ -38,7 +56,7 @@ const services = [
   {
     name: "Hotel Booking",
     icon: <FaHotel />,
-    path: "/hotels",
+    path: getFirstPath(hotels, "/hotels/:id", "/hotels"),
     buttonLabel: "Request Hotel Booking",
   },
   {
@@ -61,7 +79,6 @@ const ServiceSearchBar = ({ defaultService = "Umrah" }) => {
 
   return (
     <div className="relative z-[80] mx-auto w-full max-w-[1080px] overflow-hidden rounded-[10px] border border-white/70 bg-white/95 shadow-[0_24px_60px_rgba(15,23,42,0.10)] backdrop-blur">
-      {/* Integrated service tabs - same layout */}
       <div className="flex flex-wrap gap-1 border-b border-slate-100 px-3 pt-1">
         {services.map((item) => {
           const isActive = service === item.name
@@ -90,7 +107,6 @@ const ServiceSearchBar = ({ defaultService = "Umrah" }) => {
         })}
       </div>
 
-      {/* Same height as old fields row, fields removed */}
       <div className="p-3.5">
         <Link
           to={activeService.path}

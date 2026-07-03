@@ -1,75 +1,88 @@
+import { useMemo, useRef, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import {
   FaArrowLeft,
   FaArrowRight,
+  FaCalendarAlt,
   FaCheckCircle,
+  FaEnvelope,
   FaHotel,
   FaInfoCircle,
   FaMapMarkerAlt,
-  FaPassport,
   FaPhoneAlt,
   FaPlaneDeparture,
   FaRegClock,
   FaStar,
   FaTag,
-  FaUsers,
+  FaUser,
   FaWhatsapp,
 } from "react-icons/fa"
 
 import { umrahPackages as packages } from "../data/umrahPackagesData"
 import Footer from "../components/Footer"
+import AppSelect from "../components/common/AppSelect"
+import AppDatePicker from "../components/common/AppDatePicker"
+import { publicApi } from "../services/publicApi"
 
-const requiredInfo = [
-  "Full name and contact number",
-  "Departure city",
-  "Preferred travel month or date",
-  "Number of adults and children",
-  "Room sharing preference",
-  "Passport availability",
-  "Hotel category preference",
-  "Any special family or group requirement",
-]
+const packageOptions = ["Economy", "Executive"]
+const hotelPreferenceOptions = ["3 Star", "4 Star", "5 Star"]
+const yesNoOptions = ["Yes", "No"]
 
-const bookingSteps = [
-  {
-    title: "Open booking form",
-    description:
-      "Click Book Now and fill your booking request on the dedicated booking page.",
-  },
-  {
-    title: "Share travel details",
-    description:
-      "Provide departure city, travel date, number of passengers, and hotel preference.",
-  },
-  {
-    title: "Consultant confirmation",
-    description:
-      "TravelEx team will confirm package availability, hotel options, and final price.",
-  },
-  {
-    title: "Complete booking process",
-    description:
-      "After confirmation, our team will guide you regarding documents, payment, and next steps.",
-  },
-]
+const labelClass =
+  "mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs"
 
-const faqs = [
-  {
-    question: "Is the package price fixed?",
-    answer:
-      "Package price may change depending on travel dates, airline fare, hotel availability, room sharing, and final package selection.",
-  },
-  {
-    question: "Can this package be customized?",
-    answer:
-      "Yes. TravelEx can customize Umrah packages according to budget, travel dates, number of passengers, and hotel preference.",
-  },
-  {
-    question: "Do I need to pay immediately?",
-    answer:
-      "No. First you can submit a booking request or ask on WhatsApp. Our consultant will confirm details before payment guidance.",
-  },
-]
+const inputClass =
+  "h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:h-12 sm:px-4 sm:text-sm"
+
+const iconInputClass =
+  "h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
+
+const initialForm = {
+  fullName: "",
+  phone: "",
+  email: "",
+  city: "",
+  adults: "1",
+  children: "0",
+  infants: "0",
+  departureCity: "",
+  departureDate: "",
+  durationOfStay: "",
+  packageRequired: "",
+  hotelPreference: "",
+  visaRequired: "",
+  additionalRequirements: "",
+  companyWebsite: "",
+}
+
+const parseDateInput = (value) => {
+  if (!value) return null
+
+  const cleanValue = String(value).trim()
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(cleanValue)) {
+    const date = new Date(`${cleanValue}T00:00:00`)
+    return Number.isNaN(date.getTime()) ? null : date
+  }
+
+  const match = cleanValue.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/)
+
+  if (!match) return null
+
+  const [, day, month, year] = match
+  const date = new Date(Number(year), Number(month) - 1, Number(day))
+
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+const toIsoDate = (value) => {
+  const date = parseDateInput(value)
+  return date ? date.toISOString() : undefined
+}
+
+const getNumber = (value, fallback = 0) => {
+  return Math.max(fallback, Number(value) || fallback)
+}
 
 const getWhatsappLink = (pkg) =>
   `https://wa.me/923111444192?text=${encodeURIComponent(
@@ -78,14 +91,186 @@ const getWhatsappLink = (pkg) =>
 
 const PackageDetails = () => {
   const { id } = useParams()
+  const bookingFormRef = useRef(null)
+
   const pkg = packages.find((item) => item.id === id)
+
+  const [formData, setFormData] = useState(initialForm)
+  const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  const scrollToBookingForm = () => {
+    bookingFormRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    })
+  }
+
+  const handleChange = (event) => {
+    const { name, value } = event.target
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+
+    setError("")
+    setSubmitted(false)
+  }
+
+  const handleSelectChange = (name, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+
+    setError("")
+    setSubmitted(false)
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setError("")
+    setSubmitted(false)
+
+    if (!formData.fullName.trim()) {
+      setError("Please enter your full name.")
+      return
+    }
+
+    if (!formData.phone.trim()) {
+      setError("Please enter your mobile / WhatsApp number.")
+      return
+    }
+
+    if (!formData.email.trim()) {
+      setError("Please enter your email address.")
+      return
+    }
+
+    if (!formData.city.trim()) {
+      setError("Please enter your city.")
+      return
+    }
+
+    if (!formData.departureCity.trim()) {
+      setError("Please enter your preferred departure city.")
+      return
+    }
+
+    if (!formData.departureDate) {
+      setError("Please select your preferred departure date.")
+      return
+    }
+
+    if (!formData.durationOfStay.trim()) {
+      setError("Please enter your duration of stay.")
+      return
+    }
+
+    if (!formData.packageRequired) {
+      setError("Please select package required.")
+      return
+    }
+
+    if (!formData.hotelPreference) {
+      setError("Please select hotel preference.")
+      return
+    }
+
+    if (!formData.visaRequired) {
+      setError("Please select whether visa is required.")
+      return
+    }
+
+    try {
+      setLoading(true)
+
+      const travelers = {
+        adults: getNumber(formData.adults, 1),
+        children: getNumber(formData.children, 0),
+        infants: getNumber(formData.infants, 0),
+      }
+
+      const message = [
+        `Umrah inquiry for: ${pkg.title}`,
+        `Package Price: ${pkg.price || "Not provided"}`,
+        `Package Duration: ${pkg.duration || "Flexible"}`,
+        `Package Type: ${pkg.type || "Umrah Plan"}`,
+        "",
+        `City: ${formData.city}`,
+        `Adults: ${travelers.adults}`,
+        `Children: ${travelers.children}`,
+        `Infants: ${travelers.infants}`,
+        `Preferred Departure City: ${formData.departureCity}`,
+        `Preferred Departure Date: ${formData.departureDate}`,
+        `Duration of Stay: ${formData.durationOfStay}`,
+        `Package Required: ${formData.packageRequired}`,
+        `Hotel Preference: ${formData.hotelPreference}`,
+        `Visa Required: ${formData.visaRequired}`,
+        "",
+        formData.additionalRequirements
+          ? `Additional Requirements: ${formData.additionalRequirements}`
+          : "Additional Requirements: Not provided",
+      ].join("\n")
+
+      const payload = {
+        name: formData.fullName.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim(),
+
+        serviceType: "umrah",
+        source: "umrah-page",
+        pageUrl: window.location.href,
+
+        city: formData.city.trim(),
+        departureCity: formData.departureCity.trim(),
+        destination: "Umrah",
+
+        travelDate: toIsoDate(formData.departureDate),
+        durationOfStay: formData.durationOfStay.trim(),
+
+        packageRequired: formData.packageRequired,
+        hotelCategory: formData.hotelPreference,
+        preferredHotel: formData.hotelPreference,
+        visaRequired: formData.visaRequired,
+
+        travelers,
+        budget: pkg.price || "",
+
+        additionalRequirements: formData.additionalRequirements.trim(),
+        message,
+        priority: "high",
+        companyWebsite: formData.companyWebsite,
+      }
+
+      await publicApi.createLead(payload)
+
+      setSubmitted(true)
+      setFormData(initialForm)
+
+      bookingFormRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    } catch (err) {
+      console.error("Umrah inquiry error:", err)
+      setError(
+        err.message ||
+          "We could not submit your Umrah inquiry right now. Please try again."
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (!pkg) {
     return (
       <main className="bg-[#F8FAFC]">
         <section className="bg-[#F8FAFC] px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
           <div className="mx-auto max-w-[1180px]">
-            <div className="rounded-[12px] border border-slate-100 bg-white p-5 text-center shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-8">
+            <div className="rounded-[5px] border border-slate-100 bg-white p-5 text-center shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-8">
               <h1 className="font-fredoka text-[24px] font-semibold text-slate-950 sm:text-[34px]">
                 Package not found
               </h1>
@@ -111,11 +296,11 @@ const PackageDetails = () => {
     )
   }
 
-  const bookNowPath = `/booking/umrah/${pkg.id}`
-
   const bestFor = pkg.bestFor || []
   const highlights = pkg.highlights || []
   const inclusions = pkg.inclusions || []
+
+  const compactDetails = [...highlights, ...inclusions].slice(0, 7)
 
   const quickFacts = [
     {
@@ -164,17 +349,17 @@ const PackageDetails = () => {
             </Link>
 
             <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:mb-4 sm:gap-3">
-              <span className="inline-flex h-[27px] items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[7.5px] font-bold uppercase tracking-[0.14em] text-[#00AEEF] backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.16em]">
+              <span className="inline-flex h-[27px] items-center gap-1.5 rounded-[5px] border border-white/15 bg-white/10 px-2.5 font-poppins text-[7.5px] font-bold uppercase tracking-[0.14em] text-[#00AEEF] backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.16em]">
                 <FaTag className="text-[8px] sm:text-[10px]" />
                 {pkg.badge}
               </span>
 
-              <span className="inline-flex h-[27px] items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-xs">
+              <span className="inline-flex h-[27px] items-center gap-1.5 rounded-[5px] border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-xs">
                 <FaStar className="text-[#FF6B00]" />
                 {pkg.rating}
               </span>
 
-              <span className="inline-flex h-[27px] items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-xs">
+              <span className="inline-flex h-[27px] items-center gap-1.5 rounded-[5px] border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-xs">
                 <FaRegClock className="text-[#FF6B00]" />
                 {pkg.duration}
               </span>
@@ -193,13 +378,14 @@ const PackageDetails = () => {
             </p>
 
             <div className="mt-3 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:gap-3">
-              <Link
-                to={bookNowPath}
+              <button
+                type="button"
+                onClick={scrollToBookingForm}
                 className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
               >
-                Book Now
+                Submit Inquiry
                 <FaArrowRight className="text-[10px] sm:text-xs" />
-              </Link>
+              </button>
 
               <a
                 href={getWhatsappLink(pkg)}
@@ -215,245 +401,290 @@ const PackageDetails = () => {
         </div>
       </section>
 
- 
-      {/* Main Details */}
+      {/* Merged Booking + Details */}
       <section className="bg-[#F8FAFC] py-8 sm:py-14">
-        <div className="mx-auto grid max-w-[1440px] gap-5 px-4 sm:px-6 lg:grid-cols-[1fr_360px] lg:gap-6 lg:px-8">
-          {/* Detail Content */}
-          <div className="grid gap-4 sm:gap-6">
-            {/* Overview */}
-            <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
-              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
-                Package Overview
+        <div className="mx-auto grid max-w-[1440px] gap-5 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-6 lg:px-8">
+          {/* Booking Form Left */}
+          <div
+            ref={bookingFormRef}
+            className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_16px_45px_rgba(15,23,42,0.08)] sm:p-7"
+          >
+            <div className="mb-4 sm:mb-6">
+              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.1em]">
+                Umrah Inquiry Form
               </p>
 
-              <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[36px]">
-                A guided Umrah plan with TravelEx support
+              <h2 className="font-fredoka text-[22px] font-semibold leading-tight text-slate-950 sm:text-[36px]">
+                Submit Umrah inquiry
               </h2>
 
-              <p className="mt-2 font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:mt-3 sm:text-base sm:leading-8">
-                {pkg.overview}
+              <p className="mt-1.5 font-poppins text-[10.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
+                Fill the required details. TravelEx will confirm availability,
+                hotel options, visa guidance, and final quote.
               </p>
-
-              {bestFor.length > 0 && (
-                <div className="mt-4 grid gap-2 sm:mt-5 sm:grid-cols-3 sm:gap-3">
-                  {bestFor.map((item) => (
-                    <p
-                      key={item}
-                      className="flex items-center gap-2 rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 font-poppins text-[11.5px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-sm"
-                    >
-                      <FaUsers className="shrink-0 text-[#00AEEF]" />
-                      {item}
-                    </p>
-                  ))}
-                </div>
-              )}
             </div>
 
-            {/* Highlights and Inclusions */}
-            <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
-              <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-6">
-                <h2 className="font-fredoka text-[21px] font-semibold text-slate-950 sm:text-[26px]">
-                  Package Highlights
-                </h2>
-
-                <div className="mt-3 grid gap-2 sm:mt-5 sm:gap-3">
-                  {highlights.map((item) => (
-                    <p
-                      key={item}
-                      className="flex items-start gap-2.5 rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 font-poppins text-[11px] font-semibold leading-5 text-slate-700 sm:gap-3 sm:px-4 sm:py-3 sm:text-sm sm:leading-6"
-                    >
-                      <FaCheckCircle className="mt-1 shrink-0 text-[12px] text-[#00AEEF] sm:text-base" />
-                      {item}
-                    </p>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-6">
-                <h2 className="font-fredoka text-[21px] font-semibold text-slate-950 sm:text-[26px]">
-                  What Can Be Included?
-                </h2>
-
-                <div className="mt-3 grid gap-2 sm:mt-5 sm:gap-3">
-                  {inclusions.map((item) => (
-                    <p
-                      key={item}
-                      className="flex items-start gap-2.5 rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 font-poppins text-[11px] font-semibold leading-5 text-slate-700 sm:gap-3 sm:px-4 sm:py-3 sm:text-sm sm:leading-6"
-                    >
-                      <FaCheckCircle className="mt-1 shrink-0 text-[12px] text-[#FF6B00] sm:text-base" />
-                      {item}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Stay Plan */}
-            <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
-                    Stay Plan
-                  </p>
-
-                  <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[30px]">
-                    Makkah and Madinah stay guidance
-                  </h2>
-                </div>
-
-                <span className="inline-flex w-fit rounded-full bg-orange-50 px-3 py-1.5 font-poppins text-[10px] font-bold text-[#FF6B00] sm:px-4 sm:py-2 sm:text-xs">
-                  Subject to availability
-                </span>
-              </div>
-
-              <div className="mt-4 grid gap-2 sm:mt-5 sm:grid-cols-3 sm:gap-4">
-                <div className="rounded-[5px] bg-[#F8FAFC] p-3.5 sm:p-5">
-                  <FaMapMarkerAlt className="text-lg text-[#00AEEF] sm:text-xl" />
-
-                  <p className="mt-2 font-poppins text-[8px] font-bold uppercase tracking-[0.16em] text-slate-400 sm:mt-3 sm:text-[10px]">
-                    Makkah
-                  </p>
-
-                  <p className="mt-1 font-poppins text-xs font-semibold text-slate-950 sm:text-base">
-                    {pkg.makkahNights || "Based on package"}
-                  </p>
-                </div>
-
-                <div className="rounded-[5px] bg-[#F8FAFC] p-3.5 sm:p-5">
-                  <FaMapMarkerAlt className="text-lg text-[#00AEEF] sm:text-xl" />
-
-                  <p className="mt-2 font-poppins text-[8px] font-bold uppercase tracking-[0.16em] text-slate-400 sm:mt-3 sm:text-[10px]">
-                    Madinah
-                  </p>
-
-                  <p className="mt-1 font-poppins text-xs font-semibold text-slate-950 sm:text-base">
-                    {pkg.madinahNights || "Based on package"}
-                  </p>
-                </div>
-
-                <div className="rounded-[5px] bg-[#F8FAFC] p-3.5 sm:p-5">
-                  <FaHotel className="text-lg text-[#00AEEF] sm:text-xl" />
-
-                  <p className="mt-2 font-poppins text-[8px] font-bold uppercase tracking-[0.16em] text-slate-400 sm:mt-3 sm:text-[10px]">
-                    Hotel
-                  </p>
-
-                  <p className="mt-1 font-poppins text-xs font-semibold text-slate-950 sm:text-base">
-                    {pkg.hotelInfo || "Based on availability"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Booking Process */}
-            <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
-              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
-                Booking Process
-              </p>
-
-              <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[30px]">
-                How to book this package
-              </h2>
-
-              <div className="mt-4 grid gap-2 sm:mt-5 sm:gap-4">
-                {bookingSteps.map((step, index) => (
-                  <div
-                    key={step.title}
-                    className="grid gap-2 rounded-[5px] border border-slate-100 bg-[#F8FAFC] p-3.5 sm:grid-cols-[auto_1fr] sm:gap-3 sm:p-4"
-                  >
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FF6B00]/10 font-poppins text-xs font-bold text-[#FF6B00] sm:h-10 sm:w-10 sm:text-sm">
-                      {index + 1}
-                    </span>
-
-                    <div>
-                      <h3 className="font-fredoka text-[17px] font-semibold text-slate-950 sm:text-[20px]">
-                        {step.title}
-                      </h3>
-
-                      <p className="mt-1 font-poppins text-[11px] font-medium leading-5 text-slate-600 sm:text-sm sm:leading-7">
-                        {step.description}
-                      </p>
-                    </div>
+            {submitted && (
+              <div className="mb-5 rounded-[5px] border border-green-100 bg-green-50 p-5 sm:p-6">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[5px] bg-green-600 text-white">
+                    <FaCheckCircle className="text-lg" />
                   </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Required Information */}
-            <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
-              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
-                Required Information
-              </p>
-
-              <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[30px]">
-                Keep these details ready
-              </h2>
-
-              <div className="mt-4 grid gap-2 sm:mt-5 sm:grid-cols-2 sm:gap-3">
-                {requiredInfo.map((item) => (
-                  <p
-                    key={item}
-                    className="flex items-start gap-2.5 rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 font-poppins text-[11px] font-semibold leading-5 text-slate-700 sm:gap-3 sm:px-4 sm:py-3 sm:text-sm sm:leading-6"
-                  >
-                    <FaPassport className="mt-1 shrink-0 text-[12px] text-[#00AEEF] sm:text-base" />
-                    {item}
-                  </p>
-                ))}
-              </div>
-            </div>
-
-            {/* Important Note */}
-            <div className="rounded-[12px] border border-[#FF6B00]/15 bg-orange-50 p-4 sm:p-6">
-              <div className="flex gap-2.5 sm:gap-3">
-                <FaInfoCircle className="mt-1 shrink-0 text-sm text-[#FF6B00] sm:text-base" />
-
-                <div>
-                  <h3 className="font-fredoka text-[20px] font-semibold leading-tight text-slate-950 sm:text-[22px]">
-                    Important pricing note
-                  </h3>
-
-                  <p className="mt-1.5 font-poppins text-[11px] font-semibold leading-5 text-orange-800 sm:mt-2 sm:text-sm sm:leading-7">
-                    {pkg.note ||
-                      "Final price may change based on travel dates, airline fare, hotel availability and final package selection."}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* FAQ */}
-            <div className="rounded-[12px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-7">
-              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.18em]">
-                Common Questions
-              </p>
-
-              <h2 className="font-fredoka text-[20px] font-semibold leading-[1.08] text-slate-950 sm:text-[30px]">
-                Before you book
-              </h2>
-
-              <div className="mt-4 grid gap-2 sm:mt-5 sm:gap-3">
-                {faqs.map((faq) => (
-                  <div
-                    key={faq.question}
-                    className="rounded-[5px] bg-[#F8FAFC] p-3.5 sm:p-4"
-                  >
-                    <h3 className="font-poppins text-[12px] font-bold text-slate-950 sm:text-sm">
-                      {faq.question}
+                  <div>
+                    <h3 className="font-fredoka text-[24px] font-semibold leading-tight text-green-700">
+                      Umrah inquiry submitted
                     </h3>
 
-                    <p className="mt-1.5 font-poppins text-[11px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
-                      {faq.answer}
+                    <p className="mt-1 font-poppins text-[11.5px] font-medium leading-5 text-green-700 sm:text-sm sm:leading-7">
+                      Your inquiry has been submitted successfully. TravelEx
+                      team will contact you shortly.
                     </p>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="grid gap-4">
+              <input
+                type="text"
+                name="companyWebsite"
+                value={formData.companyWebsite}
+                onChange={handleChange}
+                className="hidden"
+                tabIndex="-1"
+                autoComplete="off"
+              />
+
+              {error && (
+                <p className="rounded-[5px] bg-red-50 px-4 py-3 font-poppins text-[11.5px] font-semibold leading-5 text-red-600 sm:text-sm">
+                  {error}
+                </p>
+              )}
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className={labelClass}>Selected Package</label>
+
+                  <input
+                    type="text"
+                    value={pkg.title}
+                    readOnly
+                    className={`${inputClass} cursor-not-allowed bg-slate-50 text-slate-500`}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Full Name *</label>
+
+                  <div className="relative">
+                    <FaUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                    <input
+                      type="text"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      placeholder="Enter full name"
+                      className={iconInputClass}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label className={labelClass}>Mobile / WhatsApp *</label>
+
+                  <div className="relative">
+                    <FaPhoneAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="03XXXXXXXXX"
+                      className={iconInputClass}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Email Address *</label>
+
+                  <div className="relative">
+                    <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="your@email.com"
+                      className={iconInputClass}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelClass}>City *</label>
+
+                  <div className="relative">
+                    <FaMapMarkerAlt className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
+
+                    <input
+                      type="text"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleChange}
+                      placeholder="Your city"
+                      className={iconInputClass}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label className={labelClass}>Number of Adults *</label>
+
+                  <input
+                    type="number"
+                    name="adults"
+                    min="1"
+                    value={formData.adults}
+                    onChange={handleChange}
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Number of Children</label>
+
+                  <input
+                    type="number"
+                    name="children"
+                    min="0"
+                    value={formData.children}
+                    onChange={handleChange}
+                    className={inputClass}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelClass}>Number of Infants</label>
+
+                  <input
+                    type="number"
+                    name="infants"
+                    min="0"
+                    value={formData.infants}
+                    onChange={handleChange}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <label className={labelClass}>
+                    Preferred Departure City *
+                  </label>
+
+                  <input
+                    type="text"
+                    name="departureCity"
+                    value={formData.departureCity}
+                    onChange={handleChange}
+                    placeholder="Karachi, Lahore, Islamabad..."
+                    className={inputClass}
+                  />
+                </div>
+
+                <AppDatePicker
+                  label="Preferred Departure Date *"
+                  value={formData.departureDate}
+                  onChange={(value) =>
+                    handleSelectChange("departureDate", value)
+                  }
+                  placeholder="Select departure date"
+                />
+
+                <div>
+                  <label className={labelClass}>Duration of Stay *</label>
+
+                  <input
+                    type="text"
+                    name="durationOfStay"
+                    value={formData.durationOfStay}
+                    onChange={handleChange}
+                    placeholder="Example: 14 days"
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <AppSelect
+                  label="Package Required *"
+                  value={formData.packageRequired}
+                  onChange={(value) =>
+                    handleSelectChange("packageRequired", value)
+                  }
+                  placeholder="Select package"
+                  options={packageOptions}
+                />
+
+                <AppSelect
+                  label="Hotel Preference *"
+                  value={formData.hotelPreference}
+                  onChange={(value) =>
+                    handleSelectChange("hotelPreference", value)
+                  }
+                  placeholder="Select hotel"
+                  options={hotelPreferenceOptions}
+                />
+
+                <AppSelect
+                  label="Visa Required? *"
+                  value={formData.visaRequired}
+                  onChange={(value) =>
+                    handleSelectChange("visaRequired", value)
+                  }
+                  placeholder="Select option"
+                  options={yesNoOptions}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>Additional Requirements</label>
+
+                <textarea
+                  rows="4"
+                  name="additionalRequirements"
+                  value={formData.additionalRequirements}
+                  onChange={handleChange}
+                  placeholder="Write any special request, hotel preference, transport need, or family requirement..."
+                  className="min-h-[120px] w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:min-h-[135px] sm:px-4 sm:text-sm"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-6 py-3.5 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {loading ? "Submitting..." : "Submit Umrah Inquiry"}
+                {!loading && <FaArrowRight className="text-xs" />}
+              </button>
+            </form>
           </div>
 
-          {/* Sticky Booking Sidebar */}
-          <aside className="h-fit lg:sticky lg:top-24 lg:self-start">
-            <div className="overflow-hidden rounded-[12px] border border-slate-100 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.08)]">
-              <div className="relative h-36 overflow-hidden sm:h-44">
+          {/* Necessary Details Right */}
+          <aside className="grid h-fit gap-5 lg:sticky lg:top-24">
+            <div className="overflow-hidden rounded-[5px] border border-slate-100 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.08)]">
+              <div className="relative h-44 overflow-hidden sm:h-56">
                 <img
                   src={pkg.image}
                   alt={pkg.title}
@@ -462,87 +693,133 @@ const PackageDetails = () => {
 
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
 
-                <div className="absolute bottom-3 left-4 right-4 sm:bottom-4">
-                  <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.16em] text-white/65 sm:text-[10px]">
+                <div className="absolute bottom-4 left-4 right-4">
+                  <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-white/70">
                     Selected Package
                   </p>
 
-                  <h3 className="mt-1 font-fredoka text-[21px] font-semibold leading-tight text-white sm:text-[24px]">
+                  <h3 className="mt-1 font-fredoka text-[26px] font-semibold leading-tight text-white">
                     {pkg.title}
                   </h3>
+
+                  <p className="mt-1 font-poppins text-xs font-semibold text-white/80">
+                    {pkg.duration || "Flexible"} • {pkg.type || "Umrah Plan"}
+                  </p>
                 </div>
               </div>
 
               <div className="p-4 sm:p-5">
-                <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.16em] text-slate-400 sm:text-[10px]">
+                <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-[#00AEEF]">
                   {pkg.pricePrefix || "From"}
                 </p>
 
-                <p className="mt-1 font-poppins text-[24px] font-semibold leading-none text-[#FF6B00] sm:text-[28px]">
+                <p className="mt-1 font-fredoka text-[30px] font-semibold leading-tight text-[#FF6B00]">
                   {pkg.price}
                 </p>
 
-                <p className="mt-2 font-poppins text-[11px] font-medium leading-5 text-slate-500 sm:text-xs sm:leading-6">
-                  Final quote depends on travel date, hotel category, airline,
-                  room sharing, and availability.
+                <p className="mt-2 font-poppins text-sm font-medium leading-7 text-slate-600">
+                  Final quote depends on travel date, airline fare, hotel
+                  category, room sharing, and availability.
                 </p>
 
-                <div className="mt-4 grid gap-2 sm:mt-5 sm:gap-3">
-                  <Link
-                    to={bookNowPath}
-                    className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    Book Now
-                    <FaArrowRight className="text-[10px] sm:text-xs" />
-                  </Link>
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  {quickFacts.map((item) => {
+                    const Icon = item.icon
 
-                  <a
-                    href={getWhatsappLink(pkg)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    <FaWhatsapp />
-                    WhatsApp Inquiry
-                  </a>
+                    return (
+                      <div
+                        key={item.label}
+                        className="rounded-[5px] bg-[#F8FAFC] p-3"
+                      >
+                        <Icon className="text-sm text-[#00AEEF]" />
 
-                  <a
-                    href="tel:03111444192"
-                    className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 bg-white px-5 py-2.5 font-poppins text-xs font-semibold text-slate-900 transition hover:border-[#00AEEF] hover:text-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                  >
-                    <FaPhoneAlt />
-                    Call Now
-                  </a>
+                        <p className="mt-2 font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                          {item.label}
+                        </p>
+
+                        <p className="mt-1 line-clamp-2 font-poppins text-xs font-bold leading-5 text-slate-950">
+                          {item.value}
+                        </p>
+                      </div>
+                    )
+                  })}
                 </div>
+              </div>
+            </div>
 
-                <div className="mt-4 rounded-[5px] bg-[#F8FAFC] p-3.5 sm:mt-5 sm:p-4">
-                  <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.16em] text-[#00AEEF] sm:text-[11px]">
-                    Need customization?
-                  </p>
+            <div className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-5">
+              <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-[#00AEEF]">
+                Package Overview
+              </p>
 
-                  <p className="mt-1.5 font-poppins text-[11px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
-                    Share your departure city, travel date, hotel preference,
-                    budget, and number of passengers for a custom Umrah plan.
-                  </p>
-                </div>
+              <h2 className="mt-1 font-fredoka text-[28px] font-semibold leading-tight text-slate-950">
+                Guided Umrah support
+              </h2>
 
-                <div className="mt-4 grid gap-2 sm:mt-5 sm:gap-3">
-                  {[
-                    "Consultant support",
-                    "Package customization",
-                    "WhatsApp guidance",
-                  ].map((item) => (
+              <p className="mt-2 font-poppins text-sm font-medium leading-7 text-slate-600">
+                {pkg.overview}
+              </p>
+
+              {bestFor.length > 0 && (
+                <div className="mt-4 grid gap-2">
+                  {bestFor.slice(0, 3).map((item) => (
                     <p
                       key={item}
-                      className="flex items-center gap-2 font-poppins text-[11.5px] font-semibold text-slate-700 sm:text-sm"
+                      className="rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 font-poppins text-sm font-semibold text-slate-700"
                     >
-                      <FaCheckCircle className="text-[#00AEEF]" />
+                      {item}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {compactDetails.length > 0 && (
+              <div className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-5">
+                <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-[#FF6B00]">
+                  Key Details
+                </p>
+
+                <div className="mt-4 grid gap-2">
+                  {compactDetails.map((item) => (
+                    <p
+                      key={item}
+                      className="flex items-start gap-2 rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 font-poppins text-sm font-semibold leading-6 text-slate-700"
+                    >
+                      <FaCheckCircle className="mt-1 shrink-0 text-[#00AEEF]" />
                       {item}
                     </p>
                   ))}
                 </div>
               </div>
+            )}
+
+            <div className="rounded-[5px] border border-[#FF6B00]/15 bg-orange-50 p-4 sm:p-5">
+              <div className="flex gap-3">
+                <FaInfoCircle className="mt-1 shrink-0 text-[#FF6B00]" />
+
+                <div>
+                  <h3 className="font-fredoka text-[22px] font-semibold leading-tight text-slate-950">
+                    Important pricing note
+                  </h3>
+
+                  <p className="mt-2 font-poppins text-sm font-semibold leading-7 text-orange-800">
+                    {pkg.note ||
+                      "Final price may change based on travel dates, airline fare, hotel availability and final package selection."}
+                  </p>
+                </div>
+              </div>
             </div>
+
+            <a
+              href={getWhatsappLink(pkg)}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-3 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
+            >
+              <FaWhatsapp />
+              WhatsApp Inquiry
+            </a>
           </aside>
         </div>
       </section>

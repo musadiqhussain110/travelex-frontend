@@ -151,7 +151,7 @@ const AppContent = () => {
 
           {/* Search */}
           <Route path="/search" element={<SearchResultsPage />} />
-
+<Route path="/visa-application" element={<VisaApplicationPage />} />
           {/* Umrah */}
           <Route path="/umrah" element={<UmrahPage />} />
           <Route path="/package/:id" element={<PackageDetails />} />

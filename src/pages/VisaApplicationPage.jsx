@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { Link, useSearchParams } from "react-router-dom"
 import {
   FaArrowLeft,
@@ -17,7 +17,7 @@ import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
 import { publicApi } from "../services/publicApi"
-
+import visaHeroImage from "../assets/visa/visa-page.jpg"
 const whatsappNumber = "923111444192"
 
 const defaultVisaTypes = [
@@ -48,15 +48,7 @@ const VisaApplicationPage = () => {
   const [searchParams] = useSearchParams()
 
   const selectedCountry = searchParams.get("country") || ""
-  const selectedVisa =
-    searchParams.get("visa") || searchParams.get("type") || "Tourist Visa"
-
-  const visaTypeOptions = useMemo(
-    () =>
-      Array.from(new Set([selectedVisa, ...defaultVisaTypes].filter(Boolean))),
-    [selectedVisa]
-  )
-
+  
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -64,7 +56,7 @@ const VisaApplicationPage = () => {
     city: "",
     nationality: "",
     destinationCountry: selectedCountry,
-    visaType: selectedVisa,
+    visaType: "",
     intendedTravelDate: "",
     durationOfStay: "",
     numberOfApplicants: "1",
@@ -295,10 +287,17 @@ ${formData.additionalRequirements || "No additional information"}
 
   return (
     <main className="bg-[#F8FAFC]">
-      <section className="relative overflow-hidden bg-slate-950">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,174,239,0.24),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(255,107,0,0.22),transparent_32%)]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/92 to-slate-900" />
+     <section className="relative overflow-hidden bg-slate-950">
+  <img
+    src={visaHeroImage}
+    alt="Visa application by TravelEx"
+    loading="eager"
+    decoding="async"
+    className="absolute inset-0 h-full w-full object-cover"
+  />
 
+  <div className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-slate-950/55 to-slate-950/25" />
+  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-transparent" />
         <div className="relative z-10 mx-auto max-w-[1340px] px-4 py-7 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
           <div className="max-w-5xl">
             <Link
@@ -319,9 +318,7 @@ ${formData.additionalRequirements || "No additional information"}
                 {formData.destinationCountry || "Visa Assistance"}
               </span>
 
-              <span className="inline-flex h-[27px] items-center rounded-[5px] border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:px-4 sm:py-2 sm:text-xs">
-                {formData.visaType}
-              </span>
+          
             </div>
 
             <h1 className="font-fredoka text-[18px] font-semibold leading-[1.08] text-white sm:text-[46px] sm:uppercase sm:leading-[1.1] lg:text-[54px]">
@@ -495,7 +492,7 @@ ${formData.additionalRequirements || "No additional information"}
                 value={formData.visaType}
                 onChange={(value) => handleSelectChange("visaType", value)}
                 placeholder="Select visa type"
-                options={visaTypeOptions}
+                options={defaultVisaTypes}
               />
 
               <AppDatePicker
@@ -600,7 +597,7 @@ ${formData.additionalRequirements || "No additional information"}
                 value={formData.additionalRequirements}
                 onChange={handleChange}
                 placeholder="Write any extra visa information, family details, document concerns, or special requirements..."
-                className={`${inputClass} h-auto resize-none py-3 leading-6`}
+                className="min-h-[120px] w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:min-h-[135px] sm:px-4 sm:text-sm"
               />
             </div>
 

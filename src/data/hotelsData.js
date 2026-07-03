@@ -1,4 +1,4 @@
-import hotelHero2 from "../assets/Hotels/Hotel6.jpg"
+import hotelHero2 from "../assets/Hotels/custom-hotel.jpg"
 import hotelHero3 from "../assets/Hotels/Hotel5.jpg"
 import hotelHero4 from "../assets/Hotels/makkahHotel4.jpg"
 

@@ -24,32 +24,38 @@ import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
 import { publicApi } from "../services/publicApi"
 
-import hotelHero2 from "../assets/Hotels/Hotel6.jpg"
+import hotelHero2 from "../assets/Hotels/custom-hotel.jpg"
 import hotelHero3 from "../assets/Hotels/Hotel5.jpg"
 import hotelHero4 from "../assets/Hotels/makkahHotel4.jpg"
 
 const hotels = [
   {
     id: "marriott-hotel",
-    name: "Marriott Hotel",
-    location: "Islamabad",
-    price: "from PKR 56,235 / night",
+    name: "Custom Hotel Request",
+    location: "Any city, destination, or hotel of your choice",
+    price: "Custom quote available",
     image: hotelHero2,
-    stars: 3,
-    type: "City Hotel",
+    stars: "Custom",
+    type: "Custom Hotel",
+    isCustomHotel: true,
     shortDescription:
-      "A comfortable hotel option suitable for business travel, family stay, and city-based trips with TravelEx booking guidance.",
+      "Tell TravelEx your preferred hotel name, city, dates, guests, room type, and budget. Our team will check availability and share a custom quote.",
     overview:
-      "This hotel option is suitable for travelers who need a comfortable stay, reliable booking guidance, and support before final confirmation. TravelEx can assist with availability, room type, final price, and booking process based on travel dates.",
+      "This option is for travelers who already have a preferred hotel in mind or want TravelEx to find a suitable stay based on their destination, budget, travel dates, number of guests, and room preference. Submit your hotel requirements and our consultant will guide you with availability, final price, and booking process.",
     highlights: [
-      "Suitable for city stay",
-      "Business and family travel support",
-      "Room options available on request",
-      "Final quote based on travel dates",
+      "Choose any hotel of your own choice",
+      "Custom quote based on your dates",
+      "Room type and category guidance",
+      "Availability checked before confirmation",
     ],
-    facilities: ["WiFi", "Breakfast", "Laundry", "Room Service"],
+    facilities: [
+      "Custom Hotel Search",
+      "Budget-Based Options",
+      "Family Stay Guidance",
+      "Consultant Support",
+    ],
     note:
-      "Final hotel price may vary based on travel dates, room category, number of guests, meal plan, availability, and supplier policy.",
+      "Final hotel price depends on your selected hotel, destination, travel dates, room type, meal plan, number of guests, availability, and supplier policy.",
   },
   {
     id: "family-stay-hotel",
@@ -175,9 +181,13 @@ const getNights = (checkIn, checkOut) => {
   return difference > 0 ? difference : "-"
 }
 
+const getCategoryLabel = (hotel) => {
+  return hotel?.isCustomHotel ? "Custom" : `${hotel?.stars || "-"} Star`
+}
+
 const getHotelWhatsappLink = (hotel) =>
   `https://wa.me/923111444192?text=${encodeURIComponent(
-    `Assalamualaikum TravelEx, I need guidance about ${hotel.name} in ${hotel.location}.`
+    `Assalamualaikum TravelEx, I need hotel booking guidance for ${hotel.name}.`
   )}`
 
 const getHotelBookingWhatsappLink = (hotel) =>
@@ -315,9 +325,7 @@ const HotelDetailsPage = () => {
         `Hotel Page: ${hotel?.name || "Not specified"}`,
         `Hotel Location: ${hotel?.location || "Not specified"}`,
         `Hotel Type: ${hotel?.type || "Not specified"}`,
-        `Hotel Category From Page: ${
-          hotel?.stars ? `${hotel.stars} Star` : "Not specified"
-        }`,
+        `Hotel Category From Page: ${getCategoryLabel(hotel)}`,
         `Displayed Quote: ${hotel?.price || "Not specified"}`,
         "",
         "Personal Information",
@@ -357,7 +365,7 @@ const HotelDetailsPage = () => {
         email: booking.email.trim(),
 
         serviceType: "hotel",
-source: "hotel-page",
+        source: "hotel-page",
         pageUrl: window.location.href,
 
         city: booking.city.trim(),
@@ -459,7 +467,7 @@ source: "hotel-page",
     },
     {
       label: "Category",
-      value: `${hotel.stars} Star`,
+      value: getCategoryLabel(hotel),
       icon: FaStar,
     },
     {
@@ -502,7 +510,7 @@ source: "hotel-page",
 
               <span className="inline-flex h-[27px] items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-xs">
                 <FaStar className="text-[#FF6B00]" />
-                {hotel.stars} Star
+                {getCategoryLabel(hotel)}
               </span>
             </div>
 
@@ -511,13 +519,14 @@ source: "hotel-page",
             </h1>
 
             <p className="mt-1 max-w-3xl font-poppins text-[9px] font-medium leading-4 text-white/85 sm:mt-4 sm:text-base sm:leading-7">
-              <span className="sm:hidden">Stay and quote support.</span>
+              <span className="sm:hidden">Custom hotel quote support.</span>
 
               <span className="hidden sm:inline">{hotel.shortDescription}</span>
             </p>
           </div>
         </div>
       </section>
+
       {/* Merged Booking + Details */}
       <section className="bg-[#F8FAFC] py-8 sm:py-14">
         <div className="mx-auto grid max-w-[1440px] gap-5 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-6 lg:px-8">
@@ -544,12 +553,12 @@ source: "hotel-page",
               </p>
 
               <h2 className="font-fredoka text-[22px] font-semibold leading-tight text-slate-950 sm:text-[36px]">
-                Request this hotel
+                Request hotel quote
               </h2>
 
               <p className="mt-2 font-poppins text-[11.5px] font-medium leading-6 text-slate-600 sm:text-sm sm:leading-7">
-                Fill the form and TravelEx consultant will confirm room
-                availability, final quote, and booking process.
+                Fill the form and TravelEx consultant will confirm availability,
+                final quote, and booking process.
               </p>
             </div>
 
@@ -870,7 +879,7 @@ source: "hotel-page",
                     placeholder="Write early check-in, late check-out, family room, Haram distance, room sharing, view preference, or any special request..."
                     value={booking.additionalRequirements}
                     onChange={handleChange}
-                    className="w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:px-4 sm:text-sm"
+                    className="min-h-[120px] w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:min-h-[135px] sm:px-4 sm:text-sm"
                   />
                 </div>
               </div>
@@ -929,7 +938,7 @@ source: "hotel-page",
                   </h3>
 
                   <p className="mt-1 font-poppins text-xs font-semibold text-white/80">
-                    {hotel.location} • {hotel.type} • {hotel.stars} Star
+                    {hotel.location} • {hotel.type} • {getCategoryLabel(hotel)}
                   </p>
                 </div>
               </div>
@@ -944,8 +953,8 @@ source: "hotel-page",
                 </p>
 
                 <p className="mt-2 font-poppins text-sm font-medium leading-7 text-slate-600">
-                  Final price depends on dates, room type, meal plan, guests,
-                  and availability.
+                  Final price depends on hotel choice, dates, room type, meal
+                  plan, guests, and availability.
                 </p>
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
@@ -976,7 +985,7 @@ source: "hotel-page",
               </p>
 
               <h2 className="mt-1 font-fredoka text-[28px] font-semibold leading-tight text-slate-950">
-                Stay support by TravelEx
+                Custom hotel support
               </h2>
 
               <p className="mt-2 font-poppins text-sm font-medium leading-7 text-slate-600">
