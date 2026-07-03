@@ -23,6 +23,7 @@ import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
 import { publicApi } from "../services/publicApi"
+import { getLeadSource } from "../utils/leadSourceTracker"
 
 import hotelHero2 from "../assets/Hotels/custom-hotel.jpg"
 import hotelHero3 from "../assets/Hotels/Hotel5.jpg"
@@ -185,11 +186,6 @@ const getCategoryLabel = (hotel) => {
   return hotel?.isCustomHotel ? "Custom" : `${hotel?.stars || "-"} Star`
 }
 
-const getHotelWhatsappLink = (hotel) =>
-  `https://wa.me/923111444192?text=${encodeURIComponent(
-    `Assalamualaikum TravelEx, I need hotel booking guidance for ${hotel.name}.`
-  )}`
-
 const getHotelBookingWhatsappLink = (hotel) =>
   `https://wa.me/923111444192?text=${encodeURIComponent(
     `Assalamualaikum TravelEx, I want to request hotel booking for ${
@@ -214,13 +210,6 @@ const HotelDetailsPage = () => {
   const nights = useMemo(() => {
     return getNights(booking.checkInDate, booking.checkOutDate)
   }, [booking.checkInDate, booking.checkOutDate])
-
-  const scrollToBookingForm = () => {
-    bookingFormRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    })
-  }
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target
@@ -299,6 +288,7 @@ const HotelDetailsPage = () => {
       const infants = Math.max(0, Number(booking.infants) || 0)
       const rooms = Math.max(1, Number(booking.rooms) || 1)
       const guests = adults + children + infants
+      const leadSource = getLeadSource()
 
       const selectedHotelName =
         booking.hotelName.trim() || hotel?.name || "Not specified"
@@ -366,6 +356,7 @@ const HotelDetailsPage = () => {
 
         serviceType: "hotel",
         source: "hotel-page",
+        leadSource,
         pageUrl: window.location.href,
 
         city: booking.city.trim(),
@@ -962,7 +953,10 @@ const HotelDetailsPage = () => {
                     const Icon = item.icon
 
                     return (
-                      <div key={item.label} className="rounded-[5px] bg-[#F8FAFC] p-3">
+                      <div
+                        key={item.label}
+                        className="rounded-[5px] bg-[#F8FAFC] p-3"
+                      >
                         <Icon className="text-sm text-[#00AEEF]" />
 
                         <p className="mt-2 font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400">

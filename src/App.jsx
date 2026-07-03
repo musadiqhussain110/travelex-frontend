@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom"
 
 import Navbar from "./components/Navbar"
@@ -51,9 +52,17 @@ import AdminContactInquiriesPage from "./pages/admin/AdminContactInquiriesPage"
 import AdminContactInquiryDetailPage from "./pages/admin/AdminContactInquiryDetailPage"
 import AdminNotificationsPage from "./pages/admin/AdminNotificationsPage"
 
+import { captureLeadSource } from "./utils/leadSourceTracker"
+
 const AppContent = () => {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith("/admin")
+
+  useEffect(() => {
+    if (!isAdminRoute) {
+      captureLeadSource()
+    }
+  }, [location.pathname, location.search, isAdminRoute])
 
   return (
     <>
@@ -151,7 +160,7 @@ const AppContent = () => {
 
           {/* Search */}
           <Route path="/search" element={<SearchResultsPage />} />
-<Route path="/visa-application" element={<VisaApplicationPage />} />
+
           {/* Umrah */}
           <Route path="/umrah" element={<UmrahPage />} />
           <Route path="/package/:id" element={<PackageDetails />} />
@@ -173,6 +182,7 @@ const AppContent = () => {
           <Route path="/tickets" element={<TicketsPage />} />
           <Route path="/visa" element={<VisaPage />} />
           <Route path="/visa/apply" element={<VisaApplicationPage />} />
+          <Route path="/visa-application" element={<VisaApplicationPage />} />
 
           {/* Blogs */}
           <Route path="/blogs" element={<BlogsPage />} />

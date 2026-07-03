@@ -22,6 +22,7 @@ import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
 import AppTimePicker from "../components/common/AppTimePicker"
 import { publicApi } from "../services/publicApi"
+import { getLeadSource } from "../utils/leadSourceTracker"
 
 import carHero1 from "../assets/Cars/Car5.avif"
 import carHero4 from "../assets/Cars/Car5.webp"
@@ -74,7 +75,8 @@ const transferCards = [
 const vehicleCards = [
   {
     title: "Economy Car",
-    description: "Budget-friendly option for solo travelers, couples, and light luggage.",
+    description:
+      "Budget-friendly option for solo travelers, couples, and light luggage.",
     icon: FaCar,
   },
   {
@@ -227,7 +229,8 @@ const CarRentalPage = () => {
 
   const validateForm = () => {
     if (!quoteForm.fullName.trim()) return "Please enter your full name."
-    if (!quoteForm.phone.trim()) return "Please enter your mobile / WhatsApp number."
+    if (!quoteForm.phone.trim())
+      return "Please enter your mobile / WhatsApp number."
     if (!quoteForm.email.trim()) return "Please enter your email address."
     if (!quoteForm.cityCountry.trim()) return "Please enter your city/country."
     if (!quoteForm.serviceRequired) return "Please select service required."
@@ -236,9 +239,12 @@ const CarRentalPage = () => {
     if (!quoteForm.flightDate) return "Please select arrival / departure date."
     if (!quoteForm.flightTime) return "Please select arrival / departure time."
     if (!quoteForm.airport.trim()) return "Please enter airport name."
-    if (!quoteForm.pickupLocation.trim()) return "Please enter pickup location."
-    if (!quoteForm.dropoffLocation.trim()) return "Please enter drop-off location."
-    if (!quoteForm.vehiclePreference) return "Please select vehicle preference."
+    if (!quoteForm.pickupLocation.trim())
+      return "Please enter pickup location."
+    if (!quoteForm.dropoffLocation.trim())
+      return "Please enter drop-off location."
+    if (!quoteForm.vehiclePreference)
+      return "Please select vehicle preference."
 
     const adults = Number(quoteForm.adults) || 0
     const children = Number(quoteForm.children) || 0
@@ -270,6 +276,7 @@ const CarRentalPage = () => {
       const children = Math.max(0, Number(quoteForm.children) || 0)
       const infants = Math.max(0, Number(quoteForm.infants) || 0)
       const passengerCount = adults + children + infants
+      const leadSource = getLeadSource()
 
       const luggageInfo = `Checked Bags: ${
         quoteForm.checkedBags || 0
@@ -321,6 +328,7 @@ const CarRentalPage = () => {
 
         serviceType: "carRental",
         source: "car-rental-page",
+        leadSource,
         pageUrl: window.location.href,
 
         city: quoteForm.cityCountry.trim(),

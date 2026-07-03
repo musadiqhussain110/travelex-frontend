@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import {
   FaArrowLeft,
+  FaBullhorn,
   FaCalendarAlt,
   FaCheckCircle,
   FaClock,
@@ -25,6 +26,7 @@ import AppTimePicker from "../../components/common/AppTimePicker"
 import { adminApi } from "../../services/api"
 import Customer360Timeline from "../../components/admin/Customer360Timeline"
 import LeadWhatsAppTemplates from "../../components/admin/LeadWhatsAppTemplates"
+
 const leadStatuses = [
   "New",
   "Contacted",
@@ -270,6 +272,57 @@ const FieldGrid = ({ fields }) => {
   )
 }
 
+const MarketingSourceDetails = ({ lead }) => {
+  const leadSource = lead?.leadSource || {}
+
+  return (
+    <SectionCard
+      title="Marketing Source Tracking"
+      description="UTM, referrer, landing page, and form submission tracking captured from website campaigns."
+    >
+      <div className="mb-4 rounded-[5px] border border-orange-100 bg-orange-50 p-4">
+        <div className="flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[5px] bg-[#FF6B00]/10 text-[#FF6B00]">
+            <FaBullhorn />
+          </span>
+
+          <div>
+            <p className="font-poppins text-[11px] font-bold uppercase tracking-[0.08em] text-[#FF6B00]">
+              Main Marketing Source
+            </p>
+
+            <h3 className="mt-1 font-fredoka text-[26px] font-semibold text-slate-950">
+              {formatValue(leadSource.source || "direct")}
+            </h3>
+
+            <p className="mt-1 font-poppins text-sm font-semibold leading-6 text-orange-800">
+              Campaign: {formatValue(leadSource.campaign)}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <FieldGrid
+        fields={[
+          ["Marketing Source", leadSource.source || "direct"],
+          ["Medium", leadSource.medium],
+          ["Campaign", leadSource.campaign],
+          ["Content", leadSource.content],
+          ["Term", leadSource.term],
+          ["Landing Path", leadSource.landingPath],
+          ["Form Path", leadSource.formPath],
+          ["Captured At", formatDateTime(leadSource.capturedAt)],
+          ["Submitted At", formatDateTime(leadSource.submittedAt)],
+          ["Referrer", leadSource.referrer],
+          ["Landing Page", leadSource.landingPage],
+          ["Form Page", leadSource.formPage],
+          ["Page URL", lead.pageUrl],
+        ]}
+      />
+    </SectionCard>
+  )
+}
+
 const UmrahLeadDetails = ({ lead }) => {
   const travelers = lead?.travelers || {}
 
@@ -284,8 +337,14 @@ const UmrahLeadDetails = ({ lead }) => {
           ["Adults", travelers.adults || lead.numberOfAdults],
           ["Children", travelers.children || lead.numberOfChildren],
           ["Infants", travelers.infants || lead.numberOfInfants],
-          ["Preferred Departure City", lead.preferredDepartureCity || lead.departureCity],
-          ["Preferred Departure Date", lead.preferredDepartureDate || formatDateOnly(lead.travelDate)],
+          [
+            "Preferred Departure City",
+            lead.preferredDepartureCity || lead.departureCity,
+          ],
+          [
+            "Preferred Departure Date",
+            lead.preferredDepartureDate || formatDateOnly(lead.travelDate),
+          ],
           ["Duration of Stay", lead.durationOfStay],
           ["Package Required", lead.packageRequired],
           ["Hotel Preference", lead.hotelPreference || lead.preferredHotel],
@@ -364,7 +423,10 @@ const VisaLeadDetails = ({ lead }) => {
           ["Nationality", lead.nationality],
           ["Destination Country", lead.destinationCountry || lead.destination],
           ["Visa Type", lead.visaType],
-          ["Intended Travel Date", lead.intendedTravelDate || formatDateOnly(lead.travelDate)],
+          [
+            "Intended Travel Date",
+            lead.intendedTravelDate || formatDateOnly(lead.travelDate),
+          ],
           ["Duration of Stay", lead.durationOfStay],
           ["Number of Applicants", lead.numberOfApplicants],
           ["Traveled Abroad Before", lead.traveledAbroadBefore],
@@ -427,7 +489,10 @@ const AirportTransferLeadDetails = ({ lead }) => {
           ["Service Required", lead.rentalType],
           ["Airline", lead.preferredAirline],
           ["Flight Number", lead.bookingReference],
-          ["Arrival / Departure Date", formatDateOnly(lead.pickupDate || lead.travelDate)],
+          [
+            "Arrival / Departure Date",
+            formatDateOnly(lead.pickupDate || lead.travelDate),
+          ],
           ["Arrival / Departure Time", lead.pickupTime],
           ["Airport", lead.destination],
           ["Pickup Location", lead.pickupLocation],
@@ -582,6 +647,14 @@ const AdminLeadDetailPage = () => {
       {
         label: "Lead Source",
         value: lead.source,
+      },
+      {
+        label: "Marketing Source",
+        value: lead.leadSource?.source || "direct",
+      },
+      {
+        label: "Campaign",
+        value: lead.leadSource?.campaign || "-",
       },
       {
         label: "Follow-up Status",
@@ -831,6 +904,10 @@ const AdminLeadDetailPage = () => {
                   Follow-up: {lead?.followUpStatus || "Not Set"}
                 </span>
 
+                <span className="rounded-[5px] bg-orange-50 px-3 py-1.5 font-poppins text-xs font-bold text-[#FF6B00]">
+                  Source: {lead?.leadSource?.source || "direct"}
+                </span>
+
                 {isFollowUpOverdue(lead) && (
                   <span className="rounded-[5px] bg-red-50 px-3 py-1.5 font-poppins text-xs font-bold text-red-700">
                     Overdue
@@ -844,7 +921,8 @@ const AdminLeadDetailPage = () => {
 
               <p className="mt-2 max-w-3xl font-poppins text-sm font-medium leading-7 text-white/70 sm:text-base">
                 View customer profile, service requirements, follow-up plan,
-                communication actions, CRM status, and admin notes.
+                communication actions, CRM status, marketing source, and admin
+                notes.
               </p>
             </div>
 
@@ -992,7 +1070,10 @@ const AdminLeadDetailPage = () => {
               <select
                 value={followUpForm.followUpStatus}
                 onChange={(event) =>
-                  handleFollowUpValueChange("followUpStatus", event.target.value)
+                  handleFollowUpValueChange(
+                    "followUpStatus",
+                    event.target.value
+                  )
                 }
                 className="h-11 w-full rounded-[5px] border border-slate-200 bg-white px-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:h-12 sm:px-4 sm:text-sm"
               >
@@ -1066,8 +1147,13 @@ const AdminLeadDetailPage = () => {
       </SectionCard>
 
       <ServiceSpecificDetails lead={lead} />
-<Customer360Timeline lead={lead} />
-<LeadWhatsAppTemplates lead={lead} />
+
+      <MarketingSourceDetails lead={lead} />
+
+      <Customer360Timeline lead={lead} />
+
+      <LeadWhatsAppTemplates lead={lead} />
+
       <SectionCard
         title="Additional Requirements / Full Message"
         description="Complete customer request captured from the website form."

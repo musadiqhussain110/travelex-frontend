@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import {
   FaArrowLeft,
+  FaBullhorn,
   FaCalendarAlt,
   FaCheckCircle,
   FaEnvelope,
@@ -12,13 +13,19 @@ import {
   FaUser,
   FaWhatsapp,
 } from "react-icons/fa"
+
 import { adminApi } from "../../services/api"
 
 const inquiryStatuses = ["New", "Read", "Replied", "Closed"]
 
 const formatDateTime = (date) => {
   if (!date) return "-"
-  return new Date(date).toLocaleString()
+
+  const parsedDate = new Date(date)
+
+  if (Number.isNaN(parsedDate.getTime())) return "-"
+
+  return parsedDate.toLocaleString()
 }
 
 const formatValue = (value) => {
@@ -46,9 +53,11 @@ const InfoCard = ({ icon, label, value }) => {
   return (
     <div className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.04)]">
       <div className="flex items-start gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[5px] bg-[#00AEEF]/10 text-[#00AEEF]">
-          {icon}
-        </span>
+        {icon && (
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[5px] bg-[#00AEEF]/10 text-[#00AEEF]">
+            {icon}
+          </span>
+        )}
 
         <div className="min-w-0">
           <p className="font-poppins text-[11px] font-bold uppercase tracking-[0.05em] text-slate-400">
@@ -81,6 +90,86 @@ const SectionCard = ({ title, description, children }) => {
 
       {children}
     </div>
+  )
+}
+
+const FieldGrid = ({ fields }) => {
+  const visibleFields = fields.filter(
+    ([, value]) =>
+      value !== undefined &&
+      value !== null &&
+      value !== "" &&
+      value !== "-"
+  )
+
+  if (!visibleFields.length) {
+    return (
+      <div className="rounded-[5px] border border-dashed border-slate-200 bg-[#F8FAFC] p-6 text-center">
+        <p className="font-poppins text-sm font-semibold text-slate-500">
+          No tracking details available.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      {visibleFields.map(([label, value]) => (
+        <InfoCard key={label} label={label} value={value} />
+      ))}
+    </div>
+  )
+}
+
+const MarketingSourceDetails = ({ inquiry }) => {
+  const leadSource = inquiry?.leadSource || {}
+
+  return (
+    <SectionCard
+      title="Marketing Source Tracking"
+      description="UTM, referrer, landing page, and form submission tracking captured from website campaigns."
+    >
+      <div className="mb-4 rounded-[5px] border border-orange-100 bg-orange-50 p-4">
+        <div className="flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[5px] bg-[#FF6B00]/10 text-[#FF6B00]">
+            <FaBullhorn />
+          </span>
+
+          <div className="min-w-0">
+            <p className="font-poppins text-[11px] font-bold uppercase tracking-[0.08em] text-[#FF6B00]">
+              Main Marketing Source
+            </p>
+
+            <h3 className="mt-1 break-words font-fredoka text-[26px] font-semibold text-slate-950">
+              {formatValue(leadSource.source || "direct")}
+            </h3>
+
+            <p className="mt-1 break-words font-poppins text-sm font-semibold leading-6 text-orange-800">
+              Campaign: {formatValue(leadSource.campaign)}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <FieldGrid
+        fields={[
+          ["Marketing Source", leadSource.source || "direct"],
+          ["Medium", leadSource.medium],
+          ["Campaign", leadSource.campaign],
+          ["Content", leadSource.content],
+          ["Term", leadSource.term],
+          ["Landing Path", leadSource.landingPath],
+          ["Form Path", leadSource.formPath],
+          ["Captured At", formatDateTime(leadSource.capturedAt)],
+          ["Submitted At", formatDateTime(leadSource.submittedAt)],
+          ["Referrer", leadSource.referrer],
+          ["Landing Page", leadSource.landingPage],
+          ["Form Page", leadSource.formPage],
+          ["Page URL", inquiry?.pageUrl],
+          ["Website Form Source", inquiry?.source],
+        ]}
+      />
+    </SectionCard>
   )
 }
 
@@ -228,6 +317,7 @@ const AdminContactInquiryDetailPage = () => {
     event.preventDefault()
 
     const text = noteText.trim()
+
     if (!text || !inquiry) return
 
     setSavingNote(true)
@@ -252,6 +342,7 @@ const AdminContactInquiryDetailPage = () => {
         <p className="font-fredoka text-[28px] font-semibold text-slate-950">
           Loading contact inquiry...
         </p>
+
         <p className="mt-1 font-poppins text-sm font-medium text-slate-500">
           Please wait while we prepare customer message details.
         </p>
@@ -279,6 +370,7 @@ const AdminContactInquiryDetailPage = () => {
 
   return (
     <div className="grid gap-5">
+      {/* Header */}
       <section className="overflow-hidden rounded-[5px] bg-slate-950 shadow-[0_22px_60px_rgba(15,23,42,0.16)]">
         <div className="relative p-5 sm:p-7">
           <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#00AEEF]/20 blur-3xl" />
@@ -306,6 +398,16 @@ const AdminContactInquiryDetailPage = () => {
                 <span className="rounded-[5px] bg-white/10 px-3 py-1.5 font-poppins text-xs font-bold text-[#00AEEF] backdrop-blur">
                   Contact Message
                 </span>
+
+                <span className="rounded-[5px] bg-orange-50 px-3 py-1.5 font-poppins text-xs font-bold text-[#FF6B00]">
+                  Source: {inquiry?.leadSource?.source || "direct"}
+                </span>
+
+                {inquiry?.leadSource?.campaign && (
+                  <span className="rounded-[5px] bg-white/10 px-3 py-1.5 font-poppins text-xs font-bold text-white/80 backdrop-blur">
+                    Campaign: {inquiry.leadSource.campaign}
+                  </span>
+                )}
               </div>
 
               <h1 className="mt-3 font-fredoka text-[34px] font-semibold leading-tight text-white sm:text-[46px]">
@@ -313,8 +415,8 @@ const AdminContactInquiryDetailPage = () => {
               </h1>
 
               <p className="mt-2 max-w-3xl font-poppins text-sm font-medium leading-7 text-white/70 sm:text-base">
-                View customer message, contact details, CRM status, internal
-                notes, and quick communication actions.
+                View customer message, contact details, CRM status, marketing
+                source, internal notes, and quick communication actions.
               </p>
             </div>
 
@@ -361,6 +463,7 @@ const AdminContactInquiryDetailPage = () => {
         </div>
       )}
 
+      {/* Customer + Status */}
       <section className="grid gap-5 xl:grid-cols-[1fr_420px]">
         <SectionCard
           title="Customer Information"
@@ -440,9 +543,52 @@ const AdminContactInquiryDetailPage = () => {
               Close Inquiry
             </button>
           </div>
+
+          <div className="mt-5 grid gap-3">
+            <div className="flex items-center justify-between gap-4 rounded-[5px] bg-[#F8FAFC] px-4 py-3">
+              <span className="font-poppins text-xs font-bold uppercase tracking-[0.06em] text-slate-400">
+                Form Source
+              </span>
+
+              <span className="text-right font-poppins text-sm font-semibold text-slate-800">
+                {formatValue(inquiry.source)}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between gap-4 rounded-[5px] bg-[#F8FAFC] px-4 py-3">
+              <span className="font-poppins text-xs font-bold uppercase tracking-[0.06em] text-slate-400">
+                Marketing Source
+              </span>
+
+              <span className="text-right font-poppins text-sm font-semibold text-slate-800">
+                {inquiry.leadSource?.source || "direct"}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between gap-4 rounded-[5px] bg-[#F8FAFC] px-4 py-3">
+              <span className="font-poppins text-xs font-bold uppercase tracking-[0.06em] text-slate-400">
+                Campaign
+              </span>
+
+              <span className="break-words text-right font-poppins text-sm font-semibold text-slate-800">
+                {formatValue(inquiry.leadSource?.campaign)}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between gap-4 rounded-[5px] bg-[#F8FAFC] px-4 py-3">
+              <span className="font-poppins text-xs font-bold uppercase tracking-[0.06em] text-slate-400">
+                Created
+              </span>
+
+              <span className="text-right font-poppins text-sm font-semibold text-slate-800">
+                {formatDateTime(inquiry.createdAt)}
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
+      {/* Customer Message */}
       <SectionCard
         title="Customer Message"
         description="Complete message submitted through the contact form."
@@ -466,6 +612,10 @@ const AdminContactInquiryDetailPage = () => {
         </div>
       </SectionCard>
 
+      {/* Marketing Tracking */}
+      <MarketingSourceDetails inquiry={inquiry} />
+
+      {/* Notes + Actions */}
       <div className="grid gap-5 xl:grid-cols-[1fr_380px]">
         <SectionCard
           title="Admin Notes"

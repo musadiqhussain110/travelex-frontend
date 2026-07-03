@@ -3,7 +3,6 @@ import { Link, useSearchParams } from "react-router-dom"
 import {
   FaArrowLeft,
   FaArrowRight,
-  FaCalendarAlt,
   FaCheckCircle,
   FaEnvelope,
   FaGlobeAsia,
@@ -18,6 +17,8 @@ import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
 import { publicApi } from "../services/publicApi"
 import visaHeroImage from "../assets/visa/visa-page.jpg"
+import { getLeadSource } from "../utils/leadSourceTracker"
+
 const whatsappNumber = "923111444192"
 
 const defaultVisaTypes = [
@@ -48,7 +49,7 @@ const VisaApplicationPage = () => {
   const [searchParams] = useSearchParams()
 
   const selectedCountry = searchParams.get("country") || ""
-  
+
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -212,6 +213,7 @@ ${formData.additionalRequirements || "No additional information"}
       setLoading(true)
 
       const applicants = Math.max(1, Number(formData.numberOfApplicants) || 1)
+      const leadSource = getLeadSource()
 
       const message = [
         "Visa application inquiry",
@@ -242,22 +244,28 @@ ${formData.additionalRequirements || "No additional information"}
         name: formData.fullName.trim(),
         phone: formData.phone.trim(),
         email: formData.email.trim(),
+
         serviceType: "visa",
         source: "visa-page",
+        leadSource,
         pageUrl: window.location.href,
+
         city: formData.city.trim(),
         nationality: formData.nationality.trim(),
         destinationCountry: formData.destinationCountry.trim(),
         destination: formData.destinationCountry.trim(),
+
         visaType: formData.visaType,
         travelDate: toIsoDate(formData.intendedTravelDate),
         durationOfStay: formData.durationOfStay.trim(),
         numberOfApplicants: applicants,
+
         travelers: {
           adults: applicants,
           children: 0,
           infants: 0,
         },
+
         traveledAbroadBefore: formData.traveledAbroadBefore,
         visaRefusedBefore: formData.visaRefusedBefore,
         currentOccupation: formData.currentOccupation.trim(),
@@ -265,6 +273,7 @@ ${formData.additionalRequirements || "No additional information"}
         flightBookingAssistance: formData.flightBookingAssistance,
         hotelBookingAssistance: formData.hotelBookingAssistance,
         additionalRequirements: formData.additionalRequirements.trim(),
+
         message,
         priority: "high",
         companyWebsite: formData.companyWebsite,
@@ -287,17 +296,18 @@ ${formData.additionalRequirements || "No additional information"}
 
   return (
     <main className="bg-[#F8FAFC]">
-     <section className="relative overflow-hidden bg-slate-950">
-  <img
-    src={visaHeroImage}
-    alt="Visa application by TravelEx"
-    loading="eager"
-    decoding="async"
-    className="absolute inset-0 h-full w-full object-cover"
-  />
+      <section className="relative overflow-hidden bg-slate-950">
+        <img
+          src={visaHeroImage}
+          alt="Visa application by TravelEx"
+          loading="eager"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
 
-  <div className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-slate-950/55 to-slate-950/25" />
-  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-slate-950/55 to-slate-950/25" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-transparent" />
+
         <div className="relative z-10 mx-auto max-w-[1340px] px-4 py-7 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
           <div className="max-w-5xl">
             <Link
@@ -317,8 +327,6 @@ ${formData.additionalRequirements || "No additional information"}
               <span className="inline-flex h-[27px] items-center rounded-[5px] border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:px-4 sm:py-2 sm:text-xs">
                 {formData.destinationCountry || "Visa Assistance"}
               </span>
-
-          
             </div>
 
             <h1 className="font-fredoka text-[18px] font-semibold leading-[1.08] text-white sm:text-[46px] sm:uppercase sm:leading-[1.1] lg:text-[54px]">
@@ -380,8 +388,8 @@ ${formData.additionalRequirements || "No additional information"}
                     </h3>
 
                     <p className="mt-1.5 font-poppins text-[11.5px] font-medium leading-5 text-green-700 sm:text-sm sm:leading-7">
-                      Your visa application inquiry has been saved. Our consultant will contact you
-                      soon.
+                      Your visa application inquiry has been saved. Our
+                      consultant will contact you soon.
                     </p>
 
                     <a
@@ -498,7 +506,9 @@ ${formData.additionalRequirements || "No additional information"}
               <AppDatePicker
                 label="Intended Travel Date *"
                 value={formData.intendedTravelDate}
-                onChange={(value) => handleSelectChange("intendedTravelDate", value)}
+                onChange={(value) =>
+                  handleSelectChange("intendedTravelDate", value)
+                }
                 placeholder="Select intended travel date"
               />
 
@@ -531,7 +541,9 @@ ${formData.additionalRequirements || "No additional information"}
               <AppSelect
                 label="Traveled Abroad Before? *"
                 value={formData.traveledAbroadBefore}
-                onChange={(value) => handleSelectChange("traveledAbroadBefore", value)}
+                onChange={(value) =>
+                  handleSelectChange("traveledAbroadBefore", value)
+                }
                 placeholder="Select option"
                 options={yesNoOptions}
               />
@@ -539,7 +551,9 @@ ${formData.additionalRequirements || "No additional information"}
               <AppSelect
                 label="Visa Refused Before? *"
                 value={formData.visaRefusedBefore}
-                onChange={(value) => handleSelectChange("visaRefusedBefore", value)}
+                onChange={(value) =>
+                  handleSelectChange("visaRefusedBefore", value)
+                }
                 placeholder="Select option"
                 options={yesNoOptions}
               />
@@ -575,7 +589,9 @@ ${formData.additionalRequirements || "No additional information"}
               <AppSelect
                 label="Require Flight Booking Assistance? *"
                 value={formData.flightBookingAssistance}
-                onChange={(value) => handleSelectChange("flightBookingAssistance", value)}
+                onChange={(value) =>
+                  handleSelectChange("flightBookingAssistance", value)
+                }
                 placeholder="Select option"
                 options={yesNoOptions}
               />
@@ -583,14 +599,19 @@ ${formData.additionalRequirements || "No additional information"}
               <AppSelect
                 label="Require Hotel Booking Assistance? *"
                 value={formData.hotelBookingAssistance}
-                onChange={(value) => handleSelectChange("hotelBookingAssistance", value)}
+                onChange={(value) =>
+                  handleSelectChange("hotelBookingAssistance", value)
+                }
                 placeholder="Select option"
                 options={yesNoOptions}
               />
             </div>
 
             <div className="mt-4">
-              <label className={labelClass}>Additional Information / Requirements</label>
+              <label className={labelClass}>
+                Additional Information / Requirements
+              </label>
+
               <textarea
                 rows="4"
                 name="additionalRequirements"
@@ -615,10 +636,12 @@ ${formData.additionalRequirements || "No additional information"}
             <h3 className="font-fredoka text-[24px] font-semibold text-slate-950">
               Visa support
             </h3>
+
             <p className="mt-2 font-poppins text-sm font-medium leading-7 text-slate-600">
               TravelEx will review your details and guide you about documents,
               eligibility and processing requirements.
             </p>
+
             <a
               href={getWhatsappUrl()}
               target="_blank"

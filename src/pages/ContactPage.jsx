@@ -11,6 +11,7 @@ import {
 import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
 import { publicApi } from "../services/publicApi"
+import { getLeadSource } from "../utils/leadSourceTracker"
 import contactHero from "../assets/contact/contact.jpg"
 
 const initialForm = {
@@ -124,6 +125,8 @@ const ContactPage = () => {
     try {
       setLoading(true)
 
+      const leadSource = getLeadSource()
+
       const payload = {
         name: formData.name.trim(),
         email: formData.email.trim(),
@@ -137,6 +140,7 @@ Message:
 ${formData.message.trim()}
         `.trim(),
         source: "contact-page",
+        leadSource,
         pageUrl: window.location.href,
         companyWebsite: formData.companyWebsite,
       }

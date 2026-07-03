@@ -1,7 +1,6 @@
 import { useState } from "react"
 import {
   FaArrowRight,
-  FaCalendarAlt,
   FaCheckCircle,
   FaEnvelope,
   FaPlaneArrival,
@@ -16,6 +15,7 @@ import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
 import { publicApi } from "../services/publicApi"
+import { getLeadSource } from "../utils/leadSourceTracker"
 import ticketHero from "../assets/ticket/ticket.jpg"
 
 const classOptions = ["Economy", "Premium Economy", "Business", "First Class"]
@@ -58,7 +58,8 @@ const toIsoDate = (value) => {
   return new Date(`${value}T00:00:00`).toISOString()
 }
 
-const getNumber = (value, fallback = 0) => Math.max(fallback, Number(value) || fallback)
+const getNumber = (value, fallback = 0) =>
+  Math.max(fallback, Number(value) || fallback)
 
 const whatsappLink =
   "https://wa.me/923111444192?text=Assalamualaikum%20TravelEx%2C%20I%20need%20guidance%20about%20air%20ticket%20booking."
@@ -140,6 +141,8 @@ const TicketsPage = () => {
         infants: getNumber(formData.infants, 0),
       }
 
+      const leadSource = getLeadSource()
+
       const message = [
         "Air ticket booking inquiry",
         "",
@@ -165,17 +168,24 @@ const TicketsPage = () => {
         name: formData.fullName.trim(),
         phone: formData.phone.trim(),
         email: formData.email.trim(),
+
         serviceType: "ticket",
         source: "ticket-page",
+        leadSource,
         pageUrl: window.location.href,
+
         departureCity: formData.departureCity.trim(),
         destinationCity: formData.destinationCity.trim(),
         destination: `${formData.departureCity.trim()} to ${formData.destinationCity.trim()}`,
+
         travelDate: toIsoDate(formData.departureDate),
         returnDate: toIsoDate(formData.returnDate),
+
         travelers,
+
         preferredAirline: formData.preferredAirline.trim(),
         travelClass: formData.travelClass,
+
         additionalRequirements: formData.additionalRequirements.trim(),
         message,
         priority: "high",
@@ -285,7 +295,10 @@ const TicketsPage = () => {
         </div>
       </section>
 
-      <section id="ticket-form" className="scroll-mt-24 bg-white pt-4 pb-8 sm:pt-7 sm:pb-12">
+      <section
+        id="ticket-form"
+        className="scroll-mt-24 bg-white pb-8 pt-4 sm:pb-12 sm:pt-7"
+      >
         <div className="mx-auto grid max-w-[1440px] gap-5 px-4 sm:px-6 lg:grid-cols-[1fr_360px] lg:gap-6 lg:px-8">
           <form
             onSubmit={handleSubmit}
@@ -427,17 +440,38 @@ const TicketsPage = () => {
             <div className="mt-4 grid gap-4 sm:grid-cols-3">
               <div>
                 <label className={labelClass}>Adults *</label>
-                <input type="number" name="adults" min="1" value={formData.adults} onChange={handleChange} className={inputClass} />
+                <input
+                  type="number"
+                  name="adults"
+                  min="1"
+                  value={formData.adults}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
               </div>
 
               <div>
                 <label className={labelClass}>Children</label>
-                <input type="number" name="children" min="0" value={formData.children} onChange={handleChange} className={inputClass} />
+                <input
+                  type="number"
+                  name="children"
+                  min="0"
+                  value={formData.children}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
               </div>
 
               <div>
                 <label className={labelClass}>Infants</label>
-                <input type="number" name="infants" min="0" value={formData.infants} onChange={handleChange} className={inputClass} />
+                <input
+                  type="number"
+                  name="infants"
+                  min="0"
+                  value={formData.infants}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
               </div>
             </div>
 

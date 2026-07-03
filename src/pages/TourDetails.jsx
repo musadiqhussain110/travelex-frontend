@@ -3,7 +3,6 @@ import { Link, useParams } from "react-router-dom"
 import {
   FaArrowLeft,
   FaArrowRight,
-  FaCalendarAlt,
   FaCheckCircle,
   FaEnvelope,
   FaInfoCircle,
@@ -20,6 +19,7 @@ import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
 import { publicApi } from "../services/publicApi"
+import { getLeadSource } from "../utils/leadSourceTracker"
 
 const hotelCategoryOptions = ["3 Star", "4 Star", "5 Star"]
 const interestedInOptions = ["Group Tour", "Private Tour"]
@@ -183,6 +183,8 @@ const TourDetails = () => {
         infants: getNumber(formData.infants, 0),
       }
 
+      const leadSource = getLeadSource()
+
       const message = [
         `Tour package inquiry for: ${tour.title}`,
         `Tour Location: ${tour.location || tour.title}`,
@@ -212,6 +214,7 @@ const TourDetails = () => {
 
         serviceType: "tour",
         source: "tour-page",
+        leadSource,
         pageUrl: window.location.href,
 
         city: formData.city.trim(),
