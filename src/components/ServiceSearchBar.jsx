@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import {
   FaCar,
   FaGlobeAsia,
@@ -11,43 +11,31 @@ import {
 } from "react-icons/fa"
 
 import { umrahPackages } from "../data/umrahPackagesData"
-import { tours } from "../data/tours"
-import { hotels } from "../data/hotelsData"
 
-const getIndexedPath = (
-  items = [],
-  index,
-  pathTemplate,
-  fallbackPath
-) => {
-  const selectedItem = items?.[index]
+/*
+|--------------------------------------------------------------------------
+| Umrah destination
+|--------------------------------------------------------------------------
+| Open the 4th Umrah package = index 3.
+| If it does not exist, safely fall back to /umrah.
+*/
+const fourthUmrahPackage = umrahPackages?.[3]
 
-  return selectedItem?.id
-    ? pathTemplate.replace(":id", selectedItem.id)
-    : fallbackPath
-}
+const umrahPackageId =
+  fourthUmrahPackage?.id ||
+  fourthUmrahPackage?._id ||
+  fourthUmrahPackage?.slug ||
+  ""
 
-const getFirstPath = (
-  items = [],
-  pathTemplate,
-  fallbackPath
-) => {
-  return items?.[0]?.id
-    ? pathTemplate.replace(":id", items[0].id)
-    : fallbackPath
-}
+const umrahPath = umrahPackageId
+  ? `/package/${encodeURIComponent(umrahPackageId)}`
+  : "/umrah"
 
 const services = [
   {
     name: "Umrah",
     icon: <FaKaaba />,
-    // 4th Umrah package = index 3
-    path: getIndexedPath(
-      umrahPackages,
-      3,
-      "/package/:id",
-      "/umrah"
-    ),
+    path: umrahPath,
     buttonLabel: "Book Umrah Package",
   },
   {
@@ -59,13 +47,7 @@ const services = [
   {
     name: "International Tours",
     icon: <FaGlobeAsia />,
-    // 4th Tour = index 3
-    path: getIndexedPath(
-      tours,
-      3,
-      "/tours/:id",
-      "/tours"
-    ),
+    path: "/tours/custom-international-tour",
     buttonLabel: "Book International Tour",
   },
   {
@@ -77,12 +59,7 @@ const services = [
   {
     name: "Hotel Booking",
     icon: <FaHotel />,
-    // First hotel details page
-    path: getFirstPath(
-      hotels,
-      "/hotels/:id",
-      "/hotels"
-    ),
+    path: "/hotels/marriott-hotel",
     buttonLabel: "Request Hotel Booking",
   },
   {
@@ -94,8 +71,6 @@ const services = [
 ]
 
 const ServiceSearchBar = ({ defaultService = "Umrah" }) => {
-  const navigate = useNavigate()
-
   const [service, setService] = useState(defaultService)
 
   useEffect(() => {
@@ -106,9 +81,10 @@ const ServiceSearchBar = ({ defaultService = "Umrah" }) => {
     services.find((item) => item.name === service) ||
     services[0]
 
+  // Tab clicks only switch the active service tab.
+  // Navigation happens only when the user clicks the CTA button below.
   const handleServiceClick = (item) => {
     setService(item.name)
-    navigate(item.path)
   }
 
   return (
