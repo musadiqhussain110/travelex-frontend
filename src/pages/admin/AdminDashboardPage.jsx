@@ -66,8 +66,8 @@ const marketingSourceLabels = {
   email: "Email",
   referral: "Referral",
   direct: "Direct",
-  unknown: "Unknown / Legacy",
-  Unknown: "Unknown / Legacy",
+  unknown: "Unknown",
+  Unknown: "Unknown",
 }
 
 const statusColor = {
@@ -86,7 +86,7 @@ const statusColor = {
 const formatService = (service = "") => serviceLabels[service] || service || "-"
 
 const formatMarketingSource = (source = "") => {
-  return marketingSourceLabels[source] || source || "Unknown / Legacy"
+  return marketingSourceLabels[source] || source || "Unknown"
 }
 
 const getServicePath = (service = "") => servicePaths[service] || "/admin/leads"
