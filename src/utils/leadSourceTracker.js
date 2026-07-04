@@ -1,19 +1,19 @@
-const STORAGE_KEY = "travelex_visit_source_v4"
+const CURRENT_VISIT_KEY = "travelex_attribution_v1"
 
-// Old keys from our previous implementations.
-// These are permanently removed so stale Instagram data cannot return.
 const LEGACY_LOCAL_STORAGE_KEYS = [
   "travelex_lead_source",
 ]
 
 const LEGACY_SESSION_STORAGE_KEYS = [
-  "travelex_current_visit_source",
   "travelex_lead_source",
+  "travelex_current_visit_source",
+  "travelex_visit_source_v4",
 ]
 
-// Current source for the currently loaded React document.
-// SPA route changes preserve this in memory.
-let currentVisitSource = null
+// Source captured for the currently loaded React document.
+// Internal SPA navigation keeps this value.
+let currentDocumentSource = null
+let hasCapturedCurrentDocument = false
 
 const safeJsonParse = (value) => {
   try {
@@ -23,19 +23,19 @@ const safeJsonParse = (value) => {
   }
 }
 
+const normalizeValue = (value = "") => {
+  return String(value).trim()
+}
+
+const normalizeSource = (value = "") => {
+  return normalizeValue(value).toLowerCase()
+}
+
 const normalizeHostname = (hostname = "") => {
   return String(hostname)
     .trim()
     .toLowerCase()
     .replace(/^www\./, "")
-}
-
-const normalizeSource = (value = "") => {
-  return String(value).trim().toLowerCase()
-}
-
-const normalizeValue = (value = "") => {
-  return String(value).trim()
 }
 
 const isSameSite = (hostA = "", hostB = "") => {
@@ -48,7 +48,7 @@ const isSameSite = (hostA = "", hostB = "") => {
   return a.endsWith(`.${b}`) || b.endsWith(`.${a}`)
 }
 
-const clearOldTrackingStorage = () => {
+const clearLegacyTrackingStorage = () => {
   if (typeof window === "undefined") return
 
   try {
@@ -68,27 +68,29 @@ const clearOldTrackingStorage = () => {
   }
 }
 
-const getStoredVisitSource = () => {
+const getStoredSource = () => {
   if (typeof window === "undefined") return null
 
   try {
-    return safeJsonParse(sessionStorage.getItem(STORAGE_KEY))
+    return safeJsonParse(
+      sessionStorage.getItem(CURRENT_VISIT_KEY)
+    )
   } catch {
     return null
   }
 }
 
-const saveVisitSource = (sourceData) => {
-  currentVisitSource = sourceData
+const saveSource = (sourceData) => {
+  currentDocumentSource = sourceData
 
   if (typeof window !== "undefined") {
     try {
       sessionStorage.setItem(
-        STORAGE_KEY,
+        CURRENT_VISIT_KEY,
         JSON.stringify(sourceData)
       )
     } catch {
-      // Current in-memory attribution still works.
+      // In-memory attribution still works.
     }
   }
 
@@ -99,10 +101,8 @@ const getNavigationType = () => {
   if (typeof window === "undefined") return "navigate"
 
   try {
-    const navigationEntries =
-      performance.getEntriesByType("navigation")
-
-    return navigationEntries?.[0]?.type || "navigate"
+    const entries = performance.getEntriesByType("navigation")
+    return entries?.[0]?.type || "navigate"
   } catch {
     return "navigate"
   }
@@ -192,7 +192,6 @@ const getReferrerAttribution = (referrer = "") => {
 
   try {
     const referrerUrl = new URL(referrer)
-
     const referrerHost = normalizeHostname(
       referrerUrl.hostname
     )
@@ -202,7 +201,6 @@ const getReferrerAttribution = (referrer = "") => {
         ? normalizeHostname(window.location.hostname)
         : ""
 
-    // TravelEx → TravelEx
     if (isSameSite(referrerHost, currentHost)) {
       return {
         type: "internal",
@@ -283,7 +281,6 @@ const getReferrerAttribution = (referrer = "") => {
       }
     }
 
-    // Unknown external website
     return {
       type: "external",
       source: "referral",
@@ -302,7 +299,6 @@ const getClickIdAttribution = (
   params,
   referrerAttribution
 ) => {
-  // Google Ads
   if (
     params.get("gclid") ||
     params.get("dclid") ||
@@ -312,87 +308,57 @@ const getClickIdAttribution = (
     return {
       source: "google",
       medium: "paid",
-      clickIdType: "google",
     }
   }
 
-  // Meta click identifier.
-  // When a known Facebook / Instagram referrer exists,
-  // use it to distinguish the actual Meta platform.
   if (params.get("fbclid")) {
-    const metaReferrerSource =
-      referrerAttribution?.source === "instagram" ||
-      referrerAttribution?.source === "facebook"
-        ? referrerAttribution.source
-        : "facebook"
+    // fbclid is a Meta identifier.
+    // Referrer helps distinguish Facebook from Instagram.
+    if (
+      referrerAttribution?.source === "facebook" ||
+      referrerAttribution?.source === "instagram"
+    ) {
+      return {
+        source: referrerAttribution.source,
+        medium: "social",
+      }
+    }
 
     return {
-      source: metaReferrerSource,
+      source: "meta",
       medium: "social",
-      clickIdType: "meta",
     }
   }
 
-  // TikTok
   if (params.get("ttclid")) {
     return {
       source: "tiktok",
       medium: "paid_social",
-      clickIdType: "tiktok",
     }
   }
 
-  // Microsoft / Bing
   if (params.get("msclkid")) {
     return {
       source: "bing",
       medium: "paid",
-      clickIdType: "microsoft",
     }
   }
 
-  // LinkedIn
   if (params.get("li_fat_id")) {
     return {
       source: "linkedin",
       medium: "paid_social",
-      clickIdType: "linkedin",
     }
   }
 
-  // X / Twitter
   if (params.get("twclid")) {
     return {
       source: "x",
       medium: "social",
-      clickIdType: "x",
     }
   }
 
   return null
-}
-
-const getTrackingSignature = (params) => {
-  const trackingKeys = [
-    "utm_source",
-    "utm_medium",
-    "utm_campaign",
-    "utm_content",
-    "utm_term",
-    "gclid",
-    "dclid",
-    "gbraid",
-    "wbraid",
-    "fbclid",
-    "ttclid",
-    "msclkid",
-    "li_fat_id",
-    "twclid",
-  ]
-
-  return trackingKeys
-    .map((key) => `${key}=${params.get(key) || ""}`)
-    .join("&")
 }
 
 const createSourceData = ({
@@ -402,63 +368,78 @@ const createSourceData = ({
   content = "",
   term = "",
   referrer = "",
-  captureMethod = "direct",
-  trackingSignature = "",
+  landingPage,
+  landingPath,
 }) => {
   return {
-    source: source || "direct",
+    source: normalizeSource(source) || "direct",
+    medium: normalizeSource(medium),
+    campaign: normalizeValue(campaign),
+    content: normalizeValue(content),
+    term: normalizeValue(term),
+    referrer: normalizeValue(referrer),
+
+    landingPage:
+      landingPage ||
+      (typeof window !== "undefined"
+        ? window.location.href
+        : ""),
+
+    landingPath:
+      landingPath ||
+      (typeof window !== "undefined"
+        ? window.location.pathname
+        : ""),
+
+    capturedAt: new Date().toISOString(),
+  }
+}
+
+export const captureManualLeadSource = ({
+  source,
+  medium = "",
+  campaign = "",
+  content = "",
+  term = "",
+  landingPage = "",
+  landingPath = "",
+} = {}) => {
+  if (typeof window === "undefined") return null
+
+  clearLegacyTrackingStorage()
+
+  const normalizedSource = normalizeSource(source)
+
+  if (!normalizedSource) {
+    return captureLeadSource()
+  }
+
+  const sourceData = createSourceData({
+    source: normalizedSource,
     medium,
     campaign,
     content,
     term,
-    referrer,
-
+    referrer: document.referrer || "",
     landingPage:
-      typeof window !== "undefined"
-        ? window.location.href
-        : "",
-
+      landingPage || window.location.href,
     landingPath:
-      typeof window !== "undefined"
-        ? window.location.pathname
-        : "",
+      landingPath || window.location.pathname,
+  })
 
-    capturedAt: new Date().toISOString(),
+  hasCapturedCurrentDocument = true
 
-    // Internal-only metadata.
-    // Removed before sending to backend.
-    _captureMethod: captureMethod,
-    _trackingSignature: trackingSignature,
-    _trackerVersion: 4,
-  }
-}
-
-const getPublicSourceData = (sourceData) => {
-  if (!sourceData) return null
-
-  const {
-    _captureMethod,
-    _trackingSignature,
-    _trackerVersion,
-    ...publicSourceData
-  } = sourceData
-
-  return publicSourceData
+  return saveSource(sourceData)
 }
 
 export const captureLeadSource = () => {
   if (typeof window === "undefined") return null
 
-  /*
-  |--------------------------------------------------------------------------
-  | STEP 0 — permanently remove old stale storage
-  |--------------------------------------------------------------------------
-  */
-  clearOldTrackingStorage()
+  clearLegacyTrackingStorage()
 
-  const params = new URLSearchParams(window.location.search)
-
-  const trackingSignature = getTrackingSignature(params)
+  const params = new URLSearchParams(
+    window.location.search
+  )
 
   const utmSource = normalizeSource(
     params.get("utm_source") || ""
@@ -490,19 +471,11 @@ export const captureLeadSource = () => {
 
   /*
   |--------------------------------------------------------------------------
-  | PRIORITY 1 — UTM
+  | 1. UTM parameters
   |--------------------------------------------------------------------------
+  | Always replace previous attribution.
   */
   if (hasUtm) {
-    // React StrictMode / repeated effect protection
-    if (
-      currentVisitSource &&
-      currentVisitSource._trackingSignature ===
-        trackingSignature
-    ) {
-      return getPublicSourceData(currentVisitSource)
-    }
-
     const sourceData = createSourceData({
       source: utmSource || "direct",
       medium: utmMedium,
@@ -510,27 +483,19 @@ export const captureLeadSource = () => {
       content: utmContent,
       term: utmTerm,
       referrer: document.referrer || "",
-      captureMethod: "utm",
-      trackingSignature,
     })
 
-    return getPublicSourceData(
-      saveVisitSource(sourceData)
-    )
+    hasCapturedCurrentDocument = true
+    return saveSource(sourceData)
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Calculate referrer only for initial-document decisions
-  |--------------------------------------------------------------------------
-  */
   const referrerAttribution = getReferrerAttribution(
     document.referrer || ""
   )
 
   /*
   |--------------------------------------------------------------------------
-  | PRIORITY 2 — CLICK IDENTIFIERS
+  | 2. Platform click IDs
   |--------------------------------------------------------------------------
   */
   const clickIdAttribution = getClickIdAttribution(
@@ -539,48 +504,36 @@ export const captureLeadSource = () => {
   )
 
   if (clickIdAttribution) {
-    if (
-      currentVisitSource &&
-      currentVisitSource._trackingSignature ===
-        trackingSignature
-    ) {
-      return getPublicSourceData(currentVisitSource)
-    }
-
     const sourceData = createSourceData({
       source: clickIdAttribution.source,
       medium: clickIdAttribution.medium,
       referrer: document.referrer || "",
-      captureMethod: "click_id",
-      trackingSignature,
     })
 
-    return getPublicSourceData(
-      saveVisitSource(sourceData)
-    )
+    hasCapturedCurrentDocument = true
+    return saveSource(sourceData)
   }
 
   /*
   |--------------------------------------------------------------------------
-  | CRITICAL SPA GUARD
+  | 3. SPA route protection
   |--------------------------------------------------------------------------
-  | Once this document has captured a source, do not process the same
-  | document.referrer again during:
+  | After source has been captured for this document:
   |
-  | / → /tickets → /hotels → /visa-application
+  | / → /tickets → /visa-application
   |
-  | This was one of the bugs in the previous version.
-  |--------------------------------------------------------------------------
+  | keep the current attribution.
   */
-  if (currentVisitSource) {
-    return getPublicSourceData(currentVisitSource)
+  if (
+    hasCapturedCurrentDocument &&
+    currentDocumentSource
+  ) {
+    return currentDocumentSource
   }
 
   /*
   |--------------------------------------------------------------------------
-  | PRIORITY 3 — EXTERNAL REFERRER
-  |--------------------------------------------------------------------------
-  | Only processed once per actual document load.
+  | 4. External referrer
   |--------------------------------------------------------------------------
   */
   if (referrerAttribution.type === "external") {
@@ -588,71 +541,53 @@ export const captureLeadSource = () => {
       source: referrerAttribution.source,
       medium: referrerAttribution.medium,
       referrer: document.referrer || "",
-      captureMethod: "referrer",
     })
 
-    return getPublicSourceData(
-      saveVisitSource(sourceData)
-    )
+    hasCapturedCurrentDocument = true
+    return saveSource(sourceData)
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Stored source is NOT trusted by default
-  |--------------------------------------------------------------------------
-  | It may belong to an old Instagram visit.
-  |--------------------------------------------------------------------------
-  */
-  const storedSource = getStoredVisitSource()
+  const storedSource = getStoredSource()
   const navigationType = getNavigationType()
 
   /*
   |--------------------------------------------------------------------------
-  | Genuine full-page same-site navigation
-  |--------------------------------------------------------------------------
-  | Example:
-  | TravelEx page A → TravelEx page B with a real page load
-  |
-  | Preserve current website visit.
+  | 5. Full-page internal TravelEx navigation
   |--------------------------------------------------------------------------
   */
   if (
     referrerAttribution.type === "internal" &&
     storedSource
   ) {
-    return getPublicSourceData(
-      saveVisitSource(storedSource)
-    )
+    currentDocumentSource = storedSource
+    hasCapturedCurrentDocument = true
+
+    return storedSource
   }
 
   /*
   |--------------------------------------------------------------------------
-  | Genuine browser reload
+  | 6. Reload
   |--------------------------------------------------------------------------
-  | Preserve only on actual reload.
-  |
-  | IMPORTANT:
-  | We intentionally do NOT preserve on "back_forward".
-  | That could resurrect stale Instagram attribution.
-  |--------------------------------------------------------------------------
+  | Preserve active visit only on genuine reload.
   */
   if (
     navigationType === "reload" &&
     storedSource
   ) {
-    return getPublicSourceData(
-      saveVisitSource(storedSource)
-    )
+    currentDocumentSource = storedSource
+    hasCapturedCurrentDocument = true
+
+    return storedSource
   }
 
   /*
   |--------------------------------------------------------------------------
-  | PERMANENT STALE-SOURCE FIX
+  | 7. No source evidence
   |--------------------------------------------------------------------------
-  | New navigation + no marketing evidence = DIRECT.
+  | New visit with no signal = DIRECT.
   |
-  | Old Instagram is explicitly overwritten.
-  |--------------------------------------------------------------------------
+  | Never reuse previous Instagram/Facebook source.
   */
   const directSource = createSourceData({
     source: "direct",
@@ -661,31 +596,25 @@ export const captureLeadSource = () => {
     content: "",
     term: "",
     referrer: "",
-    captureMethod: "direct",
   })
 
-  return getPublicSourceData(
-    saveVisitSource(directSource)
-  )
+  hasCapturedCurrentDocument = true
+  return saveSource(directSource)
 }
 
 export const getLeadSource = () => {
   if (typeof window === "undefined") return null
 
-  const capturedSource = captureLeadSource()
+  const sourceData =
+    currentDocumentSource ||
+    captureLeadSource() ||
+    getStoredSource()
 
   const safeSource =
-    capturedSource || {
+    sourceData ||
+    createSourceData({
       source: "direct",
-      medium: "",
-      campaign: "",
-      content: "",
-      term: "",
-      referrer: "",
-      landingPage: window.location.href,
-      landingPath: window.location.pathname,
-      capturedAt: new Date().toISOString(),
-    }
+    })
 
   return {
     ...safeSource,

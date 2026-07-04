@@ -51,7 +51,7 @@ import AdminWhatsappLogsPage from "./pages/admin/AdminWhatsappLogsPage"
 import AdminContactInquiriesPage from "./pages/admin/AdminContactInquiriesPage"
 import AdminContactInquiryDetailPage from "./pages/admin/AdminContactInquiryDetailPage"
 import AdminNotificationsPage from "./pages/admin/AdminNotificationsPage"
-
+import SourceRedirectPage from "./pages/SourceRedirectPage"
 import { captureLeadSource } from "./utils/leadSourceTracker"
 
 const AppContent = () => {
@@ -81,7 +81,10 @@ const AppContent = () => {
         <Routes>
           {/* Admin Login */}
           <Route path="/admin/login" element={<AdminLoginPage />} />
-
+<Route
+  path="/go/:source/*"
+  element={<SourceRedirectPage />}
+/>
           {/* Protected Admin Routes */}
           <Route element={<AdminProtectedRoute />}>
             <Route
