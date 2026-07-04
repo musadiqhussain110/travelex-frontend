@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import {
   FaCar,
   FaGlobeAsia,
@@ -14,7 +14,12 @@ import { umrahPackages } from "../data/umrahPackagesData"
 import { tours } from "../data/tours"
 import { hotels } from "../data/hotelsData"
 
-const getIndexedPath = (items = [], index, pathTemplate, fallbackPath) => {
+const getIndexedPath = (
+  items = [],
+  index,
+  pathTemplate,
+  fallbackPath
+) => {
   const selectedItem = items?.[index]
 
   return selectedItem?.id
@@ -22,29 +27,45 @@ const getIndexedPath = (items = [], index, pathTemplate, fallbackPath) => {
     : fallbackPath
 }
 
-const getFirstPath = (items = [], pathTemplate, fallbackPath) => {
-  return items?.[0]?.id ? pathTemplate.replace(":id", items[0].id) : fallbackPath
+const getFirstPath = (
+  items = [],
+  pathTemplate,
+  fallbackPath
+) => {
+  return items?.[0]?.id
+    ? pathTemplate.replace(":id", items[0].id)
+    : fallbackPath
 }
 
 const services = [
   {
     name: "Umrah",
     icon: <FaKaaba />,
-    // 4th Umrah card = index 3
-    path: getIndexedPath(umrahPackages, 3, "/package/:id", "/umrah"),
+    // 4th Umrah package = index 3
+    path: getIndexedPath(
+      umrahPackages,
+      3,
+      "/package/:id",
+      "/umrah"
+    ),
     buttonLabel: "Book Umrah Package",
   },
   {
-  name: "Visa Assistance",
-  icon: <FaPassport />,
-  path: "/visa-application",
-  buttonLabel: "Apply for Visa Assistance",
-},
+    name: "Visa Assistance",
+    icon: <FaPassport />,
+    path: "/visa-application",
+    buttonLabel: "Apply for Visa Assistance",
+  },
   {
     name: "International Tours",
     icon: <FaGlobeAsia />,
-    // 4th Tours card = index 3
-    path: getIndexedPath(tours, 3, "/tours/:id", "/tours"),
+    // 4th Tour = index 3
+    path: getIndexedPath(
+      tours,
+      3,
+      "/tours/:id",
+      "/tours"
+    ),
     buttonLabel: "Book International Tour",
   },
   {
@@ -56,7 +77,12 @@ const services = [
   {
     name: "Hotel Booking",
     icon: <FaHotel />,
-    path: getFirstPath(hotels, "/hotels/:id", "/hotels"),
+    // First hotel details page
+    path: getFirstPath(
+      hotels,
+      "/hotels/:id",
+      "/hotels"
+    ),
     buttonLabel: "Request Hotel Booking",
   },
   {
@@ -68,6 +94,8 @@ const services = [
 ]
 
 const ServiceSearchBar = ({ defaultService = "Umrah" }) => {
+  const navigate = useNavigate()
+
   const [service, setService] = useState(defaultService)
 
   useEffect(() => {
@@ -75,10 +103,17 @@ const ServiceSearchBar = ({ defaultService = "Umrah" }) => {
   }, [defaultService])
 
   const activeService =
-    services.find((item) => item.name === service) || services[0]
+    services.find((item) => item.name === service) ||
+    services[0]
+
+  const handleServiceClick = (item) => {
+    setService(item.name)
+    navigate(item.path)
+  }
 
   return (
     <div className="relative z-[80] mx-auto w-full max-w-[1080px] overflow-hidden rounded-[10px] border border-white/70 bg-white/95 shadow-[0_24px_60px_rgba(15,23,42,0.10)] backdrop-blur">
+      {/* Service buttons */}
       <div className="flex flex-wrap gap-1 border-b border-slate-100 px-3 pt-1">
         {services.map((item) => {
           const isActive = service === item.name
@@ -87,19 +122,24 @@ const ServiceSearchBar = ({ defaultService = "Umrah" }) => {
             <button
               key={item.name}
               type="button"
-              onClick={() => setService(item.name)}
+              onClick={() => handleServiceClick(item)}
               className={`relative flex items-center gap-2 px-5 py-3.5 text-[13px] font-semibold transition-colors duration-200 ${
                 isActive
                   ? "text-[#FF6B00]"
                   : "text-slate-500 hover:text-[#00AEEF]"
               }`}
             >
-              <span className="text-[18px]">{item.icon}</span>
+              <span className="text-[18px]">
+                {item.icon}
+              </span>
+
               {item.name}
 
               <span
                 className={`absolute bottom-0 left-3 right-3 h-[2.5px] origin-center rounded-full bg-[#FF6B00] transition-transform duration-300 ${
-                  isActive ? "scale-x-100" : "scale-x-0"
+                  isActive
+                    ? "scale-x-100"
+                    : "scale-x-0"
                 }`}
               />
             </button>
@@ -107,6 +147,7 @@ const ServiceSearchBar = ({ defaultService = "Umrah" }) => {
         })}
       </div>
 
+      {/* Main CTA */}
       <div className="p-3.5">
         <Link
           to={activeService.path}
