@@ -101,6 +101,17 @@ const formatPriority = (priority = "") => {
   return priority.charAt(0).toUpperCase() + priority.slice(1)
 }
 
+const formatRoleLabel = (role = "") => {
+  const labels = {
+    superAdmin: "Super Admin",
+    admin: "Admin",
+    consultant: "Consultant",
+    viewer: "Viewer",
+  }
+
+  return labels[role] || role || "Team Member"
+}
+
 const formatService = (serviceType = "") => {
   const labels = {
     umrah: "Umrah Package",
@@ -583,6 +594,8 @@ const AdminLeadDetailPage = () => {
   const { id } = useParams()
 
   const [lead, setLead] = useState(null)
+  const [teamMembers, setTeamMembers] = useState([])
+  const [selectedAssignee, setSelectedAssignee] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("")
   const [noteText, setNoteText] = useState("")
   const [followUpForm, setFollowUpForm] = useState({
@@ -593,11 +606,41 @@ const AdminLeadDetailPage = () => {
   })
 
   const [loading, setLoading] = useState(true)
+  const [loadingTeamMembers, setLoadingTeamMembers] = useState(true)
+  const [assigningLead, setAssigningLead] = useState(false)
   const [savingStatus, setSavingStatus] = useState(false)
   const [savingNote, setSavingNote] = useState(false)
   const [savingFollowUp, setSavingFollowUp] = useState(false)
   const [error, setError] = useState("")
+  const [teamError, setTeamError] = useState("")
   const [success, setSuccess] = useState("")
+
+  const assignableMembers = useMemo(() => {
+    const roleOrder = {
+      consultant: 0,
+      admin: 1,
+      superAdmin: 2,
+    }
+
+    return [...teamMembers]
+      .filter(
+        (member) =>
+          member?.isActive !== false &&
+          ["consultant", "admin", "superAdmin"].includes(member?.role)
+      )
+      .sort((a, b) => {
+        const roleCompare =
+          (roleOrder[a?.role] ?? 99) - (roleOrder[b?.role] ?? 99)
+
+        if (roleCompare !== 0) return roleCompare
+
+        return String(a?.name || "").localeCompare(String(b?.name || ""))
+      })
+  }, [teamMembers])
+
+  const currentAssigneeId = String(
+    lead?.assignedTo?._id || lead?.assignedTo || ""
+  )
 
   const customerSummary = useMemo(() => {
     if (!lead) return []
@@ -645,6 +688,10 @@ const AdminLeadDetailPage = () => {
         value: formatPriority(lead.priority || "medium"),
       },
       {
+        label: "Assigned Consultant",
+        value: lead.assignedTo?.name || "Unassigned",
+      },
+      {
         label: "Lead Source",
         value: lead.source,
       },
@@ -685,6 +732,9 @@ const AdminLeadDetailPage = () => {
 
       setLead(leadData)
       setSelectedStatus(leadData?.status || "New")
+      setSelectedAssignee(
+        String(leadData?.assignedTo?._id || leadData?.assignedTo || "")
+      )
 
       setFollowUpForm({
         followUpDate: formatDateForInput(leadData?.followUpDate),
@@ -699,8 +749,30 @@ const AdminLeadDetailPage = () => {
     }
   }
 
+  const loadTeamMembers = async () => {
+    setLoadingTeamMembers(true)
+    setTeamError("")
+
+    try {
+      const data = await adminApi.getTeamMembers({
+        page: 1,
+        limit: 100,
+        isActive: true,
+      })
+
+      const members = data.members || data.data?.members || []
+      setTeamMembers(Array.isArray(members) ? members : [])
+    } catch (err) {
+      setTeamMembers([])
+      setTeamError(err.message || "Failed to load active team members.")
+    } finally {
+      setLoadingTeamMembers(false)
+    }
+  }
+
   useEffect(() => {
     loadLead()
+    loadTeamMembers()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
@@ -719,6 +791,42 @@ const AdminLeadDetailPage = () => {
       setError(err.message || "Failed to update lead status.")
     } finally {
       setSavingStatus(false)
+    }
+  }
+
+  const handleAssignLead = async () => {
+    if (!lead) return
+
+    if (!selectedAssignee) {
+      setError("Please select a consultant or team member before assigning.")
+      setSuccess("")
+      return
+    }
+
+    if (selectedAssignee === currentAssigneeId) {
+      return
+    }
+
+    const selectedMember = assignableMembers.find(
+      (member) => String(member._id) === String(selectedAssignee)
+    )
+
+    setAssigningLead(true)
+    setError("")
+    setSuccess("")
+
+    try {
+      await adminApi.assignLead(lead._id, selectedAssignee)
+
+      setSuccess(
+        `Lead assigned to ${selectedMember?.name || "team member"} successfully.`
+      )
+
+      await loadLead()
+    } catch (err) {
+      setError(err.message || "Failed to assign lead.")
+    } finally {
+      setAssigningLead(false)
     }
   }
 
@@ -1017,6 +1125,103 @@ const AdminLeadDetailPage = () => {
             >
               {savingStatus ? "Updating Status..." : "Update Status"}
             </button>
+          </div>
+
+          <div className="mt-5 border-t border-slate-100 pt-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-poppins text-[11px] font-bold uppercase tracking-[0.08em] text-[#00AEEF]">
+                  Lead Assignment
+                </p>
+
+                <p className="mt-1 font-poppins text-xs font-semibold leading-5 text-slate-500">
+                  Assign this lead to the consultant or staff member responsible for follow-up.
+                </p>
+              </div>
+
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[5px] bg-[#00AEEF]/10 text-[#00AEEF]">
+                <FaUser />
+              </span>
+            </div>
+
+            <div className="mt-4 grid gap-3">
+              <select
+                value={selectedAssignee}
+                onChange={(event) => {
+                  setSelectedAssignee(event.target.value)
+                  setError("")
+                  setSuccess("")
+                }}
+                disabled={loadingTeamMembers || assigningLead}
+                className="h-12 rounded-[5px] border border-slate-200 bg-[#F8FAFC] px-3 font-poppins text-sm font-semibold text-slate-800 outline-none focus:border-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <option value="">
+                  {loadingTeamMembers
+                    ? "Loading team members..."
+                    : "Select consultant / team member"}
+                </option>
+
+                {assignableMembers.map((member) => (
+                  <option key={member._id} value={member._id}>
+                    {member.name} — {formatRoleLabel(member.role)}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                type="button"
+                onClick={handleAssignLead}
+                disabled={
+                  assigningLead ||
+                  loadingTeamMembers ||
+                  !selectedAssignee ||
+                  selectedAssignee === currentAssigneeId
+                }
+                className="h-12 rounded-[5px] bg-slate-950 px-4 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {assigningLead
+                  ? "Assigning Lead..."
+                  : selectedAssignee === currentAssigneeId && selectedAssignee
+                    ? "Already Assigned"
+                    : currentAssigneeId
+                      ? "Reassign Lead"
+                      : "Assign Lead"}
+              </button>
+            </div>
+
+            <div className="mt-3 rounded-[5px] border border-slate-100 bg-[#F8FAFC] px-4 py-3">
+              <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
+                Current Owner
+              </p>
+
+              <p className="mt-1 font-poppins text-sm font-bold text-slate-900">
+                {lead.assignedTo?.name || "Unassigned"}
+              </p>
+
+              {lead.assignedTo?.email && (
+                <p className="mt-1 break-all font-poppins text-xs font-semibold text-slate-500">
+                  {lead.assignedTo.email}
+                </p>
+              )}
+
+              {lead.assignedTo?.role && (
+                <span className="mt-2 inline-flex rounded-[5px] bg-sky-50 px-2.5 py-1 font-poppins text-[10px] font-bold uppercase text-[#00AEEF]">
+                  {formatRoleLabel(lead.assignedTo.role)}
+                </span>
+              )}
+            </div>
+
+            {teamError && (
+              <div className="mt-3 rounded-[5px] border border-amber-100 bg-amber-50 px-4 py-3 font-poppins text-xs font-semibold leading-5 text-amber-700">
+                {teamError}
+              </div>
+            )}
+
+            {!loadingTeamMembers && !teamError && assignableMembers.length === 0 && (
+              <div className="mt-3 rounded-[5px] border border-dashed border-slate-200 bg-[#F8FAFC] px-4 py-3 font-poppins text-xs font-semibold leading-5 text-slate-500">
+                No active assignable team members found. Create an active consultant in Control Room first.
+              </div>
+            )}
           </div>
 
           <div className="mt-5 grid gap-3">
