@@ -41,10 +41,8 @@ const nextStatusMap = {
   New: "Contacted",
   Contacted: "Interested",
   Interested: "Awaiting Documents",
-  "Awaiting Documents": "Quoted",
-  Quoted: "Payment Pending",
-  "Payment Pending": "Confirmed",
-  Confirmed: "Booked",
+  "Awaiting Documents": "Payment Pending",
+  "Payment Pending": "Booked",
 }
 
 const queueTabs = [
@@ -106,9 +104,7 @@ const getStatusBadgeClass = (status = "") => {
     Contacted: "bg-sky-50 text-[#00AEEF]",
     Interested: "bg-emerald-50 text-emerald-700",
     "Awaiting Documents": "bg-amber-50 text-amber-700",
-    Quoted: "bg-indigo-50 text-indigo-700",
     "Payment Pending": "bg-yellow-50 text-yellow-700",
-    Confirmed: "bg-green-50 text-green-700",
     Booked: "bg-green-50 text-green-700",
     Lost: "bg-red-50 text-red-700",
     Cancelled: "bg-red-50 text-red-700",
@@ -681,7 +677,7 @@ const AdminConsultantWorkbenchPage = () => {
       noFollowUp: filteredLeads.filter(
         (lead) =>
           !lead.followUpDate &&
-          !["Confirmed", "Booked", "Lost", "Cancelled"].includes(lead.status)
+          !["Booked", "Lost", "Cancelled"].includes(lead.status)
       ).length,
     }
   }, [filteredLeads])
@@ -730,7 +726,7 @@ const AdminConsultantWorkbenchPage = () => {
       return sorted.filter(
         (lead) =>
           !lead.followUpDate &&
-          !["Confirmed", "Booked", "Lost", "Cancelled"].includes(lead.status)
+          !["Booked", "Lost", "Cancelled"].includes(lead.status)
       )
     }
 

@@ -32,9 +32,7 @@ const leadStatuses = [
   "Contacted",
   "Interested",
   "Awaiting Documents",
-  "Quoted",
   "Payment Pending",
-  "Confirmed",
   "Booked",
   "Lost",
   "Cancelled",
@@ -47,48 +45,85 @@ const formatDateTime = (date) => {
   return new Date(date).toLocaleString()
 }
 
+const getDateOnlyValue = (value) => {
+  if (!value) return ""
+
+  const cleanValue =
+    value instanceof Date
+      ? value.toISOString()
+      : String(value).trim()
+
+  // YYYY-MM-DD or a full ISO timestamp.
+  const isoMatch = cleanValue.match(/^(\d{4})-(\d{2})-(\d{2})/)
+
+  if (isoMatch) {
+    const year = Number(isoMatch[1])
+    const month = Number(isoMatch[2])
+    const day = Number(isoMatch[3])
+
+    const validationDate = new Date(Date.UTC(year, month - 1, day))
+
+    if (
+      validationDate.getUTCFullYear() !== year ||
+      validationDate.getUTCMonth() !== month - 1 ||
+      validationDate.getUTCDate() !== day
+    ) {
+      return ""
+    }
+
+    return `${String(year).padStart(4, "0")}-${String(month).padStart(
+      2,
+      "0"
+    )}-${String(day).padStart(2, "0")}`
+  }
+
+  // DD/MM/YYYY or DD-MM-YYYY.
+  const displayMatch = cleanValue.match(
+    /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/
+  )
+
+  if (!displayMatch) return ""
+
+  const day = Number(displayMatch[1])
+  const month = Number(displayMatch[2])
+  const year = Number(displayMatch[3])
+
+  const validationDate = new Date(Date.UTC(year, month - 1, day))
+
+  if (
+    validationDate.getUTCFullYear() !== year ||
+    validationDate.getUTCMonth() !== month - 1 ||
+    validationDate.getUTCDate() !== day
+  ) {
+    return ""
+  }
+
+  return `${String(year).padStart(4, "0")}-${String(month).padStart(
+    2,
+    "0"
+  )}-${String(day).padStart(2, "0")}`
+}
+
 const formatDateOnly = (date) => {
-  if (!date) return "-"
-  return new Date(date).toLocaleDateString()
+  const dateOnly = getDateOnlyValue(date)
+
+  if (!dateOnly) return "-"
+
+  const [year, month, day] = dateOnly.split("-")
+
+  return `${day}/${month}/${year}`
 }
 
 const formatDateForInput = (date) => {
-  if (!date) return ""
-
-  const parsedDate = new Date(date)
-
-  if (Number.isNaN(parsedDate.getTime())) return ""
-
-  const year = parsedDate.getFullYear()
-  const month = String(parsedDate.getMonth() + 1).padStart(2, "0")
-  const day = String(parsedDate.getDate()).padStart(2, "0")
-
-  return `${year}-${month}-${day}`
-}
-
-const parseDateInput = (value) => {
-  if (!value) return null
-
-  const cleanValue = String(value).trim()
-
-  if (/^\d{4}-\d{2}-\d{2}$/.test(cleanValue)) {
-    const date = new Date(`${cleanValue}T00:00:00`)
-    return Number.isNaN(date.getTime()) ? null : date
-  }
-
-  const match = cleanValue.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/)
-
-  if (!match) return null
-
-  const [, day, month, year] = match
-  const date = new Date(Number(year), Number(month) - 1, Number(day))
-
-  return Number.isNaN(date.getTime()) ? null : date
+  return getDateOnlyValue(date)
 }
 
 const getDateIso = (value) => {
-  const date = parseDateInput(value)
-  return date ? date.toISOString() : null
+  const dateOnly = getDateOnlyValue(value)
+
+  // Important: do not construct a local-time Date here.
+  // The follow-up is a date-only business value.
+  return dateOnly ? `${dateOnly}T00:00:00.000Z` : null
 }
 
 const formatValue = (value) => {
@@ -151,9 +186,7 @@ const getStatusBadgeClass = (status = "") => {
     Contacted: "bg-sky-50 text-[#00AEEF]",
     Interested: "bg-emerald-50 text-emerald-700",
     "Awaiting Documents": "bg-amber-50 text-amber-700",
-    Quoted: "bg-indigo-50 text-indigo-700",
     "Payment Pending": "bg-yellow-50 text-yellow-700",
-    Confirmed: "bg-green-50 text-green-700",
     Booked: "bg-green-50 text-green-700",
     Lost: "bg-red-50 text-red-700",
     Cancelled: "bg-red-50 text-red-700",
@@ -831,10 +864,17 @@ const AdminLeadDetailPage = () => {
   }
 
   const handleFollowUpValueChange = (name, value) => {
+    const normalizedValue =
+      name === "followUpDate"
+        ? getDateOnlyValue(value)
+        : value
+
     setFollowUpForm((prev) => ({
       ...prev,
-      [name]: value,
-      ...(name === "followUpDate" && value && prev.followUpStatus === "Not Set"
+      [name]: normalizedValue,
+      ...(name === "followUpDate" &&
+      normalizedValue &&
+      prev.followUpStatus === "Not Set"
         ? { followUpStatus: "Scheduled" }
         : {}),
     }))
@@ -861,13 +901,25 @@ const AdminLeadDetailPage = () => {
     setSuccess("")
 
     try {
+      const normalizedFollowUpDate = getDateOnlyValue(
+        followUpForm.followUpDate
+      )
+
+      if (
+        followUpForm.followUpStatus === "Scheduled" &&
+        !normalizedFollowUpDate
+      ) {
+        setError("Please select a valid follow-up date.")
+        return
+      }
+
       const payload = {
-        followUpDate: followUpForm.followUpDate
-          ? getDateIso(followUpForm.followUpDate)
+        followUpDate: normalizedFollowUpDate
+          ? getDateIso(normalizedFollowUpDate)
           : null,
         followUpTime: followUpForm.followUpTime,
         followUpNote: followUpForm.followUpNote,
-        followUpStatus: followUpForm.followUpDate
+        followUpStatus: normalizedFollowUpDate
           ? followUpForm.followUpStatus || "Scheduled"
           : "Not Set",
       }

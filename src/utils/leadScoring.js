@@ -3,13 +3,21 @@ const ACTIVE_STATUSES = [
   "Contacted",
   "Interested",
   "Awaiting Documents",
-  "Quoted",
   "Payment Pending",
 ]
 
-const CLOSED_STATUSES = ["Confirmed", "Booked", "Lost", "Cancelled"]
+const CLOSED_STATUSES = [
+  "Booked",
+  "Lost",
+  "Cancelled",
+]
 
-const HIGH_VALUE_SERVICES = ["umrah", "tour", "visa", "hotel"]
+const HIGH_VALUE_SERVICES = [
+  "umrah",
+  "tour",
+  "visa",
+  "hotel",
+]
 
 const getNumber = (value) => {
   const number = Number(value)
@@ -42,7 +50,12 @@ const getPrimaryTravelDate = (lead = {}) => {
 }
 
 export const isSmartFollowUpOverdue = (lead = {}) => {
-  if (!lead.followUpDate || lead.followUpStatus !== "Scheduled") return false
+  if (
+    !lead.followUpDate ||
+    lead.followUpStatus !== "Scheduled"
+  ) {
+    return false
+  }
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -54,7 +67,12 @@ export const isSmartFollowUpOverdue = (lead = {}) => {
 }
 
 export const isSmartFollowUpToday = (lead = {}) => {
-  if (!lead.followUpDate || lead.followUpStatus !== "Scheduled") return false
+  if (
+    !lead.followUpDate ||
+    lead.followUpStatus !== "Scheduled"
+  ) {
+    return false
+  }
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -64,7 +82,10 @@ export const isSmartFollowUpToday = (lead = {}) => {
 
   const followUpDate = new Date(lead.followUpDate)
 
-  return followUpDate >= today && followUpDate < tomorrow
+  return (
+    followUpDate >= today &&
+    followUpDate < tomorrow
+  )
 }
 
 export const getTravelUrgency = (lead = {}) => {
@@ -78,23 +99,29 @@ export const getTravelUrgency = (lead = {}) => {
   const travelDate = new Date(date)
   travelDate.setHours(0, 0, 0, 0)
 
-  const diffDays = Math.ceil((travelDate - today) / (1000 * 60 * 60 * 24))
+  const diffDays = Math.ceil(
+    (travelDate - today) /
+      (1000 * 60 * 60 * 24)
+  )
 
   if (diffDays < 0) return "Past Date"
   if (diffDays <= 3) return "Very Urgent"
   if (diffDays <= 10) return "Soon"
   if (diffDays <= 30) return "Planned"
+
   return "Future"
 }
 
 export const getSmartLeadScore = (lead = {}) => {
   let score = 30
+
   const reasons = []
   const tags = []
 
   const status = lead.status || "New"
   const priority = lead.priority || "medium"
-  const serviceType = lead.serviceType || "general"
+  const serviceType =
+    lead.serviceType || "general"
 
   const messageText = [
     lead.message,
@@ -106,21 +133,39 @@ export const getSmartLeadScore = (lead = {}) => {
     .filter(Boolean)
     .join(" ")
 
-  const travelerCount = getTravelerCount(lead)
-  const travelUrgency = getTravelUrgency(lead)
-  const overdue = isSmartFollowUpOverdue(lead)
-  const todayFollowUp = isSmartFollowUpToday(lead)
+  const travelerCount =
+    getTravelerCount(lead)
+
+  const travelUrgency =
+    getTravelUrgency(lead)
+
+  const overdue =
+    isSmartFollowUpOverdue(lead)
+
+  const todayFollowUp =
+    isSmartFollowUpToday(lead)
 
   const needsFollowUp =
     ACTIVE_STATUSES.includes(status) &&
-    (!lead.followUpDate || lead.followUpStatus === "Not Set")
+    (
+      !lead.followUpDate ||
+      lead.followUpStatus === "Not Set"
+    )
 
   const highValue =
     HIGH_VALUE_SERVICES.includes(serviceType) &&
-    (priority === "high" ||
+    (
+      priority === "high" ||
       priority === "urgent" ||
       travelerCount >= 3 ||
-      messageText.length >= 120)
+      messageText.length >= 120
+    )
+
+  /*
+  |--------------------------------------------------------------------------
+  | Priority scoring
+  |--------------------------------------------------------------------------
+  */
 
   if (priority === "urgent") {
     score += 28
@@ -134,6 +179,12 @@ export const getSmartLeadScore = (lead = {}) => {
   } else {
     score += 3
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Lead status scoring
+  |--------------------------------------------------------------------------
+  */
 
   if (status === "New") {
     score += 8
@@ -155,25 +206,29 @@ export const getSmartLeadScore = (lead = {}) => {
     reasons.push("Documents pending")
   }
 
-  if (status === "Quoted") {
-    score += 25
-    reasons.push("Quotation shared")
-  }
-
   if (status === "Payment Pending") {
     score += 30
     reasons.push("Payment pending")
   }
 
-  if (status === "Confirmed" || status === "Booked") {
+  if (status === "Booked") {
     score += 38
     reasons.push("Converted lead")
   }
 
-  if (status === "Lost" || status === "Cancelled") {
+  if (
+    status === "Lost" ||
+    status === "Cancelled"
+  ) {
     score -= 28
     reasons.push("Closed lost/cancelled")
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Follow-up scoring
+  |--------------------------------------------------------------------------
+  */
 
   if (overdue) {
     score += 22
@@ -181,7 +236,10 @@ export const getSmartLeadScore = (lead = {}) => {
   } else if (todayFollowUp) {
     score += 16
     reasons.push("Follow-up due today")
-  } else if (lead.followUpDate && lead.followUpStatus === "Scheduled") {
+  } else if (
+    lead.followUpDate &&
+    lead.followUpStatus === "Scheduled"
+  ) {
     score += 8
     reasons.push("Follow-up scheduled")
   }
@@ -191,26 +249,61 @@ export const getSmartLeadScore = (lead = {}) => {
     reasons.push("Needs follow-up")
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Value scoring
+  |--------------------------------------------------------------------------
+  */
+
   if (highValue) {
     score += 16
     reasons.push("High value inquiry")
   }
 
-  if (HIGH_VALUE_SERVICES.includes(serviceType)) {
+  if (
+    HIGH_VALUE_SERVICES.includes(serviceType)
+  ) {
     score += 8
     reasons.push("High-value service")
   }
 
-  if (lead.phone) score += 6
-  if (lead.email) score += 4
+  /*
+  |--------------------------------------------------------------------------
+  | Contact completeness
+  |--------------------------------------------------------------------------
+  */
+
+  if (lead.phone) {
+    score += 6
+  }
+
+  if (lead.email) {
+    score += 4
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Requirement detail scoring
+  |--------------------------------------------------------------------------
+  */
 
   if (messageText.length >= 250) {
     score += 12
-    reasons.push("Detailed customer requirement")
+    reasons.push(
+      "Detailed customer requirement"
+    )
   } else if (messageText.length >= 100) {
     score += 7
-    reasons.push("Good requirement detail")
+    reasons.push(
+      "Good requirement detail"
+    )
   }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Traveler count scoring
+  |--------------------------------------------------------------------------
+  */
 
   if (travelerCount >= 5) {
     score += 12
@@ -220,69 +313,112 @@ export const getSmartLeadScore = (lead = {}) => {
     reasons.push("Multiple travelers")
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Travel urgency scoring
+  |--------------------------------------------------------------------------
+  */
+
   if (travelUrgency === "Very Urgent") {
     score += 18
     reasons.push("Travel date very near")
   } else if (travelUrgency === "Soon") {
     score += 10
     reasons.push("Travel date soon")
-  } else if (travelUrgency === "Past Date") {
+  } else if (
+    travelUrgency === "Past Date"
+  ) {
     score -= 6
     reasons.push("Travel date passed")
   }
 
-  score = Math.max(0, Math.min(100, Math.round(score)))
+  /*
+  |--------------------------------------------------------------------------
+  | Normalize score
+  |--------------------------------------------------------------------------
+  */
+
+  score = Math.max(
+    0,
+    Math.min(100, Math.round(score))
+  )
+
+  /*
+  |--------------------------------------------------------------------------
+  | Temperature
+  |--------------------------------------------------------------------------
+  */
 
   const temperature =
     score >= 80
       ? {
           label: "Hot Lead",
-          className: "bg-red-50 text-red-700",
-          dotClassName: "bg-red-500",
+          className:
+            "bg-red-50 text-red-700",
+          dotClassName:
+            "bg-red-500",
         }
       : score >= 60
         ? {
             label: "Warm Lead",
-            className: "bg-orange-50 text-[#FF6B00]",
-            dotClassName: "bg-[#FF6B00]",
+            className:
+              "bg-orange-50 text-[#FF6B00]",
+            dotClassName:
+              "bg-[#FF6B00]",
           }
         : {
             label: "Cold Lead",
-            className: "bg-slate-100 text-slate-600",
-            dotClassName: "bg-slate-400",
+            className:
+              "bg-slate-100 text-slate-600",
+            dotClassName:
+              "bg-slate-400",
           }
 
   tags.push(temperature)
 
+  /*
+  |--------------------------------------------------------------------------
+  | Smart tags
+  |--------------------------------------------------------------------------
+  */
+
   if (overdue) {
     tags.unshift({
       label: "Overdue",
-      className: "bg-red-50 text-red-700",
-      dotClassName: "bg-red-500",
+      className:
+        "bg-red-50 text-red-700",
+      dotClassName:
+        "bg-red-500",
     })
   }
 
   if (needsFollowUp) {
     tags.push({
       label: "Needs Follow-up",
-      className: "bg-sky-50 text-[#00AEEF]",
-      dotClassName: "bg-[#00AEEF]",
+      className:
+        "bg-sky-50 text-[#00AEEF]",
+      dotClassName:
+        "bg-[#00AEEF]",
     })
   }
 
   if (highValue) {
     tags.push({
       label: "High Value",
-      className: "bg-emerald-50 text-emerald-700",
-      dotClassName: "bg-emerald-500",
+      className:
+        "bg-emerald-50 text-emerald-700",
+      dotClassName:
+        "bg-emerald-500",
     })
   }
 
   if (todayFollowUp) {
     tags.push({
       label: "Today Follow-up",
-      className: "bg-purple-50 text-purple-700",
-      dotClassName: "bg-purple-500",
+      className:
+        "bg-purple-50 text-purple-700",
+      dotClassName:
+        "bg-purple-500",
     })
   }
 
@@ -296,5 +432,6 @@ export const getSmartLeadScore = (lead = {}) => {
     overdue,
     needsFollowUp,
     todayFollowUp,
+    isClosed: CLOSED_STATUSES.includes(status),
   }
 }

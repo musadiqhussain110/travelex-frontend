@@ -32,9 +32,7 @@ const statuses = [
   "Contacted",
   "Interested",
   "Awaiting Documents",
-  "Quoted",
   "Payment Pending",
-  "Confirmed",
   "Booked",
   "Lost",
   "Cancelled",
@@ -205,9 +203,7 @@ const getStatusBadgeClass = (status = "") => {
     Contacted: "bg-sky-50 text-[#00AEEF]",
     Interested: "bg-emerald-50 text-emerald-700",
     "Awaiting Documents": "bg-amber-50 text-amber-700",
-    Quoted: "bg-indigo-50 text-indigo-700",
     "Payment Pending": "bg-yellow-50 text-yellow-700",
-    Confirmed: "bg-green-50 text-green-700",
     Booked: "bg-green-50 text-green-700",
     Lost: "bg-red-50 text-red-700",
     Cancelled: "bg-red-50 text-red-700",
@@ -668,7 +664,6 @@ const LeadMobileCard = ({
             disabled={
               contactedLoading ||
               lead.status === "Contacted" ||
-              lead.status === "Confirmed" ||
               lead.status === "Booked"
             }
             className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-sky-50 px-3 py-2 font-poppins text-xs font-bold text-[#00AEEF] transition hover:bg-[#00AEEF] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
@@ -683,7 +678,6 @@ const LeadMobileCard = ({
             disabled={
               interestedLoading ||
               lead.status === "Interested" ||
-              lead.status === "Confirmed" ||
               lead.status === "Booked"
             }
             className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-emerald-50 px-3 py-2 font-poppins text-xs font-bold text-emerald-700 transition hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
@@ -1545,7 +1539,7 @@ const AdminLeadsPage = ({ serviceType = "all" }) => {
                                 disabled={
                                   contactedLoading ||
                                   lead.status === "Contacted" ||
-                                  lead.status === "Confirmed" ||
+                          
                                   lead.status === "Booked"
                                 }
                                 className="inline-flex items-center justify-center gap-1 rounded-[5px] bg-sky-50 px-2.5 py-1.5 font-poppins text-[10px] font-bold text-[#00AEEF] transition hover:bg-[#00AEEF] hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
@@ -1562,7 +1556,7 @@ const AdminLeadsPage = ({ serviceType = "all" }) => {
                                 disabled={
                                   interestedLoading ||
                                   lead.status === "Interested" ||
-                                  lead.status === "Confirmed" ||
+                            
                                   lead.status === "Booked"
                                 }
                                 className="inline-flex items-center justify-center gap-1 rounded-[5px] bg-emerald-50 px-2.5 py-1.5 font-poppins text-[10px] font-bold text-emerald-700 transition hover:bg-emerald-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"

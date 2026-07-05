@@ -27,9 +27,7 @@ const pipelineStatuses = [
   "Contacted",
   "Interested",
   "Awaiting Documents",
-  "Quoted",
   "Payment Pending",
-  "Confirmed",
   "Booked",
   "Lost",
   "Cancelled",
@@ -40,9 +38,7 @@ const mainPipelineStatuses = [
   "Contacted",
   "Interested",
   "Awaiting Documents",
-  "Quoted",
   "Payment Pending",
-  "Confirmed",
   "Booked",
 ]
 
@@ -80,9 +76,7 @@ const statusStyles = {
   Contacted: "bg-[#00AEEF]",
   Interested: "bg-emerald-500",
   "Awaiting Documents": "bg-amber-500",
-  Quoted: "bg-indigo-500",
   "Payment Pending": "bg-yellow-500",
-  Confirmed: "bg-green-500",
   Booked: "bg-teal-500",
   Lost: "bg-red-500",
   Cancelled: "bg-slate-500",
@@ -188,11 +182,15 @@ const getLeadScore = (lead) => {
   if (lead.priority === "high") score += 20
   if (lead.priority === "medium") score += 10
 
-  if (["Interested", "Quoted", "Payment Pending"].includes(lead.status)) {
+  if (
+  ["Interested", "Awaiting Documents", "Payment Pending"].includes(
+    lead.status
+  )
+) {
     score += 25
   }
 
-  if (["Confirmed", "Booked"].includes(lead.status)) {
+if (lead.status === "Booked") {
     score += 35
   }
 
@@ -612,7 +610,7 @@ const AdminLeadKanbanPage = () => {
         (filters.focus === "overdue" && isFollowUpOverdue(lead)) ||
         (filters.focus === "today" && isFollowUpToday(lead)) ||
         (filters.focus === "won" &&
-          ["Confirmed", "Booked"].includes(lead.status))
+          ["Booked"].includes(lead.status))
 
       return matchesSearch && matchesService && matchesPriority && matchesFocus
     })
@@ -634,7 +632,7 @@ const AdminLeadKanbanPage = () => {
       overdue: filteredLeads.filter((lead) => isFollowUpOverdue(lead)).length,
       today: filteredLeads.filter((lead) => isFollowUpToday(lead)).length,
       won: filteredLeads.filter((lead) =>
-        ["Confirmed", "Booked"].includes(lead.status)
+        ["Booked"].includes(lead.status)
       ).length,
     }
   }, [filteredLeads])

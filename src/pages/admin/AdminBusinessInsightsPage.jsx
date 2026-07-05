@@ -10,9 +10,7 @@ import {
   FaCheckCircle,
   FaClock,
   FaExclamationTriangle,
-  FaGlobeAsia,
   FaPhoneAlt,
-  FaPlane,
   FaRocket,
   FaShieldAlt,
   FaSyncAlt,
@@ -1153,21 +1151,18 @@ const AdminBusinessInsightsPage = () => {
   return (
     <div className="grid gap-5">
       <section className="overflow-hidden rounded-[5px] border border-slate-100 bg-white shadow-sm">
-        <div className="relative overflow-hidden bg-slate-950 p-5 text-white sm:p-6">
-          <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[#00AEEF]/20 blur-3xl" />
-          <div className="absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-[#FF6B00]/20 blur-3xl" />
-
-          <div className="relative z-10 grid gap-6 xl:grid-cols-[1.1fr_0.9fr] xl:items-end">
+        <div className="relative overflow-hidden bg-gradient-to-br from-orange-50/60 via-white to-sky-50/60 p-5 sm:p-6">
+          <div className="relative z-10 grid gap-6 xl:grid-cols-[1.2fr_0.8fr] xl:items-center">
             <div>
-              <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.14em] text-[#00AEEF] sm:text-xs">
+              <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.14em] text-[#FF6B00] sm:text-xs">
                 TravelEx Business Intelligence
               </p>
 
-              <h1 className="mt-2 max-w-4xl font-fredoka text-[38px] font-semibold leading-[0.95] text-white sm:text-[52px]">
+              <h1 className="mt-2 max-w-4xl font-fredoka text-[38px] font-semibold leading-[0.95] text-slate-950 sm:text-[52px]">
                 Executive Business Insights
               </h1>
 
-              <p className="mt-4 max-w-3xl font-poppins text-sm font-medium leading-7 text-slate-300">
+              <p className="mt-4 max-w-3xl font-poppins text-sm font-medium leading-7 text-slate-500">
                 A decision-focused view of lead conversion, service growth,
                 follow-up discipline, and travel business performance.
               </p>
@@ -1180,8 +1175,8 @@ const AdminBusinessInsightsPage = () => {
                     onClick={() => setDays(item.value)}
                     className={`rounded-[5px] px-4 py-2 font-poppins text-xs font-bold transition ${
                       days === item.value
-                        ? "bg-[#FF6B00] text-white shadow-[0_12px_28px_rgba(255,107,0,0.28)]"
-                        : "bg-white/10 text-slate-200 hover:bg-white hover:text-slate-950"
+                        ? "bg-[#FF6B00] text-white shadow-[0_12px_28px_rgba(255,107,0,0.2)]"
+                        : "border border-slate-200 bg-white text-slate-600 hover:border-[#FF6B00] hover:text-[#FF6B00]"
                     }`}
                   >
                     {item.label}
@@ -1192,7 +1187,7 @@ const AdminBusinessInsightsPage = () => {
                   type="button"
                   onClick={() => loadInsights(days)}
                   disabled={loading}
-                  className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-white/10 px-4 py-2 font-poppins text-xs font-bold text-slate-200 transition hover:bg-white hover:text-slate-950 disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 bg-white px-4 py-2 font-poppins text-xs font-bold text-slate-600 transition hover:border-[#00AEEF] hover:text-[#00AEEF] disabled:opacity-50"
                 >
                   <FaSyncAlt className={loading ? "animate-spin" : ""} />
                   Refresh
@@ -1200,59 +1195,40 @@ const AdminBusinessInsightsPage = () => {
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-              <div className="rounded-[5px] border border-white/10 bg-white/10 p-4 backdrop-blur-xl">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[5px] bg-[#FF6B00] text-white">
-                    <FaCalendarAlt />
-                  </div>
+            <div className="rounded-[5px] border border-slate-100 bg-white shadow-sm">
+              <div className="flex items-center gap-3 border-b border-slate-100 p-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[5px] bg-orange-50 text-[#FF6B00]">
+                  <FaCalendarAlt />
+                </div>
 
-                  <div>
-                    <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                      Selected Period
-                    </p>
+                <div>
+                  <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                    Reporting Window
+                  </p>
 
-                    <p className="font-fredoka text-[24px] font-semibold leading-none text-white">
-                      Last {days} Days
-                    </p>
-                  </div>
+                  <p className="font-fredoka text-[20px] font-semibold leading-none text-slate-950">
+                    {formatDate(insights?.range?.from)} –{" "}
+                    {formatDate(insights?.range?.to)}
+                  </p>
                 </div>
               </div>
 
-              <div className="rounded-[5px] border border-white/10 bg-white/10 p-4 backdrop-blur-xl">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[5px] bg-[#00AEEF] text-white">
-                    <FaGlobeAsia />
-                  </div>
-
-                  <div>
-                    <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                      Date Range
-                    </p>
-
-                    <p className="font-fredoka text-[20px] font-semibold leading-none text-white">
-                      {formatDate(insights?.range?.from)} -{" "}
-                      {formatDate(insights?.range?.to)}
-                    </p>
-                  </div>
+              <div className="flex items-center gap-3 p-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[5px] bg-emerald-50 text-emerald-600">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                  </span>
                 </div>
-              </div>
 
-              <div className="rounded-[5px] border border-white/10 bg-white/10 p-4 backdrop-blur-xl">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[5px] bg-white text-slate-950">
-                    <FaPlane />
-                  </div>
+                <div>
+                  <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                    Sync Status
+                  </p>
 
-                  <div>
-                    <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                      Travel CRM
-                    </p>
-
-                    <p className="font-fredoka text-[24px] font-semibold leading-none text-white">
-                      Live Performance
-                    </p>
-                  </div>
+                  <p className="font-fredoka text-[20px] font-semibold leading-none text-slate-950">
+                    Live · Last {days} Days
+                  </p>
                 </div>
               </div>
             </div>
@@ -1321,84 +1297,41 @@ const AdminBusinessInsightsPage = () => {
         </div>
       ) : (
         <>
-          <section className="grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
-            <BusinessGradePanel grade={businessGrade} summary={summary} />
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <ExecutiveMetric
+              icon={<FaClock />}
+              label="Scheduled Follow-ups"
+              value={formatNumber(summary.scheduledFollowUps)}
+              description="Follow-ups currently planned."
+              tone="purple"
+            />
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <ExecutiveMetric
-                icon={<FaClock />}
-                label="Scheduled Follow-ups"
-                value={formatNumber(summary.scheduledFollowUps)}
-                description="Follow-ups currently planned."
-                tone="purple"
-              />
+            <ExecutiveMetric
+              icon={<FaExclamationTriangle />}
+              label="Overdue Follow-ups"
+              value={formatNumber(summary.overdueFollowUps)}
+              description="Needs immediate sales action."
+              tone="red"
+            />
 
-              <ExecutiveMetric
-                icon={<FaExclamationTriangle />}
-                label="Overdue Follow-ups"
-                value={formatNumber(summary.overdueFollowUps)}
-                description="Needs immediate sales action."
-                tone="red"
-              />
+            <ExecutiveMetric
+              icon={<FaTimesCircle />}
+              label="Lost / Cancelled"
+              value={formatNumber(summary.lostLeads)}
+              description={`${formatPercent(summary.lostRate)} lost rate.`}
+              tone="slate"
+            />
 
-              <ExecutiveMetric
-                icon={<FaTimesCircle />}
-                label="Lost / Cancelled"
-                value={formatNumber(summary.lostLeads)}
-                description={`${formatPercent(summary.lostRate)} lost rate.`}
-                tone="slate"
-              />
-
-              <ExecutiveMetric
-                icon={<FaCalendarAlt />}
-                label="Today Follow-ups"
-                value={formatNumber(summary.todayFollowUps)}
-                description="Due today for the CRM team."
-                tone="blue"
-              />
-            </div>
+            <ExecutiveMetric
+              icon={<FaCalendarAlt />}
+              label="Today Follow-ups"
+              value={formatNumber(summary.todayFollowUps)}
+              description="Due today for the CRM team."
+              tone="blue"
+            />
           </section>
 
           <LeadFunnel summary={summary} />
-
-          <section className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-            <ServiceLeaderboard servicePerformance={servicePerformance} />
-
-            <div className="grid gap-5">
-              <TimelineComparison comparison={comparison} days={days} />
-
-              <section className="rounded-[5px] border border-slate-100 bg-white p-5 shadow-sm">
-                <div>
-                  <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.1em] text-[#FF6B00]">
-                    Executive Recommendations
-                  </p>
-
-                  <h2 className="mt-1 font-fredoka text-[32px] font-semibold leading-tight text-slate-950">
-                    What To Do Next
-                  </h2>
-
-                  <p className="mt-1 font-poppins text-sm font-medium leading-6 text-slate-500">
-                    Practical next actions based on CRM performance.
-                  </p>
-                </div>
-
-                <div className="mt-5 grid gap-3">
-                  {recommendations.length === 0 ? (
-                    <div className="rounded-[5px] bg-emerald-50 p-5">
-                      <p className="font-poppins text-sm font-bold text-emerald-700">
-                        Business health looks stable. Keep tracking service
-                        performance and follow-up discipline.
-                      </p>
-                    </div>
-                  ) : (
-                    recommendations.map((item) => (
-                      <RecommendationCard key={item.title} item={item} />
-                    ))
-                  )}
-                </div>
-              </section>
-            </div>
-          </section>
 
           <TimelinePulse timeline={timeline} />
 
