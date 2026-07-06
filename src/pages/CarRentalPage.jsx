@@ -24,7 +24,7 @@ import AppTimePicker from "../components/common/AppTimePicker"
 import { publicApi } from "../services/publicApi"
 import { getLeadSource } from "../utils/leadSourceTracker"
 
-import carHero1 from "../assets/Cars/Car5.avif"
+import carHero1 from "../assets/Cars/car-rental.jpg"
 import carHero4 from "../assets/Cars/Car5.webp"
 import carHero5 from "../assets/Cars/Car6.webp"
 
