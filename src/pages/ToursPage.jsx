@@ -10,7 +10,7 @@ import {
 
 import Footer from "../components/Footer"
 import { tours } from "../data/tours"
-import tourHero from "../assets/tours/tour.jpg"
+import tourHero from "../assets/tours/tour-optimized.webp"
 
 const whatsappLink =
   "https://wa.me/923111444192?text=Assalamualaikum%20TravelEx%2C%20I%20want%20to%20customize%20an%20international%20tour."
@@ -110,7 +110,7 @@ const ToursPage = () => {
           </div>
 
           <div className={cardRowClass}>
-            {tours.map((tour) => (
+            {tours.map((tour, index) => (
               <Link
                 key={tour.id}
                 to={`/tours/${tour.id}`}
@@ -119,12 +119,13 @@ const ToursPage = () => {
               >
                 <div className="relative h-[305px] overflow-hidden sm:h-[360px]">
                   <img
-                    src={tour.image}
-                    alt={`${tour.badge} Tour Package`}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-                  />
+  src={tour.image}
+  alt={`${tour.badge} Tour Package`}
+  loading={index < 4 ? "eager" : "lazy"}
+  fetchPriority={index < 2 ? "high" : "auto"}
+  decoding="async"
+  className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+/>
 
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-slate-950 to-transparent sm:h-32" />

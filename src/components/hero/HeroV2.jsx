@@ -10,7 +10,6 @@ import {
 
 import BannerSlider from "./BannerSlider"
 import ServiceSearchBar from "../ServiceSearchBar"
-import bannerBg from "../../assets/hero/banner-bg1.png"
 
 const mobileServices = [
   {
@@ -47,10 +46,7 @@ const mobileServices = [
 
 const HeroV2 = () => {
   return (
-    <section
-      className="relative w-full overflow-hidden bg-[#F2F2F2] bg-cover bg-center"
-      style={{ backgroundImage: `url(${bannerBg})` }}
-    >
+    <section className="relative w-full overflow-hidden">
       <style>{`
         @keyframes heroPlaneFly {
           from { offset-distance: 0%; }
@@ -77,11 +73,6 @@ const HeroV2 = () => {
           }
         }
       `}</style>
-
-      <div
-        className="pointer-events-none absolute inset-0 z-0"
-        style={{ backgroundColor: "rgba(255,107,0,0.08)" }}
-      />
 
       {/* Desktop only moving plane */}
       <svg

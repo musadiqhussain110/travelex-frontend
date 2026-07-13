@@ -40,8 +40,9 @@ const FAQSection = () => {
   const [openIndex, setOpenIndex] = useState(null)
 
   return (
-    <section className="bg-white py-12 sm:py-20">
+    <section className="py-8 sm:py-10">
       <div className="mx-auto max-w-[920px] px-4 sm:px-6 lg:px-8">
+        <div className="rounded-[22px] bg-white px-4 py-6 shadow-[0_10px_34px_rgba(11,42,74,0.06)] sm:rounded-[26px] sm:px-8 sm:py-10">
         <Reveal>
           <div className="mb-10 text-center">
             <p className="mb-3 font-poppins text-[12px] font-bold uppercase tracking-[0.24em] text-[#00AEEF]">
@@ -140,6 +141,7 @@ const FAQSection = () => {
             </div>
           </div>
         </Reveal>
+        </div>
       </div>
     </section>
   )

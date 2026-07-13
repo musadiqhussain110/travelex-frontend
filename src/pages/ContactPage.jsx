@@ -12,7 +12,7 @@ import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
 import { publicApi } from "../services/publicApi"
 import { getLeadSource } from "../utils/leadSourceTracker"
-import contactHero from "../assets/contact/contact.jpg"
+import contactHero from "../assets/contact/contact-optimized.webp"
 
 const initialForm = {
   name: "",
@@ -221,7 +221,7 @@ ${formData.message.trim()}
                 </h2>
 
                 <p className="mt-1.5 max-w-2xl font-poppins text-[10.5px] font-medium leading-5 text-slate-600 sm:mt-3 sm:text-base sm:leading-7">
-                  Send your details and we’ll suggest the best travel option.
+                  Send your details and weâ€™ll suggest the best travel option.
                 </p>
               </div>
 

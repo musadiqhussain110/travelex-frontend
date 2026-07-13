@@ -8,6 +8,7 @@ import Footer from "../components/Footer"
 import Blogs from "../components/BlogsSection"
 import FAQ from "../components/FAQSection.jsx"
 import LeadInquiryModal from "../components/common/LeadInquiryModal"
+import bannerBg from "../assets/hero/banner-bg1-optimized.webp"
 
 const Home = () => {
   const [leadModal, setLeadModal] = useState({
@@ -51,7 +52,10 @@ const Home = () => {
 
   return (
     <>
-      <div className="bg-[#F8FAFC]">
+      <div
+        className="bg-[#F8FAFC] bg-repeat bg-center"
+        style={{ backgroundImage: `url(${bannerBg})`, backgroundSize: "60%" }}
+      >
         <HeroV2 onOpenLeadModal={openLeadModal} />
 
         <UmrahPackages onOpenLeadModal={openLeadModal} />

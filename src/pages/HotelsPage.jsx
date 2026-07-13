@@ -174,7 +174,7 @@ const HotelsPage = () => {
 
           {filteredHotels.length > 0 ? (
             <div className={cardRowClass}>
-              {filteredHotels.map((hotel) => (
+              {filteredHotels.map((hotel, index) => (
                 <Link
                   key={hotel.id}
                   to={`/hotels/${hotel.id}`}
@@ -182,14 +182,13 @@ const HotelsPage = () => {
                   aria-label={`View details for ${hotel.name}`}
                 >
                   <div className="relative h-[305px] overflow-hidden sm:h-[360px]">
-                    <img
-                      src={hotel.image}
-                      alt={hotel.name}
-                      loading="lazy"
-                      decoding="async"
-                      className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-                    />
-
+<img
+  src={hotel.image}
+  alt={hotel.name}
+  loading={index < 3 ? "eager" : "lazy"}
+  decoding="async"
+  className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+/>
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
                     <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-slate-950 to-transparent sm:h-32" />
 

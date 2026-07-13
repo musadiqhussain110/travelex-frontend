@@ -9,8 +9,9 @@ const cardRowClass =
 
 const UmrahPackages = () => {
   return (
-    <section id="umrah" className="bg-[#F8FAFC] pt-4 pb-4 sm:pt-8 sm:pb-16">
+    <section id="umrah" className="pt-4 pb-4 sm:pt-6 sm:pb-8">
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+        <div className="rounded-[22px] bg-white px-4 py-6 shadow-[0_10px_34px_rgba(11,42,74,0.06)] sm:rounded-[26px] sm:px-8 sm:py-10 lg:px-10">
         <Reveal>
           <div className="mb-5 flex flex-col gap-4 md:mb-10 md:flex-row md:items-end md:justify-between">
             <div>
@@ -111,6 +112,7 @@ const UmrahPackages = () => {
             View All Packages
             <FaArrowRight className="text-[10px]" />
           </Link>
+        </div>
         </div>
       </div>
     </section>

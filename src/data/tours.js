@@ -1,7 +1,7 @@
-import baku from "../assets/tours/baku.jpg"
-import turkey from "../assets/tours/istanbul.jpg"
-import malaysia from "../assets/tours/malaysia.jpg"
-import customTour from "../assets/tours/dubai.jpg"
+import baku from "../assets/tours/baku-optimized.webp"
+import turkey from "../assets/tours/istanbul-optimized.webp"
+import malaysia from "../assets/tours/malaysia-optimized-v2.webp"
+import customTour from "../assets/tours/dubai-optimized.webp"
 
 export const tours = [
   {

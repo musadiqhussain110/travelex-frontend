@@ -58,7 +58,7 @@ const Footer = () => {
   }
 
   return (
-    <footer className="bg-[#F8FAFC] text-slate-700">
+    <footer className="text-slate-700">
       {/* Newsletter */}
       <div className="px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
         <div className="mx-auto max-w-[1180px]">
@@ -101,133 +101,138 @@ const Footer = () => {
       </div>
 
       {/* Footer Main */}
-      <div className="border-t border-slate-100 bg-white">
-        <div className="mx-auto max-w-[1180px] px-4 py-8 pb-24 sm:px-6 sm:py-10 sm:pb-10 lg:px-8">
-          <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-[1.15fr_0.72fr_0.78fr_1.2fr] lg:gap-8">
-            {/* Brand */}
-            <div>
-              <Link to="/" className="inline-flex">
-                <img
-                  src={logo}
-                  alt="TravelEx"
-                  className="h-12 w-auto object-contain sm:h-14"
-                />
-              </Link>
+      <div className="px-4 pb-8 sm:px-6 sm:pb-10 lg:px-8">
+        <div className="mx-auto max-w-[1180px]">
+          <div className="rounded-[22px] bg-white px-4 py-6 shadow-[0_10px_34px_rgba(11,42,74,0.06)] sm:rounded-[26px] sm:px-8 sm:py-10 lg:px-10">
+            <div className="grid items-start gap-7 sm:grid-cols-2 lg:grid-cols-[1.15fr_0.72fr_0.78fr_1.2fr] lg:gap-8">
+              {/* Brand */}
+              <div>
+                <Link to="/" className="inline-flex">
+                  <img
+                    src={logo}
+                    alt="TravelEx"
+                    className="h-12 w-auto object-contain sm:h-14"
+                  />
+                </Link>
 
-              <p className="mt-3 max-w-sm font-poppins text-[12.5px] font-medium leading-6 text-slate-600 sm:text-sm">
-                TravelEx specializes in Umrah packages, visa assistance, hotel
-                support and customized international tours.
-              </p>
+                <p className="mt-3 max-w-sm font-poppins text-[12.5px] font-medium leading-6 text-slate-600 sm:text-sm">
+                  TravelEx specializes in Umrah packages, visa assistance,
+                  hotel support and customized international tours.
+                </p>
 
-              <div className="mt-4 flex gap-2">
-                {socialLinks.map(([href, Icon, label]) => (
+                <div className="mt-4 flex gap-2">
+                  {socialLinks.map(([href, Icon, label]) => (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex h-9 w-9 items-center justify-center rounded-[5px] border border-slate-200 bg-[#F8FAFC] text-xs text-slate-700 transition hover:border-[#00AEEF]/40 hover:bg-[#00AEEF] hover:text-white sm:h-10 sm:w-10 sm:text-sm"
+                      aria-label={label}
+                    >
+                      <Icon />
+                    </a>
+                  ))}
+
                   <a
-                    key={label}
-                    href={href}
+                    href="https://wa.me/923111444192"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex h-9 w-9 items-center justify-center rounded-[5px] border border-slate-200 bg-[#F8FAFC] text-xs text-slate-700 transition hover:border-[#00AEEF]/40 hover:bg-[#00AEEF] hover:text-white sm:h-10 sm:w-10 sm:text-sm"
-                    aria-label={label}
+                    className="flex h-9 w-9 items-center justify-center rounded-[5px] bg-[#25D366] text-xs text-white transition hover:bg-[#00AEEF] sm:h-10 sm:w-10 sm:text-sm"
+                    aria-label="WhatsApp"
                   >
-                    <Icon />
+                    <FaWhatsapp />
                   </a>
-                ))}
-
-                <a
-                  href="https://wa.me/923111444192"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex h-9 w-9 items-center justify-center rounded-[5px] bg-[#25D366] text-xs text-white transition hover:bg-[#00AEEF] sm:h-10 sm:w-10 sm:text-sm"
-                  aria-label="WhatsApp"
-                >
-                  <FaWhatsapp />
-                </a>
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h3 className="font-fredoka text-[18px] font-semibold text-slate-950">
-                Quick Links
-              </h3>
-
-              <ul className="mt-3 grid gap-2 sm:mt-4">
-                {quickLinks.map(([label, link]) => (
-                  <li key={label}>
-                    <Link
-                      to={link}
-                      className="font-poppins text-[12.5px] font-semibold text-slate-600 transition hover:text-[#00AEEF] sm:text-sm"
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Services */}
-            <div>
-              <h3 className="font-fredoka text-[18px] font-semibold text-slate-950">
-                Services
-              </h3>
-
-              <ul className="mt-3 grid gap-2 sm:mt-4">
-                {services.map(([label, link]) => (
-                  <li key={label}>
-                    <Link
-                      to={link}
-                      className="font-poppins text-[12.5px] font-semibold text-slate-600 transition hover:text-[#00AEEF] sm:text-sm"
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div>
-              <h3 className="font-fredoka text-[18px] font-semibold text-slate-950">
-                Contact TravelEx
-              </h3>
-
-              <div className="mt-3 grid gap-2.5 sm:mt-4">
-                <a
-                  href="tel:03111444192"
-                  className="flex items-start gap-3 font-poppins text-[12.5px] font-semibold leading-5 text-slate-600 transition hover:text-slate-950 sm:text-sm sm:leading-6"
-                >
-                  <FaPhoneAlt className="mt-1 shrink-0 text-[#00AEEF]" />
-                  <span>03 111 444 192</span>
-                </a>
-
-                <a
-                  href="https://wa.me/923111444192"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-start gap-3 font-poppins text-[12.5px] font-semibold leading-5 text-slate-600 transition hover:text-slate-950 sm:text-sm sm:leading-6"
-                >
-                  <FaWhatsapp className="mt-1 shrink-0 text-[#25D366]" />
-                  <span>WhatsApp Inquiry</span>
-                </a>
-
-                <a
-                  href="mailto:info@travelex.pk"
-                  className="flex items-start gap-3 font-poppins text-[12.5px] font-semibold leading-5 text-slate-600 transition hover:text-slate-950 sm:text-sm sm:leading-6"
-                >
-                  <FaEnvelope className="mt-1 shrink-0 text-[#FF6B00]" />
-                  <span>info@travelex.pk</span>
-                </a>
-
-                <div className="flex items-start gap-3 font-poppins text-[12.5px] font-semibold leading-5 text-slate-600 sm:text-sm sm:leading-6">
-                  <FaMapMarkerAlt className="mt-1 shrink-0 text-[#00AEEF]" />
-                  <span>
-                    TravelEx Air Services, Shakeel Plaza, Opposite Islamia
-                    College, University Road, Peshawar.
-                  </span>
                 </div>
               </div>
 
-              <div className="mt-4 rounded-[8px] border border-slate-100 bg-[#F8FAFC] p-3.5 sm:p-4">
+              {/* Quick Links */}
+              <div>
+                <h3 className="font-fredoka text-[18px] font-semibold text-slate-950">
+                  Quick Links
+                </h3>
+
+                <ul className="mt-3 grid gap-2 sm:mt-4">
+                  {quickLinks.map(([label, link]) => (
+                    <li key={label}>
+                      <Link
+                        to={link}
+                        className="font-poppins text-[12.5px] font-semibold text-slate-600 transition hover:text-[#00AEEF] sm:text-sm"
+                      >
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Services */}
+              <div>
+                <h3 className="font-fredoka text-[18px] font-semibold text-slate-950">
+                  Services
+                </h3>
+
+                <ul className="mt-3 grid gap-2 sm:mt-4">
+                  {services.map(([label, link]) => (
+                    <li key={label}>
+                      <Link
+                        to={link}
+                        className="font-poppins text-[12.5px] font-semibold text-slate-600 transition hover:text-[#00AEEF] sm:text-sm"
+                      >
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Contact */}
+              <div>
+                <h3 className="font-fredoka text-[18px] font-semibold text-slate-950">
+                  Contact TravelEx
+                </h3>
+
+                <div className="mt-3 grid gap-2.5 sm:mt-4">
+                  <a
+                    href="tel:03111444192"
+                    className="flex items-start gap-3 font-poppins text-[12.5px] font-semibold leading-5 text-slate-600 transition hover:text-slate-950 sm:text-sm sm:leading-6"
+                  >
+                    <FaPhoneAlt className="mt-1 shrink-0 text-[#00AEEF]" />
+                    <span>03 111 444 192</span>
+                  </a>
+
+                  <a
+                    href="https://wa.me/923111444192"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-start gap-3 font-poppins text-[12.5px] font-semibold leading-5 text-slate-600 transition hover:text-slate-950 sm:text-sm sm:leading-6"
+                  >
+                    <FaWhatsapp className="mt-1 shrink-0 text-[#25D366]" />
+                    <span>WhatsApp Inquiry</span>
+                  </a>
+
+                  <a
+                    href="mailto:info@travelex.pk"
+                    className="flex items-start gap-3 font-poppins text-[12.5px] font-semibold leading-5 text-slate-600 transition hover:text-slate-950 sm:text-sm sm:leading-6"
+                  >
+                    <FaEnvelope className="mt-1 shrink-0 text-[#FF6B00]" />
+                    <span>info@travelex.pk</span>
+                  </a>
+
+                  <div className="flex items-start gap-3 font-poppins text-[12.5px] font-semibold leading-5 text-slate-600 sm:text-sm sm:leading-6">
+                    <FaMapMarkerAlt className="mt-1 shrink-0 text-[#00AEEF]" />
+                    <span>
+                      TravelEx Air Services, Shakeel Plaza, Opposite Islamia
+                      College, University Road, Peshawar.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Need quick help banner - full width, sits below the columns */}
+            <div className="mt-4 flex flex-col items-start justify-between gap-4 rounded-[8px] border border-slate-100 bg-[#F8FAFC] p-4 sm:mt-5 sm:flex-row sm:items-center sm:p-5">
+              <div>
                 <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.16em] text-[#00AEEF] sm:text-[10px]">
                   Need quick help?
                 </p>
@@ -235,45 +240,45 @@ const Footer = () => {
                 <p className="mt-1.5 font-poppins text-[11px] font-medium leading-5 text-slate-600 sm:text-xs sm:leading-6">
                   Share your travel plan and get quick guidance.
                 </p>
-
-                <Link
-                  to="/contact"
-                  className="mt-3 inline-flex items-center gap-2 rounded-[5px] bg-[#FF6B00] px-3.5 py-2 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF]"
-                >
-                  Send Inquiry
-                  <FaArrowRight className="text-[10px]" />
-                </Link>
               </div>
+
+              <Link
+                to="/contact"
+                className="inline-flex shrink-0 items-center gap-2 rounded-[5px] bg-[#FF6B00] px-3.5 py-2 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF]"
+              >
+                Send Inquiry
+                <FaArrowRight className="text-[10px]" />
+              </Link>
             </div>
-          </div>
 
-          {/* Bottom */}
-          <div className="mt-7 border-t border-slate-100 pt-4 sm:mt-8 sm:pt-5">
-            <div className="flex flex-col justify-between gap-3 font-poppins text-[12px] font-semibold text-slate-500 sm:text-sm md:flex-row md:items-center">
-              <div>
-                <p>TravelEx © 2026. All Rights Reserved.</p>
+            {/* Bottom */}
+            <div className="mt-4 border-t border-slate-100 pt-3 sm:mt-5 sm:pt-4">
+              <div className="flex flex-col justify-between gap-3 font-poppins text-[12px] font-semibold text-slate-500 sm:text-sm md:flex-row md:items-center">
+                <div>
+                  <p>TravelEx © 2026. All Rights Reserved.</p>
 
-                <p className="mt-1">
-                  Powered by{" "}
-                  <a
-                    href="#"
-                    className="font-bold text-[#00AEEF] transition hover:text-[#FF6B00]"
-                  >
-                    The Order Of Pen (TOOP)
-                  </a>
-                </p>
-              </div>
+                  <p className="mt-1">
+                    Powered by{" "}
+                    <a
+                      href="#"
+                      className="font-bold text-[#00AEEF] transition hover:text-[#FF6B00]"
+                    >
+                      The Order Of Pen (TOOP)
+                    </a>
+                  </p>
+                </div>
 
-              <div className="flex flex-wrap gap-x-4 gap-y-2">
-                {bottomLinks.map(([label, link]) => (
-                  <Link
-                    key={label}
-                    to={link}
-                    className="transition hover:text-[#00AEEF]"
-                  >
-                    {label}
-                  </Link>
-                ))}
+                <div className="flex flex-wrap gap-x-4 gap-y-2">
+                  {bottomLinks.map(([label, link]) => (
+                    <Link
+                      key={label}
+                      to={link}
+                      className="transition hover:text-[#00AEEF]"
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

@@ -16,10 +16,10 @@ import Umrah5 from "../assets/Umrah/family2.jpeg"
 import Umrah6 from "../assets/Umrah/family3.jpeg"
 import Umrah7 from "../assets/Umrah/family4.jpeg"
 
-import baku from "../assets/tours/baku.jpg"
-import turkey from "../assets/tours/istanbul.jpg"
-import malaysia from "../assets/tours/malaysia.jpg"
-import customTour from "../assets/tours/dubai.jpg"
+import baku from "../assets/tours/baku-optimized.webp"
+import turkey from "../assets/tours/istanbul-optimized.webp"
+import malaysia from "../assets/tours/malaysia-optimized-v2.webp"
+import customTour from "../assets/tours/dubai-optimized.webp"
 
 const whatsappLink =
   "https://wa.me/923111444192?text=Assalamualaikum%20TravelEx%2C%20I%20need%20guidance%20about%20travel%20packages."
@@ -300,7 +300,7 @@ const SearchResultsPage = () => {
             {query ? (
               <>
                 Results for{" "}
-                <span className="text-[#FF6B00]">“{query}”</span>
+                <span className="text-[#FF6B00]">Ã¢â‚¬Å“{query}Ã¢â‚¬Â</span>
               </>
             ) : (
               "Search Umrah and tour packages"
@@ -336,7 +336,7 @@ const SearchResultsPage = () => {
 
                 <p className="mt-1 max-w-2xl font-poppins text-[10px] font-medium leading-4 text-slate-600 sm:mt-1.5 sm:text-base sm:leading-7">
                   {results.length} result{results.length > 1 ? "s" : ""} found
-                  for “{query}”.
+                  for Ã¢â‚¬Å“{query}Ã¢â‚¬Â.
                 </p>
               </div>
 
@@ -391,7 +391,7 @@ const SearchResultsPage = () => {
               </h2>
 
               <p className="mx-auto mt-1.5 max-w-xl font-poppins text-[11.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
-                We could not find a package for “{query}”. You can still ask
+                We could not find a package for Ã¢â‚¬Å“{query}Ã¢â‚¬Â. You can still ask
                 TravelEx for a custom quote through WhatsApp.
               </p>
 

@@ -1,21 +1,14 @@
-import { useMemo, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import {
   FaArrowLeft,
   FaArrowRight,
-  FaCalendarAlt,
   FaCheckCircle,
   FaEnvelope,
-  FaHotel,
-  FaInfoCircle,
+  FaKaaba,
   FaMapMarkerAlt,
   FaPhoneAlt,
-  FaPlaneDeparture,
-  FaRegClock,
-  FaStar,
-  FaTag,
   FaUser,
-  FaWhatsapp,
 } from "react-icons/fa"
 
 import { umrahPackages as packages } from "../data/umrahPackagesData"
@@ -23,6 +16,7 @@ import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
 import { publicApi } from "../services/publicApi"
+import umrahFormAsset from "../assets/umrah/umrah-form.png"
 
 const packageOptions = ["Economy", "Executive"]
 const hotelPreferenceOptions = ["3 Star", "4 Star", "5 Star"]
@@ -84,11 +78,6 @@ const getNumber = (value, fallback = 0) => {
   return Math.max(fallback, Number(value) || fallback)
 }
 
-const getWhatsappLink = (pkg) =>
-  `https://wa.me/923111444192?text=${encodeURIComponent(
-    `Assalamualaikum TravelEx, I am interested in ${pkg.title}. Please guide me about availability and booking.`
-  )}`
-
 const PackageDetails = () => {
   const { id } = useParams()
   const bookingFormRef = useRef(null)
@@ -99,13 +88,6 @@ const PackageDetails = () => {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-
-  const scrollToBookingForm = () => {
-    bookingFormRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    })
-  }
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -296,131 +278,118 @@ const PackageDetails = () => {
     )
   }
 
-  const bestFor = pkg.bestFor || []
-  const highlights = pkg.highlights || []
-  const inclusions = pkg.inclusions || []
-
-  const compactDetails = [...highlights, ...inclusions].slice(0, 7)
-
-  const quickFacts = [
-    {
-      label: "Duration",
-      value: pkg.duration || "On request",
-      icon: FaRegClock,
-    },
-    {
-      label: "Departure",
-      value: pkg.from || "Flexible",
-      icon: FaPlaneDeparture,
-    },
-    {
-      label: "Plan Type",
-      value: pkg.type || pkg.badge || "Umrah Plan",
-      icon: FaTag,
-    },
-    {
-      label: "Hotel Info",
-      value: pkg.hotelInfo || "Available",
-      icon: FaHotel,
-    },
-  ]
-
   return (
     <main className="bg-[#F8FAFC]">
-      {/* Detail Hero */}
-      <section className="relative overflow-hidden bg-slate-950">
-        <img
-          src={pkg.image}
-          alt={pkg.title}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+      <section className="relative px-4 pb-10 pt-3 sm:px-6 sm:pb-16 sm:pt-5 lg:px-8">
+        {/* Back arrow — fixed to the section's top-left corner, outside banner */}
+<Link
+  to="/umrah"
+  aria-label="Back to packages"
+  title="Back to packages"
+  className="absolute left-4 top-3 z-30 hidden h-9 w-9 items-center justify-center rounded-[5px] border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-[#00AEEF] hover:text-[#00AEEF] sm:left-6 sm:top-5 sm:flex sm:h-10 sm:w-10 lg:left-8"
+>
+  <FaArrowLeft className="text-[12px] sm:text-sm" />
+</Link>
+        {/* Banner — exactly same width as form */}
+      {/* Banner — exactly same width as form */}
+<div className="mx-auto max-w-[920px]">
+  <div className="relative mb-3 min-h-[120px] overflow-hidden rounded-[18px] bg-white px-5 py-4 shadow-[0_10px_34px_rgba(11,42,74,0.08)] sm:mb-4 sm:min-h-[150px] sm:px-8 sm:py-5 lg:min-h-[170px]">
+    <style>{`
+      @keyframes bannerFadeUp {
+        0%   { opacity: 0; transform: translateY(16px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes bannerStampIn {
+        0%   { opacity: 0; transform: translateY(24px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes bannerAssetIn {
+        from { opacity: 0; transform: translateX(46px); }
+        to   { opacity: 1; transform: translateX(0); }
+      }
+      @keyframes bannerFloat {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(-9px); }
+      }
+      .umrah-banner-asset {
+        animation:
+          bannerAssetIn 0.9s ease-out both,
+          bannerFloat 4.5s ease-in-out 0.9s infinite;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        [data-umrah-stagger],
+        .umrah-banner-asset {
+          animation: none !important;
+        }
+      }
+    `}</style>
 
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/65 via-slate-950/45 to-slate-950/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 via-transparent to-transparent" />
+    {/* Soft ambient glow for depth */}
+    <div className="pointer-events-none absolute -right-10 -top-16 hidden h-64 w-64 rounded-full bg-[#00AEEF]/10 blur-3xl sm:block" />
+    <div className="pointer-events-none absolute -bottom-16 right-24 hidden h-40 w-40 rounded-full bg-[#FF6B00]/10 blur-3xl sm:block" />
 
-        <div className="relative z-10 mx-auto max-w-[1340px] px-4 py-7 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
-          <div className="max-w-4xl">
-            <Link
-              to="/umrah"
-              className="mb-2 inline-flex items-center gap-1.5 font-poppins text-[9px] font-semibold text-white/75 transition hover:text-[#00AEEF] sm:mb-6 sm:gap-2 sm:text-sm"
-            >
-              <FaArrowLeft className="text-[8px] sm:text-xs" />
-              Back to packages
-            </Link>
+    {/* Text block */}
+    <div className="absolute inset-y-0 left-0 z-10 flex w-full items-center px-5 py-5 sm:w-[72%] sm:px-8 sm:py-6 lg:w-[70%]">
+      <div>
+        <p
+          data-umrah-stagger
+          style={{ animation: "bannerFadeUp 0.6s ease-out 0s both" }}
+          className="mb-2 flex items-center gap-2 font-poppins text-[11px] font-bold uppercase tracking-[0.22em] text-[#00AEEF] sm:mb-3 sm:text-[14px]"
+        >
+          <span className="inline-block h-[2px] w-6 bg-[#FF6B00] sm:w-8" />
+          Trusted By 8,500+ Pilgrims
+        </p>
+<h2
+  data-umrah-stagger
+  style={{ animation: "bannerFadeUp 0.6s ease-out 0.15s both" }}
+  className="flex flex-nowrap items-center gap-2 font-fredoka text-[16px] font-semibold uppercase leading-[1.05] tracking-wide text-slate-950 sm:gap-2.5 sm:text-[34px] lg:text-[38px]"
+>
+  <span className="whitespace-nowrap">Your Path To</span>
 
-            <div className="mb-2 flex flex-wrap items-center gap-1.5 sm:mb-4 sm:gap-3">
-              <span className="inline-flex h-[27px] items-center gap-1.5 rounded-[5px] border border-white/15 bg-white/10 px-2.5 font-poppins text-[7.5px] font-bold uppercase tracking-[0.14em] text-[#00AEEF] backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-[11px] sm:tracking-[0.16em]">
-                <FaTag className="text-[8px] sm:text-[10px]" />
-                {pkg.badge}
-              </span>
+  <span
+    className="rounded-[6px] bg-[#FF6B00] px-2.5 py-1 leading-none tracking-wide text-white shadow-sm sm:px-4 sm:py-1.5"
+    style={{ animation: "bannerStampIn 0.9s ease-out 0.3s both" }}
+  >
+    Makkah
+  </span>
+</h2>
+      </div>
+    </div>
 
-              <span className="inline-flex h-[27px] items-center gap-1.5 rounded-[5px] border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-xs">
-                <FaStar className="text-[#FF6B00]" />
-                {pkg.rating}
-              </span>
-
-              <span className="inline-flex h-[27px] items-center gap-1.5 rounded-[5px] border border-white/15 bg-white/10 px-2.5 font-poppins text-[8.5px] font-semibold text-white/85 backdrop-blur sm:h-auto sm:gap-2 sm:px-4 sm:py-2 sm:text-xs">
-                <FaRegClock className="text-[#FF6B00]" />
-                {pkg.duration}
-              </span>
-            </div>
-
-            <h1 className="font-fredoka text-[18px] font-semibold leading-[1.08] text-white sm:text-[46px] sm:uppercase sm:leading-[1.1] lg:text-[54px]">
-              {pkg.title}
-            </h1>
-
-            <p className="mt-1 max-w-3xl font-poppins text-[9px] font-medium leading-4 text-white/85 sm:mt-4 sm:text-base sm:leading-7">
-              <span className="sm:hidden">
-                Hotel, visa and travel support.
-              </span>
-
-              <span className="hidden sm:inline">{pkg.overview}</span>
-            </p>
-
-            <div className="mt-3 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:gap-3">
-              <button
-                type="button"
-                onClick={scrollToBookingForm}
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-              >
-                Submit Inquiry
-                <FaArrowRight className="text-[10px] sm:text-xs" />
-              </button>
-
-              <a
-                href={getWhatsappLink(pkg)}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-              >
-                <FaWhatsapp />
-                Ask on WhatsApp
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Merged Booking + Details */}
-      <section className="bg-[#F8FAFC] py-8 sm:py-14">
-        <div className="mx-auto grid max-w-[1440px] gap-5 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-6 lg:px-8">
-          {/* Booking Form Left */}
+    {/* Illustration — sized to fit within the compact card, no bleed */}
+  <img
+  src={umrahFormAsset}
+  alt="Umrah pilgrim illustration"
+  className="umrah-banner-asset pointer-events-none absolute right-2 top-14 z-0 block h-[60px] w-auto object-contain sm:right-5 sm:top-[58%] sm:block sm:h-[170px] sm:-translate-y-[42%] lg:right-7 lg:h-[190px]"
+/>
+  </div>
+</div>
+        {/* Form — narrower centered column */}
+        <div className="mx-auto max-w-[920px]">
           <div
             ref={bookingFormRef}
-            className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_16px_45px_rgba(15,23,42,0.08)] sm:p-7"
+            className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_16px_45px_rgba(15,23,42,0.08)] sm:p-8"
           >
             <div className="mb-4 sm:mb-6">
-              <p className="mb-1.5 font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:mb-2 sm:text-[12px] sm:tracking-[0.1em]">
-                Umrah Inquiry Form
-              </p>
+              <div className="mb-1.5 flex items-center gap-2 sm:mb-2 sm:gap-2.5">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#00AEEF]/10 text-xs text-[#00AEEF] sm:h-8 sm:w-8 sm:text-sm">
+                  <FaKaaba />
+                </span>
 
-              <h2 className="font-fredoka text-[22px] font-semibold leading-tight text-slate-950 sm:text-[36px]">
+                <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-[12px] sm:tracking-[0.1em]">
+                  Umrah Inquiry Form
+                </p>
+              </div>
+
+              <h1 className="font-fredoka text-[22px] font-semibold leading-tight text-slate-950 sm:text-[36px]">
                 Submit Umrah inquiry
-              </h2>
+              </h1>
 
               <p className="mt-1.5 font-poppins text-[10.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
-                Fill the required details. TravelEx will confirm availability,
-                hotel options, visa guidance, and final quote.
+                Fill the required details for{" "}
+                <span className="font-bold text-slate-950">{pkg.title}</span>.
+                TravelEx will confirm availability, hotel options, visa
+                guidance, and final quote.
               </p>
             </div>
 
@@ -432,9 +401,9 @@ const PackageDetails = () => {
                   </div>
 
                   <div>
-                    <h3 className="font-fredoka text-[24px] font-semibold leading-tight text-green-700">
+                    <h2 className="font-fredoka text-[24px] font-semibold leading-tight text-green-700">
                       Umrah inquiry submitted
-                    </h3>
+                    </h2>
 
                     <p className="mt-1 font-poppins text-[11.5px] font-medium leading-5 text-green-700 sm:text-sm sm:leading-7">
                       Your inquiry has been submitted successfully. TravelEx
@@ -665,8 +634,8 @@ const PackageDetails = () => {
                   name="additionalRequirements"
                   value={formData.additionalRequirements}
                   onChange={handleChange}
-                  placeholder="Write any special request, hotel preference, transport need, or family requirement..."
-                  className={`${inputClass} h-auto resize-none py-3 leading-6`}
+                  placeholder="Write any special request, hotel preference, transfers, activities, or family requirement..."
+                  className="min-h-[130px] w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:min-h-[150px] sm:px-4 sm:text-sm"
                 />
               </div>
 
@@ -680,147 +649,6 @@ const PackageDetails = () => {
               </button>
             </form>
           </div>
-
-          {/* Necessary Details Right */}
-          <aside className="grid h-fit gap-5 lg:sticky lg:top-24">
-            <div className="overflow-hidden rounded-[5px] border border-slate-100 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.08)]">
-              <div className="relative h-44 overflow-hidden sm:h-56">
-                <img
-                  src={pkg.image}
-                  alt={pkg.title}
-                  className="h-full w-full object-cover"
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
-
-                <div className="absolute bottom-4 left-4 right-4">
-                  <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-white/70">
-                    Selected Package
-                  </p>
-
-                  <h3 className="mt-1 font-fredoka text-[26px] font-semibold leading-tight text-white">
-                    {pkg.title}
-                  </h3>
-
-                  <p className="mt-1 font-poppins text-xs font-semibold text-white/80">
-                    {pkg.duration || "Flexible"} • {pkg.type || "Umrah Plan"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-4 sm:p-5">
-                <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-[#00AEEF]">
-                  {pkg.pricePrefix || "From"}
-                </p>
-
-                <p className="mt-1 font-fredoka text-[30px] font-semibold leading-tight text-[#FF6B00]">
-                  {pkg.price}
-                </p>
-
-                <p className="mt-2 font-poppins text-sm font-medium leading-7 text-slate-600">
-                  Final quote depends on travel date, airline fare, hotel
-                  category, room sharing, and availability.
-                </p>
-
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  {quickFacts.map((item) => {
-                    const Icon = item.icon
-
-                    return (
-                      <div
-                        key={item.label}
-                        className="rounded-[5px] bg-[#F8FAFC] p-3"
-                      >
-                        <Icon className="text-sm text-[#00AEEF]" />
-
-                        <p className="mt-2 font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400">
-                          {item.label}
-                        </p>
-
-                        <p className="mt-1 line-clamp-2 font-poppins text-xs font-bold leading-5 text-slate-950">
-                          {item.value}
-                        </p>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-5">
-              <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-[#00AEEF]">
-                Package Overview
-              </p>
-
-              <h2 className="mt-1 font-fredoka text-[28px] font-semibold leading-tight text-slate-950">
-                Guided Umrah support
-              </h2>
-
-              <p className="mt-2 font-poppins text-sm font-medium leading-7 text-slate-600">
-                {pkg.overview}
-              </p>
-
-              {bestFor.length > 0 && (
-                <div className="mt-4 grid gap-2">
-                  {bestFor.slice(0, 3).map((item) => (
-                    <p
-                      key={item}
-                      className="rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 font-poppins text-sm font-semibold text-slate-700"
-                    >
-                      {item}
-                    </p>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {compactDetails.length > 0 && (
-              <div className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] sm:p-5">
-                <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.12em] text-[#FF6B00]">
-                  Key Details
-                </p>
-
-                <div className="mt-4 grid gap-2">
-                  {compactDetails.map((item) => (
-                    <p
-                      key={item}
-                      className="flex items-start gap-2 rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 font-poppins text-sm font-semibold leading-6 text-slate-700"
-                    >
-                      <FaCheckCircle className="mt-1 shrink-0 text-[#00AEEF]" />
-                      {item}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="rounded-[5px] border border-[#FF6B00]/15 bg-orange-50 p-4 sm:p-5">
-              <div className="flex gap-3">
-                <FaInfoCircle className="mt-1 shrink-0 text-[#FF6B00]" />
-
-                <div>
-                  <h3 className="font-fredoka text-[22px] font-semibold leading-tight text-slate-950">
-                    Important pricing note
-                  </h3>
-
-                  <p className="mt-2 font-poppins text-sm font-semibold leading-7 text-orange-800">
-                    {pkg.note ||
-                      "Final price may change based on travel dates, airline fare, hotel availability and final package selection."}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <a
-              href={getWhatsappLink(pkg)}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-3 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
-            >
-              <FaWhatsapp />
-              WhatsApp Inquiry
-            </a>
-          </aside>
         </div>
       </section>
 

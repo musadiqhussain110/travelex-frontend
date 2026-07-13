@@ -305,40 +305,6 @@ const getLeadSubtitle = (lead = {}) => {
   return [lead.city, lead.destination].filter(Boolean).join(" • ")
 }
 
-const MetricCard = ({ label, value, icon, tone, onClick, active }) => {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-[5px] border bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#00AEEF]/30 hover:shadow-[0_16px_40px_rgba(15,23,42,0.08)] ${
-        active
-          ? "border-[#00AEEF] shadow-[0_0_0_4px_rgba(0,174,239,0.10)]"
-          : "border-slate-100"
-      }`}
-    >
-      <div className="flex items-center gap-3">
-        <span
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[5px] ${getToneClass(
-            tone
-          )}`}
-        >
-          {icon}
-        </span>
-
-        <div>
-          <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
-            {label}
-          </p>
-
-          <p className="font-fredoka text-[28px] font-semibold leading-none text-slate-950">
-            {value}
-          </p>
-        </div>
-      </div>
-    </button>
-  )
-}
-
 const FollowUpLeadCard = ({
   lead,
   sectionKey,
@@ -576,20 +542,6 @@ const AdminFollowUpsPage = () => {
 
   const activeLeads = filteredLists[activeSection] || []
 
-  const metrics = useMemo(() => {
-    return {
-      today: filteredLists.today.length,
-      overdue: filteredLists.overdue.length,
-      upcoming: filteredLists.upcoming.length,
-      none: filteredLists.none.length,
-      total:
-        filteredLists.today.length +
-        filteredLists.overdue.length +
-        filteredLists.upcoming.length +
-        filteredLists.none.length,
-    }
-  }, [filteredLists])
-
   const patchLeadEverywhere = (leadId, patch) => {
     setLists((prev) => {
       const patchedLists = {}
@@ -695,10 +647,10 @@ const AdminFollowUpsPage = () => {
               </p>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:min-w-[430px]">
+            <div className="grid grid-cols-2 gap-3 sm:w-[420px]">
               <Link
                 to="/admin/workbench"
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-white/10 px-4 py-3 font-poppins text-sm font-semibold text-white backdrop-blur transition hover:bg-[#00AEEF]"
+                className="inline-flex h-11 w-full items-center justify-center gap-2 whitespace-nowrap rounded-[5px] bg-white/10 px-4 font-poppins text-sm font-semibold text-white backdrop-blur transition hover:bg-[#00AEEF]"
               >
                 Consultant Workbench
                 <FaArrowRight className="text-xs" />
@@ -707,7 +659,7 @@ const AdminFollowUpsPage = () => {
               <button
                 type="button"
                 onClick={loadFollowUps}
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-4 py-3 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
+                className="inline-flex h-11 w-full items-center justify-center gap-2 whitespace-nowrap rounded-[5px] bg-[#FF6B00] px-4 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
               >
                 <FaSyncAlt />
                 Refresh Calendar
@@ -728,29 +680,6 @@ const AdminFollowUpsPage = () => {
           {error}
         </div>
       )}
-
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <MetricCard
-          label="All Tasks"
-          value={metrics.total}
-          icon={<FaUserClock />}
-          tone="dark"
-          active={false}
-          onClick={() => setActiveSection("overdue")}
-        />
-
-        {followUpSections.map((section) => (
-          <MetricCard
-            key={section.key}
-            label={section.title}
-            value={metrics[section.key]}
-            icon={section.icon}
-            tone={section.tone}
-            active={activeSection === section.key}
-            onClick={() => setActiveSection(section.key)}
-          />
-        ))}
-      </section>
 
       <section className="rounded-[5px] border border-slate-100 bg-white p-5 shadow-sm">
         <div className="grid gap-3 xl:grid-cols-[1fr_auto] xl:items-center">

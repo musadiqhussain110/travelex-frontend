@@ -3,18 +3,11 @@ import {
   FaArrowRight,
   FaCar,
   FaCheckCircle,
-  FaClock,
   FaEnvelope,
   FaMapMarkerAlt,
   FaPhoneAlt,
   FaPlaneArrival,
-  FaPlaneDeparture,
-  FaRoute,
-  FaShieldAlt,
-  FaSuitcaseRolling,
   FaUser,
-  FaUsers,
-  FaWhatsapp,
 } from "react-icons/fa"
 
 import Footer from "../components/Footer"
@@ -23,10 +16,7 @@ import AppDatePicker from "../components/common/AppDatePicker"
 import AppTimePicker from "../components/common/AppTimePicker"
 import { publicApi } from "../services/publicApi"
 import { getLeadSource } from "../utils/leadSourceTracker"
-
-import carHero1 from "../assets/Cars/car-rental.jpg"
-import carHero4 from "../assets/Cars/Car5.webp"
-import carHero5 from "../assets/Cars/Car6.webp"
+import carFormAsset from "../assets/Cars/car-form.png"
 
 const serviceRequiredOptions = [
   "Airport Pick-up",
@@ -40,90 +30,6 @@ const vehiclePreferenceOptions = [
   "SUV",
   "Van / Minivan",
   "Bus / Coach",
-]
-
-const transferCards = [
-  {
-    title: "Airport Pick-up",
-    subtitle: "From airport to hotel / home",
-    description:
-      "Share your arrival details and TravelEx will arrange a suitable vehicle for your airport pickup.",
-    icon: FaPlaneArrival,
-    image: carHero4,
-    bestFor: ["Airport arrival", "Hotel transfer", "Family pickup"],
-  },
-  {
-    title: "Airport Drop-off",
-    subtitle: "From hotel / home to airport",
-    description:
-      "Book a reliable airport drop-off service according to your flight departure time.",
-    icon: FaPlaneDeparture,
-    image: carHero5,
-    bestFor: ["Departure transfer", "On-time drop-off", "Luggage support"],
-  },
-  {
-    title: "Round Trip Transfer",
-    subtitle: "Pick-up and drop-off both",
-    description:
-      "A complete transfer option for travelers who need both arrival pickup and departure drop-off.",
-    icon: FaRoute,
-    image: carHero1,
-    bestFor: ["Complete transfer", "Families", "Groups"],
-  },
-]
-
-const vehicleCards = [
-  {
-    title: "Economy Car",
-    description:
-      "Budget-friendly option for solo travelers, couples, and light luggage.",
-    icon: FaCar,
-  },
-  {
-    title: "Sedan",
-    description: "Comfortable option for small families and airport transfers.",
-    icon: FaShieldAlt,
-  },
-  {
-    title: "SUV",
-    description: "Better space for families, luggage, and comfortable travel.",
-    icon: FaUsers,
-  },
-  {
-    title: "Van / Minivan",
-    description: "Suitable for groups, families, and extra luggage.",
-    icon: FaSuitcaseRolling,
-  },
-]
-
-const processSteps = [
-  {
-    title: "Share flight details",
-    description:
-      "Send airline, flight number, date, time, airport, and transfer type.",
-  },
-  {
-    title: "TravelEx checks vehicle",
-    description:
-      "Our team checks suitable vehicle availability according to passengers and luggage.",
-  },
-  {
-    title: "Get transfer quote",
-    description:
-      "You receive pickup/drop-off quote with vehicle option and timing guidance.",
-  },
-  {
-    title: "Confirm transfer",
-    description:
-      "After confirmation, TravelEx shares final instructions for pickup or drop-off.",
-  },
-]
-
-const trustPoints = [
-  "Airport pick-up and drop-off support",
-  "Vehicle options for families and groups",
-  "Flight-based timing guidance",
-  "WhatsApp assistance before travel",
 ]
 
 const initialQuoteForm = {
@@ -163,15 +69,17 @@ const inputClass =
 const iconInputClass =
   "h-11 w-full rounded-[5px] border border-slate-200 bg-white pl-10 pr-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
 
-const whatsappLink =
-  "https://wa.me/923111444192?text=Assalamualaikum%20TravelEx%2C%20I%20need%20airport%20pick-up%20%2F%20drop-off%20service%20guidance."
-
 const getDateIso = (value) => {
   if (!value) return undefined
 
   const date = new Date(`${value}T00:00:00`)
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
 }
+
+const bannerAnimationStyles =
+  ".car-banner-asset{animation:carBannerFloat 4.5s ease-in-out infinite}" +
+  "@keyframes carBannerFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}" +
+  "@media (prefers-reduced-motion: reduce){.car-banner-asset{animation:none}}"
 
 const CarRentalPage = () => {
   const [quoteForm, setQuoteForm] = useState(initialQuoteForm)
@@ -180,25 +88,6 @@ const CarRentalPage = () => {
   const [formError, setFormError] = useState("")
 
   const quoteFormRef = useRef(null)
-
-  const openQuoteForm = (service = "") => {
-    setQuoteSent(false)
-    setFormError("")
-
-    if (service) {
-      setQuoteForm((prev) => ({
-        ...prev,
-        serviceRequired: service,
-      }))
-    }
-
-    setTimeout(() => {
-      quoteFormRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      })
-    }, 80)
-  }
 
   const handleQuoteChange = (event) => {
     const { name, value } = event.target
@@ -383,110 +272,43 @@ const CarRentalPage = () => {
 
   return (
     <main className="bg-[#F8FAFC]">
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-slate-950">
-        <img
-          src={carHero1}
-          alt="Airport pick-up and drop-off service by TravelEx"
-          loading="eager"
-          decoding="async"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-slate-950/45 to-slate-950/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-transparent" />
-
-        <div className="relative z-10 mx-auto max-w-[1340px] px-4 py-7 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
-          <div className="grid gap-8 lg:grid-cols-[1fr_390px] lg:items-center">
-            <div className="max-w-4xl">
-              <p className="font-poppins text-[8px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-[12px] sm:tracking-[0.1em]">
-                Airport Pick-up & Drop-off
-              </p>
-
-              <h1 className="mt-1 font-fredoka text-[17px] font-semibold leading-[1.08] text-white sm:mt-2 sm:text-[46px] sm:uppercase sm:leading-[1.08] lg:text-[54px]">
-                <span className="sm:hidden">Airport Transfer Support</span>
-                <span className="hidden sm:inline">
-                  Reliable airport pick-up and drop-off
-                </span>
-              </h1>
-
-              <p className="mt-1 max-w-3xl font-poppins text-[9px] font-medium leading-4 text-white/85 sm:mt-3 sm:text-base sm:leading-7">
-                <span className="sm:hidden">
-                  Share flight details and get transfer support.
-                </span>
-
-                <span className="hidden sm:inline">
-                  Share your flight details, pickup/drop-off location,
-                  passengers, luggage, and vehicle preference. TravelEx will
-                  arrange suitable airport transfer guidance.
-                </span>
-              </p>
-
-              <div className="mt-3 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:gap-3">
-                <button
-                  type="button"
-                  onClick={() => openQuoteForm()}
-                  className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-5 py-2.5 font-poppins text-xs font-semibold text-white transition hover:bg-[#00AEEF] sm:px-6 sm:py-3 sm:text-sm"
-                >
-                  Request Transfer
-                  <FaArrowRight className="text-[10px] sm:text-xs" />
-                </button>
-
-                <a
-                  href={whatsappLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-white/15 bg-white/10 px-5 py-2.5 font-poppins text-xs font-semibold text-white backdrop-blur transition hover:bg-[#25D366] sm:px-6 sm:py-3 sm:text-sm"
-                >
-                  <FaWhatsapp />
-                  WhatsApp Inquiry
-                </a>
-              </div>
-            </div>
-
-            <div className="hidden lg:block">
-              <div className="rounded-[5px] border border-white/15 bg-white/10 p-5 shadow-[0_22px_60px_rgba(0,0,0,0.28)] backdrop-blur-md">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[5px] bg-[#00AEEF]/15 text-[#00AEEF]">
-                  <FaPlaneArrival />
-                </div>
-
-                <h3 className="mt-4 font-fredoka text-[28px] font-semibold leading-tight text-white">
-                  Flight-based transfer support
-                </h3>
-
-                <p className="mt-2 font-poppins text-sm font-medium leading-7 text-white/70">
-                  Transfer quote depends on airport, vehicle type, passengers,
-                  luggage, pickup/drop-off location, and travel time.
-                </p>
-
-                <div className="mt-5 grid gap-3">
-                  {trustPoints.map((point) => (
-                    <div
-                      key={point}
-                      className="flex items-center gap-3 rounded-[5px] bg-white/10 px-3 py-2.5"
-                    >
-                      <FaCheckCircle className="shrink-0 text-[#00AEEF]" />
-                      <span className="font-poppins text-sm font-semibold text-white/85">
-                        {point}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Request Form */}
       <section
         ref={quoteFormRef}
-        className="bg-white px-4 py-10 sm:px-6 sm:py-16 lg:px-8"
+        className="px-4 pb-10 pt-5 sm:px-6 sm:pb-16 sm:pt-8 lg:px-8"
       >
-        <div className="mx-auto grid max-w-[1340px] gap-6 lg:grid-cols-[1fr_360px]">
+        <style>{bannerAnimationStyles}</style>
+
+        <div className="mx-auto max-w-[920px]">
+          <div className="relative mb-3 min-h-[100px] overflow-hidden rounded-[14px] bg-white px-3.5 py-3.5 shadow-[0_10px_34px_rgba(11,42,74,0.08)] sm:mb-4 sm:min-h-[150px] sm:rounded-[18px] sm:px-8 sm:py-5 lg:min-h-[190px]">
+            <div className="pointer-events-none absolute -right-10 -top-16 hidden h-64 w-64 rounded-full bg-[#00AEEF]/10 blur-3xl sm:block"></div>
+            <div className="pointer-events-none absolute -bottom-16 right-24 hidden h-40 w-40 rounded-full bg-[#FF6B00]/10 blur-3xl sm:block"></div>
+
+            <div className="relative z-10 flex w-[58%] flex-col justify-center py-1 sm:absolute sm:inset-y-0 sm:left-0 sm:w-[68%] sm:px-8 sm:py-6 lg:w-[64%]">
+              <p className="mb-1 flex items-center gap-1 whitespace-nowrap font-poppins text-[5.5px] font-bold uppercase leading-tight tracking-[0.04em] text-[#00AEEF] sm:mb-3 sm:gap-2 sm:whitespace-normal sm:text-[14px] sm:leading-normal sm:tracking-[0.22em]">
+                <span className="inline-block h-[2px] w-2 shrink-0 bg-[#FF6B00] sm:w-8"></span>
+                Smooth Rides, Every Time
+              </p>
+
+              <h2 className="flex flex-nowrap items-center gap-1 whitespace-nowrap font-fredoka text-[9px] font-semibold uppercase leading-[1.1] tracking-wide text-slate-950 sm:gap-3 sm:text-[34px] sm:leading-[1.05] lg:text-[38px]">
+                <span className="whitespace-nowrap">Travel In</span>
+                <span className="whitespace-nowrap rounded-[3px] bg-[#FF6B00] px-1.5 py-0.5 leading-none tracking-wide text-white shadow-sm sm:rounded-[6px] sm:px-4 sm:py-1.5">
+                  Comfort
+                </span>
+              </h2>
+            </div>
+
+            <img
+              src={carFormAsset}
+              alt="Airport transfer illustration"
+              className="car-banner-asset pointer-events-none absolute right-1 top-1/2 z-0 h-[105px] w-auto -translate-y-1/2 object-contain sm:right-3 sm:h-[230px] lg:right-4 lg:h-[260px]"
+            />
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-[920px]">
           <form
             onSubmit={handleSubmit}
-            className="rounded-[5px] border border-slate-100 bg-[#F8FAFC] p-4 shadow-[0_12px_35px_rgba(15,23,42,0.06)] sm:p-7"
+            className="rounded-[5px] border border-slate-100 bg-white p-4 shadow-[0_16px_45px_rgba(15,23,42,0.08)] sm:p-8"
           >
             <input
               type="text"
@@ -498,32 +320,40 @@ const CarRentalPage = () => {
               autoComplete="off"
             />
 
-            <div className="mb-5">
-              <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-xs">
-                Airport Transfer Inquiry
-              </p>
+            <div className="mb-4 sm:mb-6">
+              <div className="mb-1.5 flex items-center gap-2 sm:mb-2 sm:gap-2.5">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#00AEEF]/10 text-xs text-[#00AEEF] sm:h-8 sm:w-8 sm:text-sm">
+                  <FaCar />
+                </span>
 
-              <h2 className="mt-2 font-fredoka text-[28px] font-semibold text-slate-950 sm:text-[42px]">
+                <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-[12px] sm:tracking-[0.1em]">
+                  Airport Transfer Inquiry
+                </p>
+              </div>
+
+              <h1 className="font-fredoka text-[22px] font-semibold leading-tight text-slate-950 sm:text-[36px]">
                 Share pick-up / drop-off details
-              </h2>
+              </h1>
 
-              <p className="mt-2 font-poppins text-sm font-medium leading-7 text-slate-600 sm:text-base">
-                Fill the details below and TravelEx consultant will contact you
-                with suitable transfer options.
+              <p className="mt-1.5 font-poppins text-[10.5px] font-medium leading-5 text-slate-600 sm:mt-2 sm:text-sm sm:leading-7">
+                Fill the details below and TravelEx consultant will contact
+                you with suitable transfer options.
               </p>
             </div>
 
             {quoteSent && (
-              <div className="mb-5 rounded-[5px] border border-green-200 bg-green-50 p-4">
+              <div className="mb-5 rounded-[5px] border border-green-100 bg-green-50 p-5 sm:p-6">
                 <div className="flex items-start gap-3">
-                  <FaCheckCircle className="mt-1 shrink-0 text-green-600" />
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[5px] bg-green-600 text-white">
+                    <FaCheckCircle className="text-lg" />
+                  </div>
 
                   <div>
-                    <h3 className="font-poppins text-sm font-bold text-green-800">
-                      Transfer request submitted successfully.
-                    </h3>
+                    <h2 className="font-fredoka text-[24px] font-semibold leading-tight text-green-700">
+                      Transfer request submitted
+                    </h2>
 
-                    <p className="mt-1 font-poppins text-xs font-semibold leading-5 text-green-700 sm:text-sm">
+                    <p className="mt-1 font-poppins text-[11.5px] font-medium leading-5 text-green-700 sm:text-sm sm:leading-7">
                       Our team will contact you soon.
                     </p>
                   </div>
@@ -540,7 +370,7 @@ const CarRentalPage = () => {
             <div className="grid gap-6">
               {/* Personal Information */}
               <div>
-                <h3 className="font-fredoka text-[24px] font-semibold text-slate-950">
+                <h3 className="font-fredoka text-[20px] font-semibold text-slate-950">
                   Personal Information
                 </h3>
 
@@ -606,7 +436,7 @@ const CarRentalPage = () => {
 
               {/* Service Required */}
               <div>
-                <h3 className="font-fredoka text-[24px] font-semibold text-slate-950">
+                <h3 className="font-fredoka text-[20px] font-semibold text-slate-950">
                   Service Required
                 </h3>
 
@@ -625,7 +455,7 @@ const CarRentalPage = () => {
 
               {/* Flight Details */}
               <div>
-                <h3 className="font-fredoka text-[24px] font-semibold text-slate-950">
+                <h3 className="font-fredoka text-[20px] font-semibold text-slate-950">
                   Flight Details
                 </h3>
 
@@ -693,7 +523,7 @@ const CarRentalPage = () => {
 
               {/* Pickup & Drop-off */}
               <div>
-                <h3 className="font-fredoka text-[24px] font-semibold text-slate-950">
+                <h3 className="font-fredoka text-[20px] font-semibold text-slate-950">
                   Pickup & Drop-off Details
                 </h3>
 
@@ -732,7 +562,7 @@ const CarRentalPage = () => {
 
               {/* Passengers */}
               <div>
-                <h3 className="font-fredoka text-[24px] font-semibold text-slate-950">
+                <h3 className="font-fredoka text-[20px] font-semibold text-slate-950">
                   Passengers
                 </h3>
 
@@ -777,7 +607,7 @@ const CarRentalPage = () => {
 
               {/* Luggage */}
               <div>
-                <h3 className="font-fredoka text-[24px] font-semibold text-slate-950">
+                <h3 className="font-fredoka text-[20px] font-semibold text-slate-950">
                   Luggage Information
                 </h3>
 
@@ -810,7 +640,7 @@ const CarRentalPage = () => {
 
               {/* Vehicle Preference */}
               <div>
-                <h3 className="font-fredoka text-[24px] font-semibold text-slate-950">
+                <h3 className="font-fredoka text-[20px] font-semibold text-slate-950">
                   Vehicle Preference
                 </h3>
 
@@ -836,7 +666,7 @@ const CarRentalPage = () => {
                   value={quoteForm.additionalRequirements}
                   onChange={handleQuoteChange}
                   placeholder="Write child seat, wheelchair support, luggage details, hotel name, waiting time, or any special request..."
-                  className="w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:px-4 sm:text-sm"
+                  className="min-h-[130px] w-full resize-none rounded-[5px] border border-slate-200 bg-white px-3 py-3 font-poppins text-xs font-semibold leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#00AEEF] focus:ring-2 focus:ring-[#00AEEF]/10 sm:min-h-[150px] sm:px-4 sm:text-sm"
                 />
               </div>
             </div>
@@ -844,136 +674,12 @@ const CarRentalPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-6 py-3.5 font-poppins text-xs font-semibold uppercase tracking-[0.04em] text-white transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-70 sm:text-sm"
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#FF6B00] px-6 py-3.5 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loading ? "Submitting Request..." : "Submit Transfer Request"}
-              {!loading && <FaArrowRight className="text-[10px] sm:text-xs" />}
+              {!loading && <FaArrowRight className="text-xs" />}
             </button>
           </form>
-
-          {/* Summary */}
-          <aside className="h-fit lg:sticky lg:top-24 lg:self-start">
-            <div className="overflow-hidden rounded-[5px] border border-slate-100 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.08)]">
-              <div className="relative h-36 overflow-hidden sm:h-44">
-                <img
-                  src={carHero5}
-                  alt="Airport transfer summary"
-                  loading="lazy"
-                  decoding="async"
-                  className="h-full w-full object-cover"
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
-
-                <div className="absolute bottom-3 left-4 right-4 sm:bottom-4">
-                  <p className="font-poppins text-[8.5px] font-bold uppercase tracking-[0.08em] text-white/65 sm:text-[10px] sm:tracking-[0.1em]">
-                    Request Summary
-                  </p>
-
-                  <h3 className="mt-1 font-fredoka text-[21px] font-semibold leading-tight text-white sm:text-[24px]">
-                    Airport Transfer
-                  </h3>
-                </div>
-              </div>
-
-              <div className="p-4 sm:p-5">
-                <div className="grid gap-2 sm:gap-3">
-                  {[
-                    ["Service", quoteForm.serviceRequired || "-"],
-                    ["Airline", quoteForm.airline || "-"],
-                    ["Flight No.", quoteForm.flightNumber || "-"],
-                    ["Date", quoteForm.flightDate || "-"],
-                    ["Time", quoteForm.flightTime || "-"],
-                    ["Airport", quoteForm.airport || "-"],
-                    ["Pickup", quoteForm.pickupLocation || "-"],
-                    ["Drop-off", quoteForm.dropoffLocation || "-"],
-                    [
-                      "Passengers",
-                      `${
-                        (Number(quoteForm.adults) || 0) +
-                        (Number(quoteForm.children) || 0) +
-                        (Number(quoteForm.infants) || 0)
-                      }`,
-                    ],
-                    ["Checked Bags", quoteForm.checkedBags || "0"],
-                    ["Hand Carry", quoteForm.handCarryBags || "0"],
-                    ["Vehicle", quoteForm.vehiclePreference || "-"],
-                  ].map(([label, value]) => (
-                    <div
-                      key={label}
-                      className="rounded-[5px] bg-[#F8FAFC] px-3.5 py-2.5 sm:px-4 sm:py-3"
-                    >
-                      <p className="font-poppins text-[10px] font-bold text-slate-400 sm:text-xs">
-                        {label}
-                      </p>
-
-                      <p className="mt-1 break-words font-poppins text-sm font-semibold text-slate-950 sm:text-base">
-                        {value || "-"}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-4 rounded-[5px] bg-orange-50 p-3.5 sm:mt-5 sm:p-4">
-                  <p className="font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-[#FF6B00] sm:text-[11px] sm:tracking-[0.1em]">
-                    Request Based Service
-                  </p>
-
-                  <p className="mt-1.5 font-poppins text-[11px] font-medium leading-5 text-orange-800 sm:mt-2 sm:text-sm sm:leading-7">
-                    No online payment is charged here. TravelEx consultant will
-                    confirm vehicle availability, route, timing, and final
-                    price.
-                  </p>
-                </div>
-
-                <a
-                  href={whatsappLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[5px] bg-[#25D366] px-5 py-3 font-poppins text-sm font-semibold text-white transition hover:bg-[#00AEEF]"
-                >
-                  <FaWhatsapp />
-                  Ask on WhatsApp
-                </a>
-              </div>
-            </div>
-          </aside>
-        </div>
-      </section>
-
-      {/* Process */}
-      <section className="bg-[#F8FAFC] px-4 py-10 sm:px-6 sm:py-16 lg:px-8">
-        <div className="mx-auto max-w-[1340px]">
-          <div className="text-center">
-            <p className="font-poppins text-[10px] font-bold uppercase tracking-[0.08em] text-[#00AEEF] sm:text-xs">
-              How It Works
-            </p>
-
-            <h2 className="mt-2 font-fredoka text-[28px] font-semibold text-slate-950 sm:text-[42px]">
-              Simple airport transfer process
-            </h2>
-          </div>
-
-          <div className="mt-7 grid gap-4 md:grid-cols-4">
-            {processSteps.map((step, index) => (
-              <article
-                key={step.title}
-                className="rounded-[5px] border border-slate-100 bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.06)]"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-[5px] bg-[#FF6B00] font-poppins text-sm font-bold text-white">
-                  {index + 1}
-                </div>
-
-                <h3 className="mt-4 font-fredoka text-[22px] font-semibold text-slate-950">
-                  {step.title}
-                </h3>
-
-                <p className="mt-2 font-poppins text-sm font-medium leading-6 text-slate-600">
-                  {step.description}
-                </p>
-              </article>
-            ))}
-          </div>
         </div>
       </section>
 

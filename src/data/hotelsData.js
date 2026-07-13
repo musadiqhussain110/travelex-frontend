@@ -1,6 +1,6 @@
-import hotelHero2 from "../assets/Hotels/custom-hotel.jpg"
-import hotelHero3 from "../assets/Hotels/Hotel5.jpg"
-import hotelHero4 from "../assets/Hotels/makkahHotel4.jpg"
+import hotelHero2 from "../assets/Hotels/custom-hotel-optimized.webp"
+import hotelHero3 from "../assets/Hotels/Hotel5-optimized.webp"
+import hotelHero4 from "../assets/Hotels/makkahHotel4-optimized.webp"
 
 export const hotels = [
   {

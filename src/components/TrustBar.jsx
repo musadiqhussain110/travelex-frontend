@@ -8,10 +8,10 @@ const TrustBar = () => {
   ]
 
   return (
-    <section className="bg-white py-6 shadow-sm">
+    <section className="py-6">
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-6 text-center md:grid-cols-5">
         {stats.map((item) => (
-          <div key={item} className="rounded-2xl bg-slate-50 p-4">
+          <div key={item} className="rounded-2xl bg-slate-50 p-4 shadow-sm">
             <p className="text-sm font-semibold text-slate-700">{item}</p>
           </div>
         ))}

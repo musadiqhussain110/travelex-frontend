@@ -24,7 +24,7 @@ const TrustSection = () => {
   return (
     <section
       id="trust"
-      className="overflow-hidden bg-white pt-5 pb-9 sm:pt-8 sm:pb-14"
+      className="overflow-hidden pt-5 pb-6 sm:pt-6 sm:pb-8"
     >
       <style>{`
         @keyframes authorityLoop {
@@ -55,6 +55,7 @@ const TrustSection = () => {
       `}</style>
 
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8">
+        <div className="rounded-[22px] bg-white px-4 py-6 shadow-[0_10px_34px_rgba(11,42,74,0.06)] sm:rounded-[26px] sm:px-8 sm:py-10 lg:px-10">
         <Reveal>
           <div className="mb-4 text-center sm:mb-5">
             <p className="mb-2 font-poppins text-[11px] font-bold uppercase tracking-[0.24em] text-[#00AEEF] sm:text-[12px] sm:tracking-[0.18em]">
@@ -73,25 +74,23 @@ const TrustSection = () => {
         </Reveal>
 
         <Reveal delay={0.12}>
-          <div className="authority-wrapper relative">
+          <div className="authority-wrapper relative overflow-hidden px-3 py-4 sm:px-5 sm:py-5">
             <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-12 bg-gradient-to-r from-white to-transparent sm:w-20" />
             <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 bg-gradient-to-l from-white to-transparent sm:w-20" />
 
-            <div className="overflow-hidden rounded-[5px] border border-slate-100 bg-[#F8FAFC] px-3 py-4 shadow-[0_10px_28px_rgba(15,23,42,0.05)] sm:px-5 sm:py-5">
-              <div className="authority-track items-center gap-3 sm:gap-5">
-                {loopItems.map((item, index) => (
-                  <div
-                    key={`${item.name}-${index}`}
-                    className="flex h-[74px] min-w-[165px] items-center justify-center rounded-[5px] border border-slate-100 bg-white px-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#00AEEF]/30 hover:shadow-md sm:h-[92px] sm:min-w-[240px] sm:px-6"
-                  >
-                    <img
-                      src={item.logo}
-                      alt={item.name}
-                      className="max-h-[48px] max-w-[125px] object-contain opacity-100 transition-all duration-300 sm:max-h-[62px] sm:max-w-[170px]"
-                    />
-                  </div>
-                ))}
-              </div>
+            <div className="authority-track items-center gap-3 sm:gap-5">
+              {loopItems.map((item, index) => (
+                <div
+                  key={`${item.name}-${index}`}
+                  className="flex h-[74px] min-w-[165px] items-center justify-center rounded-[5px] border border-slate-100 bg-white px-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#00AEEF]/30 hover:shadow-md sm:h-[92px] sm:min-w-[240px] sm:px-6"
+                >
+                  <img
+                    src={item.logo}
+                    alt={item.name}
+                    className="max-h-[48px] max-w-[125px] object-contain opacity-100 transition-all duration-300 sm:max-h-[62px] sm:max-w-[170px]"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </Reveal>
@@ -104,6 +103,7 @@ const TrustSection = () => {
               </span>
             </Reveal>
           ))}
+        </div>
         </div>
       </div>
     </section>

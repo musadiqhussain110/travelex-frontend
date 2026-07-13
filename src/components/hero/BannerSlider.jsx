@@ -1,24 +1,15 @@
 import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
-import {
-  FaArrowRight,
-  FaCertificate,
-  FaChevronLeft,
-  FaChevronRight,
-  FaHeadset,
-  FaUsers,
-  FaWhatsapp,
-} from "react-icons/fa"
+import { FaCertificate, FaHeadset, FaUsers } from "react-icons/fa"
 
 import { bannerData } from "./bannerData"
 
-import umrahAsset from "../../assets/hero/umrah/finals.png"
-import thailandAsset from "../../assets/hero/visa/thailand.png"
+import umrahAsset from "../../assets/hero/umrah/finals-optimized.webp"
+import thailandAsset from "../../assets/hero/visa/thailand-optimized.webp"
 import visaDocs from "../../assets/hero/visa/passport-boarding-pass1.svg"
-import toursAsset from "../../assets/hero/tours/tours.png"
-import consultantAsset from "../../assets/hero/consultant.png"
+import toursAsset from "../../assets/hero/tours/tours-optimized.webp"
+import consultantAsset from "../../assets/hero/consultant-optimized.webp"
 
-const SLIDE_DURATION = 4500
+const SLIDE_DURATION = 7000
 
 const updatedBannerData = [
   {
@@ -93,7 +84,6 @@ const BannerSlider = () => {
   const [travelerCount, setTravelerCount] = useState(0)
 
   const activeBanner = updatedBannerData[activeIndex]
-  const ButtonTag = activeBanner.external ? "a" : Link
 
   const mobileText = mobileBannerText[activeBanner.id] || {
     eyebrow: activeBanner.category,
@@ -102,23 +92,8 @@ const BannerSlider = () => {
     after: activeBanner.titleEnd,
   }
 
-  const mobileButtonText =
-    activeBanner.id === "consultant"
-      ? "Chat Now"
-      : activeBanner.id === "visa"
-        ? "Apply Now"
-        : activeBanner.id === "tours"
-          ? "View Tours"
-          : "Explore"
-
   const nextSlide = () => {
     setActiveIndex((prev) => (prev + 1) % updatedBannerData.length)
-  }
-
-  const prevSlide = () => {
-    setActiveIndex((prev) =>
-      prev === 0 ? updatedBannerData.length - 1 : prev - 1
-    )
   }
 
   useEffect(() => {
@@ -147,7 +122,7 @@ const BannerSlider = () => {
   }, [])
 
   const stagger = (i) => ({
-    animation: `bannerFadeUp 0.6s ease-out ${i * 0.12}s both`,
+    animation: `bannerFadeUp 0.85s ease-out ${i * 0.15}s both`,
   })
 
   const renderDots = (mobile = false) => (
@@ -191,7 +166,7 @@ const BannerSlider = () => {
       return (
         <div
           key={`mobile-vector-${activeIndex}`}
-          className="banner-slide-item pointer-events-none absolute inset-0 z-10"
+          className="banner-vector-slide pointer-events-none absolute inset-0 z-10"
         >
           <img
             src={thailandAsset}
@@ -218,7 +193,7 @@ const BannerSlider = () => {
         key={`mobile-vector-${activeIndex}`}
         src={asset}
         alt={activeBanner.category}
-        className={`banner-slide-item pointer-events-none ${className}`}
+        className={`banner-vector-slide pointer-events-none ${className}`}
       />
     )
   }
@@ -227,8 +202,18 @@ const BannerSlider = () => {
     <div className="relative w-full">
       <style>{`
         @keyframes bannerFadeUp {
-          from { opacity: 0; transform: translateY(22px); }
-          to   { opacity: 1; transform: translateY(0); }
+          0%   { opacity: 0; transform: scale(0.94) translateY(12px); }
+          100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        @keyframes bannerCardPopIn {
+          0%   { opacity: 0; transform: scale(0.97); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes bannerStampIn {
+          0%   { opacity: 0; transform: translateY(24px); }
+          100% { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes bannerSlideInLeft {
@@ -240,12 +225,6 @@ const BannerSlider = () => {
             opacity: 1;
             transform: translateX(0);
           }
-        }
-
-        @keyframes bannerStampIn {
-          0%   { opacity: 0; transform: scale(1.3) rotate(-3deg); }
-          60%  { opacity: 1; transform: scale(0.96) rotate(0.5deg); }
-          100% { opacity: 1; transform: scale(1) rotate(0deg); }
         }
 
         @keyframes bannerAssetIn {
@@ -263,19 +242,24 @@ const BannerSlider = () => {
           to   { width: 100%; }
         }
 
-        .banner-slide-item {
-          animation: bannerSlideInLeft 0.55s ease-out both;
+        .banner-text-pop {
+          animation: bannerCardPopIn 0.7s ease-out both;
+        }
+
+        .banner-vector-slide {
+          animation: bannerSlideInLeft 0.7s ease-out both;
         }
 
         .banner-asset {
           animation:
-            bannerAssetIn 0.7s ease-out both,
-            bannerFloat 4.5s ease-in-out 0.7s infinite;
+            bannerAssetIn 0.9s ease-out both,
+            bannerFloat 4.5s ease-in-out 0.9s infinite;
         }
 
         @media (prefers-reduced-motion: reduce) {
           .banner-asset,
-          .banner-slide-item,
+          .banner-text-pop,
+          .banner-vector-slide,
           [data-stagger],
           .banner-dot-fill {
             animation: none !important;
@@ -291,7 +275,7 @@ const BannerSlider = () => {
 
         <div
           key={`mobile-content-${activeIndex}`}
-          className="banner-slide-item relative z-20 flex h-full max-w-[62%] flex-col justify-center px-4 pb-7 pt-4"
+          className="banner-text-pop relative z-20 flex h-full max-w-[62%] flex-col justify-center px-4 pb-7 pt-4"
         >
     <p
   data-stagger
@@ -310,7 +294,7 @@ const BannerSlider = () => {
             <span
               className="whitespace-nowrap rounded-[5px] bg-[#FF6B00] px-1.5 py-0.5 leading-none text-white shadow-sm"
               style={{
-                animation: "bannerStampIn 0.5s ease-out 0.45s both",
+                animation: "bannerStampIn 0.9s ease-out 0.45s both",
               }}
             >
               {mobileText.highlight}
@@ -318,27 +302,6 @@ const BannerSlider = () => {
 
             <span className="whitespace-nowrap">{mobileText.after}</span>
           </h2>
-
-          <ButtonTag
-            data-stagger
-            style={stagger(4)}
-            {...(activeBanner.external
-              ? {
-                  href: activeBanner.buttonLink,
-                  target: "_blank",
-                  rel: "noreferrer",
-                }
-              : { to: activeBanner.buttonLink })}
-            className="group mt-3 inline-flex w-fit items-center gap-1.5 rounded-[5px] bg-[#FF6B00] px-3 py-1.5 font-poppins text-[8.5px] font-semibold text-white shadow-[0_6px_16px_rgba(255,107,0,0.28)] transition-colors duration-300 hover:bg-[#00AEEF]"
-          >
-            {activeBanner.id === "consultant" && (
-              <FaWhatsapp className="text-[9px]" />
-            )}
-
-            {mobileButtonText}
-
-            <FaArrowRight className="text-[8px] transition-transform duration-300 group-hover:translate-x-1" />
-          </ButtonTag>
         </div>
 
         {renderDots(true)}
@@ -346,15 +309,15 @@ const BannerSlider = () => {
 
       {/* Desktop Banner */}
       <div className="relative hidden h-[370px] rounded-[18px] bg-white/90 px-8 shadow-[0_8px_30px_rgba(11,42,74,0.05)] backdrop-blur-[3px] md:block lg:px-14">
-        <div
-          key={`desktop-${activeIndex}`}
-          className="banner-slide-item grid h-full items-center gap-6 md:grid-cols-[1fr_1fr]"
-        >
+        <div className="grid h-full items-center gap-6 md:grid-cols-[1fr_1fr]">
           {/* Left Content */}
           <div className="max-w-xl">
+            {/* Trust badges - animate in once on load, stay fixed across slide changes */}
             <div
               data-stagger
-              style={stagger(0)}
+              style={{
+                animation: "bannerFadeUp 0.85s ease-out 0.05s both",
+              }}
               className="mb-5 flex flex-wrap items-center gap-x-5 gap-y-2"
             >
               <div className="flex items-center gap-2">
@@ -386,65 +349,42 @@ const BannerSlider = () => {
               </div>
             </div>
 
-            <p
-              data-stagger
-              style={stagger(1)}
-             className="hero-banner-eyebrow mb-2 font-poppins text-[11px] font-bold uppercase text-[#00AEEF] lg:text-[12px]"
-            >
-              {activeBanner.category}
-            </p>
-
-            <h2
-              data-stagger
-              style={stagger(2)}
-              className="flex items-center gap-3 whitespace-nowrap font-fredoka text-[38px] font-semibold uppercase leading-none text-slate-950"
-            >
-              <span>{activeBanner.titleStart}</span>
-
-              <span
-                className="rounded-[5px] bg-[#FF6B00] px-3 py-2 leading-none text-white shadow-sm"
-                style={{
-                  animation: "bannerStampIn 0.5s ease-out 0.45s both",
-                }}
+            {/* Slide-specific text content - re-animates per slide */}
+            <div key={`desktop-text-${activeIndex}`} className="banner-text-pop">
+              <p
+                data-stagger
+                style={stagger(0)}
+                className="hero-banner-eyebrow mb-2 font-poppins text-[11px] font-bold uppercase text-[#00AEEF] lg:text-[12px]"
               >
-                {activeBanner.highlight}
-              </span>
+                {activeBanner.category}
+              </p>
 
-              <span>{activeBanner.titleEnd}</span>
-            </h2>
-
-            <p
-              data-stagger
-              style={stagger(3)}
-              className="mt-4 font-poppins text-[19px] font-medium text-slate-600"
-            >
-              {activeBanner.subtitle}
-            </p>
-
-            <div data-stagger style={stagger(4)}>
-              <ButtonTag
-                {...(activeBanner.external
-                  ? {
-                      href: activeBanner.buttonLink,
-                      target: "_blank",
-                      rel: "noreferrer",
-                    }
-                  : { to: activeBanner.buttonLink })}
-                className="group mt-6 inline-flex items-center gap-2 rounded-[5px] bg-[#FF6B00] px-6 py-2.5 font-poppins text-sm font-semibold text-white shadow-[0_8px_24px_rgba(255,107,0,0.35)] transition-colors duration-300 hover:bg-[#00AEEF] hover:shadow-[0_10px_28px_rgba(0,174,239,0.35)]"
+              <h2
+                data-stagger
+                style={stagger(1)}
+                className="flex items-center gap-3 whitespace-nowrap font-fredoka text-[38px] font-semibold uppercase leading-none text-slate-950"
               >
-                {activeBanner.id === "consultant" && (
-                  <FaWhatsapp className="text-[14px]" />
-                )}
+                <span>{activeBanner.titleStart}</span>
 
-                {activeBanner.buttonText}
+                <span
+                  className="rounded-[5px] bg-[#FF6B00] px-3 py-2 leading-none text-white shadow-sm"
+                  style={{
+                    animation: "bannerStampIn 0.9s ease-out 0.35s both",
+                  }}
+                >
+                  {activeBanner.highlight}
+                </span>
 
-                <FaArrowRight className="text-[12px] transition-transform duration-300 group-hover:translate-x-1" />
-              </ButtonTag>
+                <span>{activeBanner.titleEnd}</span>
+              </h2>
             </div>
           </div>
 
-          {/* Right Visual */}
-          <div className="relative hidden h-full min-h-[300px] md:block">
+          {/* Right Visual - re-animates per slide */}
+          <div
+            key={`desktop-visual-${activeIndex}`}
+            className="relative hidden h-full min-h-[300px] md:block"
+          >
             {activeBanner.id === "consultant" && (
               <div className="banner-asset absolute right-[-100px] top-[-18px] z-20 w-[760px] max-w-none lg:right-[-150px] lg:w-[820px] xl:right-[-170px] xl:w-[880px]">
                 <img
@@ -493,24 +433,7 @@ const BannerSlider = () => {
         {renderDots(false)}
       </div>
 
-      {/* Desktop arrows only */}
-      <button
-        type="button"
-        onClick={prevSlide}
-        className="absolute left-0 top-1/2 z-30 hidden h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[#00AEEF] text-white shadow-lg transition-colors duration-300 hover:bg-[#FF6B00] hover:text-white md:flex"
-        aria-label="Previous banner"
-      >
-        <FaChevronLeft />
-      </button>
-
-      <button
-        type="button"
-        onClick={nextSlide}
-        className="absolute right-0 top-1/2 z-30 hidden h-10 w-10 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full bg-[#00AEEF] text-white shadow-lg transition-colors duration-300 hover:bg-[#FF6B00] hover:text-white md:flex"
-        aria-label="Next banner"
-      >
-        <FaChevronRight />
-      </button>
+      {/* Navigation handled via dots + autoplay only */}
     </div>
   )
 }
