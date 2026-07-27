@@ -130,7 +130,6 @@ const getLeadSubtitle = (lead = {}) => {
       lead.city,
       lead.destination,
       lead.travelDateText || formatShortDate(lead.travelDate),
-      lead.interestedIn,
     ]
       .filter(Boolean)
       .join(" • ")

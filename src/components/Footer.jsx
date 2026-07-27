@@ -257,15 +257,6 @@ const Footer = () => {
                 <div>
                   <p>TravelEx © 2026. All Rights Reserved.</p>
 
-                  <p className="mt-1">
-                    Powered by{" "}
-                    <a
-                      href="#"
-                      className="font-bold text-[#00AEEF] transition hover:text-[#FF6B00]"
-                    >
-                      The Order Of Pen (TOOP)
-                    </a>
-                  </p>
                 </div>
 
                 <div className="flex flex-wrap gap-x-4 gap-y-2">

@@ -230,7 +230,7 @@ const AdminContactInquiryDetailPage = () => {
       {
         icon: <FaEnvelope />,
         label: "Email Address",
-        value: inquiry.email,
+        value: inquiry.email || "Not provided",
       },
       {
         icon: <FaCalendarAlt />,
@@ -439,13 +439,15 @@ const AdminContactInquiryDetailPage = () => {
                 Call
               </a>
 
-              <a
-                href={`mailto:${inquiry.email || ""}`}
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-white/10 px-4 py-3 font-poppins text-sm font-semibold text-white backdrop-blur transition hover:bg-[#00AEEF]"
-              >
-                <FaEnvelope />
-                Email
-              </a>
+              {inquiry.email && (
+                <a
+                  href={`mailto:${inquiry.email}`}
+                  className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-white/10 px-4 py-3 font-poppins text-sm font-semibold text-white backdrop-blur transition hover:bg-[#00AEEF]"
+                >
+                  <FaEnvelope />
+                  Email
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -680,13 +682,15 @@ const AdminContactInquiryDetailPage = () => {
                 Call Customer
               </a>
 
-              <a
-                href={`mailto:${inquiry.email || ""}`}
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 bg-white px-4 py-3 font-poppins text-sm font-semibold text-slate-700 transition hover:border-[#00AEEF] hover:text-[#00AEEF]"
-              >
-                <FaEnvelope />
-                Send Email
-              </a>
+              {inquiry.email && (
+                <a
+                  href={`mailto:${inquiry.email}`}
+                  className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 bg-white px-4 py-3 font-poppins text-sm font-semibold text-slate-700 transition hover:border-[#00AEEF] hover:text-[#00AEEF]"
+                >
+                  <FaEnvelope />
+                  Send Email
+                </a>
+              )}
 
               <Link
                 to="/admin/contact-inquiries"

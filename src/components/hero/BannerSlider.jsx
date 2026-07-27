@@ -31,9 +31,9 @@ const updatedBannerData = [
 const mobileBannerText = {
   consultant: {
     eyebrow: "Travel Help",
-    before: "Plan",
-    highlight: "Trip",
-    after: "Easy",
+    before: "Explore The ",
+    highlight: "World",
+    // after: "Easy",
   },
   umrah: {
     eyebrow: "Umrah Packages",
@@ -43,15 +43,15 @@ const mobileBannerText = {
   },
   visa: {
     eyebrow: "Visa Assistance",
-    before: "Apply",
-    highlight: "Visa",
-    after: "Easy",
+    before: "Your",
+    highlight: "Visa,",
+    after: "Simplified",
   },
   tours: {
     eyebrow: "Custom Tours",
-    before: "Plan",
-    highlight: "Tours",
-    after: "Now",
+    before: "Where to",
+    highlight: "Next?",
+    // after: "Your Rules",
   },
 }
 
@@ -277,19 +277,19 @@ const BannerSlider = () => {
           key={`mobile-content-${activeIndex}`}
           className="banner-text-pop relative z-20 flex h-full max-w-[62%] flex-col justify-center px-4 pb-7 pt-4"
         >
-    <p
+  <p
   data-stagger
   style={stagger(1)}
-  className="hero-banner-eyebrow mb-1.5 whitespace-nowrap font-poppins text-[7.5px] font-semibold uppercase text-[#00AEEF]"
+  className="hero-banner-eyebrow mb-1.5 whitespace-nowrap font-poppins !text-[6.5px] font-semibold uppercase text-[#00AEEF]"
 >
   {mobileText.eyebrow}
 </p>
-          <h2
-            data-stagger
-            style={stagger(2)}
-            className="flex flex-nowrap items-center gap-1 font-fredoka text-[18px] font-semibold uppercase leading-none text-slate-950"
-          >
-            <span className="whitespace-nowrap">{mobileText.before}</span>
+         <h2
+  data-stagger
+  style={stagger(2)}
+  className="flex flex-nowrap items-center gap-1 font-fredoka !text-[18px] font-semibold uppercase leading-none text-slate-950"
+>
+                     <span className="whitespace-nowrap">{mobileText.before}</span>
 
             <span
               className="whitespace-nowrap rounded-[5px] bg-[#FF6B00] px-1.5 py-0.5 leading-none text-white shadow-sm"

@@ -2,6 +2,15 @@ import { useState } from "react"
 import { FaTimes } from "react-icons/fa"
 import { publicApi } from "../../services/publicApi"
 import AppSelect from "./AppSelect"
+import ChildAgeFields from "./ChildAgeFields"
+import VisaApplicantProfileFields from "./VisaApplicantProfileFields"
+import { isUnitedKingdomDestination } from "../../utils/visaDestination"
+import {
+  getChildAgesError,
+  getChildCount,
+  normalizeChildAges,
+  resizeChildAges,
+} from "../../utils/travelerForm"
 
 const initialForm = {
   name: "",
@@ -18,22 +27,28 @@ const initialForm = {
   durationOfStay: "",
   adults: "1",
   children: "0",
-  infants: "0",
+  childAges: [],
   numberOfApplicants: "1",
   packageRequired: "",
   hotelCategory: "",
   preferredHotel: "",
-  visaRequired: "",
   visaType: "",
-  interestedIn: "",
   preferredAirline: "",
   travelClass: "",
   traveledAbroadBefore: "",
+  countriesTraveled: "",
   visaRefusedBefore: "",
+  visaRefusalCountries: "",
   currentOccupation: "",
   monthlyIncome: "",
-  flightBookingAssistance: "",
-  hotelBookingAssistance: "",
+  yearlyIncome: "",
+  otherOccupation: "",
+  isSponsored: "",
+  sponsorIncomeSource: "",
+  numberOfFamilyMembers: "",
+  availableFundsForVisit: "",
+  hasFamilyOrFriendInUK: "",
+  willProvideInvitationLetter: "",
   budget: "",
   makkahNights: "0",
   madinahNights: "0",
@@ -50,11 +65,9 @@ const labelClass =
 const packageOptions = ["Economy", "Executive"]
 const hotelOptions = ["3 Star", "4 Star", "5 Star"]
 const yesNoOptions = ["Yes", "No"]
-const interestedInOptions = ["Group Tour", "Private Tour"]
 const classOptions = ["Economy", "Premium Economy", "Business", "First Class"]
 const visaTypeOptions = [
   "Tourist Visa",
-  "Visit Visa",
   "Business Visa",
   "Family Visit Visa",
   "Student Visa",
@@ -148,40 +161,38 @@ const Field = ({ label, children }) => (
   </div>
 )
 
-const NumberFields = ({ formData, handleChange }) => (
-  <div className="grid gap-4 sm:grid-cols-3">
-    <Field label="Adults">
-      <input
-        type="number"
-        name="adults"
-        min="1"
-        value={formData.adults}
-        onChange={handleChange}
-        className={inputClass}
-      />
-    </Field>
+const NumberFields = ({ formData, handleChange, handleChildAgeChange }) => (
+  <div className="grid gap-4">
+    <div className="grid gap-4 sm:grid-cols-2">
+      <Field label="Adults">
+        <input
+          type="number"
+          name="adults"
+          min="1"
+          value={formData.adults}
+          onChange={handleChange}
+          className={inputClass}
+        />
+      </Field>
 
-    <Field label="Children">
-      <input
-        type="number"
-        name="children"
-        min="0"
-        value={formData.children}
-        onChange={handleChange}
-        className={inputClass}
-      />
-    </Field>
+      <Field label="Children">
+        <input
+          type="number"
+          name="children"
+          min="0"
+          value={formData.children}
+          onChange={handleChange}
+          className={inputClass}
+        />
+      </Field>
+    </div>
 
-    <Field label="Infants">
-      <input
-        type="number"
-        name="infants"
-        min="0"
-        value={formData.infants}
-        onChange={handleChange}
-        className={inputClass}
-      />
-    </Field>
+    <ChildAgeFields
+      ages={formData.childAges}
+      onChange={handleChildAgeChange}
+      labelClass={labelClass}
+      inputClass={inputClass}
+    />
   </div>
 )
 
@@ -212,24 +223,85 @@ const LeadInquiryModal = ({
   const isUmrah = finalServiceType === "umrah"
   const isTour = finalServiceType === "tour"
   const isVisa = finalServiceType === "visa"
+  const isUkDestination =
+    isVisa && isUnitedKingdomDestination(formData.destinationCountry)
   const isTicket = finalServiceType === "ticket"
   const isGeneric = !isUmrah && !isTour && !isVisa && !isTicket
 
   const handleChange = (event) => {
     const { name, value } = event.target
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    setFormData((prev) => {
+      if (name === "children") {
+        return {
+          ...prev,
+          children: value,
+          childAges: resizeChildAges(prev.childAges, value),
+        }
+      }
+
+      const next = {
+        ...prev,
+        [name]: value,
+      }
+
+      if (
+        name === "destinationCountry" &&
+        !isUnitedKingdomDestination(value)
+      ) {
+        next.hasFamilyOrFriendInUK = ""
+        next.willProvideInvitationLetter = ""
+      }
+
+      return next
+    })
 
     setError("")
   }
 
   const handleSelectChange = (name, value) => {
+    setFormData((prev) => {
+      const next = {
+        ...prev,
+        [name]: value,
+      }
+
+      if (name === "traveledAbroadBefore" && value !== "Yes") {
+        next.countriesTraveled = ""
+      }
+
+      if (name === "visaRefusedBefore" && value !== "Yes") {
+        next.visaRefusalCountries = ""
+      }
+
+      if (name === "currentOccupation") {
+        next.monthlyIncome = ""
+        next.yearlyIncome = ""
+        next.otherOccupation = ""
+        next.isSponsored = ""
+        next.sponsorIncomeSource = ""
+      }
+
+      if (name === "isSponsored" && value !== "Yes") {
+        next.sponsorIncomeSource = ""
+      }
+
+      if (name === "hasFamilyOrFriendInUK" && value !== "Yes") {
+        next.willProvideInvitationLetter = ""
+      }
+
+      return next
+    })
+
+    setError("")
+  }
+
+  const handleChildAgeChange = (index, value) => {
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      childAges: prev.childAges.map((age, ageIndex) =>
+        ageIndex === index ? value : age
+      ),
     }))
 
     setError("")
@@ -245,7 +317,6 @@ const LeadInquiryModal = ({
   const validateForm = () => {
     if (!formData.name.trim()) return "Please enter your full name."
     if (!formData.phone.trim()) return "Please enter your mobile / WhatsApp number."
-    if (!formData.email.trim()) return "Please enter your email address."
 
     if (isUmrah) {
       if (!formData.city.trim()) return "Please enter your city."
@@ -254,7 +325,6 @@ const LeadInquiryModal = ({
       if (!formData.durationOfStay.trim()) return "Please enter duration of stay."
       if (!formData.packageRequired) return "Please select package required."
       if (!formData.hotelCategory) return "Please select hotel preference."
-      if (!formData.visaRequired) return "Please select whether visa is required."
     }
 
     if (isTour) {
@@ -263,7 +333,6 @@ const LeadInquiryModal = ({
       if (!formData.travelDate) return "Please select travel date."
       if (!formData.returnDate) return "Please select return date."
       if (!formData.hotelCategory) return "Please select hotel category."
-      if (!formData.interestedIn) return "Please select interested in."
     }
 
     if (isTicket) {
@@ -284,33 +353,86 @@ const LeadInquiryModal = ({
         return "Please enter number of applicants."
       }
       if (!formData.traveledAbroadBefore) return "Please select travel history."
+      if (formData.traveledAbroadBefore === "Yes" && !formData.countriesTraveled.trim()) {
+        return "Please list the countries you have traveled to."
+      }
       if (!formData.visaRefusedBefore) return "Please select visa refusal history."
-      if (!formData.currentOccupation.trim()) return "Please enter current occupation."
-      if (!formData.monthlyIncome.trim()) return "Please enter monthly income."
-      if (!formData.flightBookingAssistance) return "Please select flight booking assistance."
-      if (!formData.hotelBookingAssistance) return "Please select hotel booking assistance."
+      if (formData.visaRefusedBefore === "Yes" && !formData.visaRefusalCountries.trim()) {
+        return "Please list the countries where your visa was refused."
+      }
+      if (!formData.currentOccupation) return "Please select current occupation."
+      if (formData.currentOccupation === "Employment" && !formData.monthlyIncome.trim()) {
+        return "Please enter monthly income."
+      }
+      if (formData.currentOccupation === "Business" && !formData.yearlyIncome.trim()) {
+        return "Please enter yearly income."
+      }
+      if (formData.currentOccupation === "Others" && !formData.otherOccupation.trim()) {
+        return "Please specify your occupation."
+      }
+      if (
+        (formData.currentOccupation === "Student" || formData.currentOccupation === "Others") &&
+        !formData.isSponsored
+      ) {
+        return "Please select whether the applicant is sponsored."
+      }
+      if (formData.isSponsored === "Yes" && !formData.sponsorIncomeSource.trim()) {
+        return "Please enter the income source of the sponsor."
+      }
+      if (
+        formData.numberOfFamilyMembers === "" ||
+        Number(formData.numberOfFamilyMembers) < 0
+      ) {
+        return "Please enter the number of family members."
+      }
+      if (!formData.availableFundsForVisit.trim()) {
+        return "Please enter the available funds for the visit."
+      }
+      if (isUkDestination && !formData.hasFamilyOrFriendInUK) {
+        return "Please select whether you have family or a friend in the UK."
+      }
+      if (
+        isUkDestination &&
+        formData.hasFamilyOrFriendInUK === "Yes" &&
+        !formData.willProvideInvitationLetter
+      ) {
+        return "Please select whether they will provide an invitation letter."
+      }
     }
+
+    const childAgesError = getChildAgesError(
+      formData.childAges,
+      formData.children
+    )
+
+    if (childAgesError) return childAgesError
 
     return ""
   }
 
   const buildMessage = () => {
-    const travelers = `${getNumber(formData.adults, 1)} adult(s), ${getNumber(
-      formData.children,
-      0
-    )} child(ren), ${getNumber(formData.infants, 0)} infant(s)`
+    const childAges = normalizeChildAges(
+      formData.childAges,
+      formData.children
+    )
+    const travelers = `${getNumber(formData.adults, 1)} adult(s), ${getChildCount(
+      formData.children
+    )} child(ren)`
+    const childAgesLine = childAges.length
+      ? `Child Ages: ${childAges.join(", ")}`
+      : null
 
     const serviceMessages = {
       umrah: [
         "Umrah inquiry form",
         `City: ${formData.city}`,
         `Travelers: ${travelers}`,
+        childAgesLine,
         `Preferred Departure City: ${formData.departureCity}`,
         `Preferred Departure Date: ${formData.travelDate}`,
         `Duration of Stay: ${formData.durationOfStay}`,
         `Package Required: ${formData.packageRequired}`,
         `Hotel Preference: ${formData.hotelCategory}`,
-        `Visa Required: ${formData.visaRequired}`,
       ],
       tour: [
         "Tour package inquiry form",
@@ -319,8 +441,8 @@ const LeadInquiryModal = ({
         `Travel Date: ${formData.travelDate}`,
         `Return Date: ${formData.returnDate}`,
         `Travelers: ${travelers}`,
+        childAgesLine,
         `Hotel Category: ${formData.hotelCategory}`,
-        `Interested In: ${formData.interestedIn}`,
       ],
       ticket: [
         "Air ticket booking form",
@@ -329,6 +451,7 @@ const LeadInquiryModal = ({
         `Departure Date: ${formData.travelDate}`,
         `Return Date: ${formData.returnDate || "Not provided"}`,
         `Passengers: ${travelers}`,
+        childAgesLine,
         `Preferred Airline: ${formData.preferredAirline || "Not provided"}`,
         `Class: ${formData.travelClass}`,
       ],
@@ -342,11 +465,37 @@ const LeadInquiryModal = ({
         `Duration of Stay: ${formData.durationOfStay}`,
         `Number of Applicants: ${formData.numberOfApplicants}`,
         `Traveled Abroad Before: ${formData.traveledAbroadBefore}`,
+        formData.traveledAbroadBefore === "Yes"
+          ? `Countries Traveled: ${formData.countriesTraveled}`
+          : null,
         `Visa Refused Before: ${formData.visaRefusedBefore}`,
+        formData.visaRefusedBefore === "Yes"
+          ? `Countries Where Visa Was Refused: ${formData.visaRefusalCountries}`
+          : null,
         `Current Occupation: ${formData.currentOccupation}`,
-        `Monthly Income: ${formData.monthlyIncome}`,
-        `Flight Booking Assistance: ${formData.flightBookingAssistance}`,
-        `Hotel Booking Assistance: ${formData.hotelBookingAssistance}`,
+        formData.currentOccupation === "Employment"
+          ? `Monthly Income: ${formData.monthlyIncome}`
+          : null,
+        formData.currentOccupation === "Business"
+          ? `Yearly Income: ${formData.yearlyIncome}`
+          : null,
+        formData.currentOccupation === "Others"
+          ? `Occupation Details: ${formData.otherOccupation}`
+          : null,
+        formData.currentOccupation === "Student" || formData.currentOccupation === "Others"
+          ? `Sponsored: ${formData.isSponsored}`
+          : null,
+        formData.isSponsored === "Yes"
+          ? `Income Source of Sponsor: ${formData.sponsorIncomeSource}`
+          : null,
+        `Number of Family Members: ${formData.numberOfFamilyMembers}`,
+        `Available Funds for Visit: ${formData.availableFundsForVisit}`,
+        isUkDestination
+          ? `Family or Friend in the UK: ${formData.hasFamilyOrFriendInUK}`
+          : null,
+        isUkDestination && formData.hasFamilyOrFriendInUK === "Yes"
+          ? `Will Provide Invitation Letter: ${formData.willProvideInvitationLetter}`
+          : null,
       ],
       general: [
         "General inquiry",
@@ -354,6 +503,7 @@ const LeadInquiryModal = ({
         `Travel Date: ${formData.travelDate || "Not provided"}`,
         `Budget: ${formData.budget || "Not provided"}`,
         `Travelers: ${travelers}`,
+        childAgesLine,
       ],
     }
 
@@ -386,8 +536,11 @@ const LeadInquiryModal = ({
 
       const travelers = {
         adults: getNumber(formData.adults, 1),
-        children: getNumber(formData.children, 0),
-        infants: getNumber(formData.infants, 0),
+        children: getChildCount(formData.children),
+        childAges: normalizeChildAges(
+          formData.childAges,
+          formData.children
+        ),
       }
 
       const finalDestination = isTicket
@@ -419,17 +572,30 @@ const LeadInquiryModal = ({
         packageRequired: formData.packageRequired,
         hotelCategory: formData.hotelCategory,
         preferredHotel: formData.preferredHotel || formData.hotelCategory,
-        visaRequired: formData.visaRequired,
         visaType: formData.visaType,
-        interestedIn: formData.interestedIn,
         preferredAirline: formData.preferredAirline.trim(),
         travelClass: formData.travelClass,
         traveledAbroadBefore: formData.traveledAbroadBefore,
+        countriesTraveled: formData.countriesTraveled.trim(),
         visaRefusedBefore: formData.visaRefusedBefore,
-        currentOccupation: formData.currentOccupation.trim(),
+        visaRefusalCountries: formData.visaRefusalCountries.trim(),
+        currentOccupation: formData.currentOccupation,
         monthlyIncome: formData.monthlyIncome.trim(),
-        flightBookingAssistance: formData.flightBookingAssistance,
-        hotelBookingAssistance: formData.hotelBookingAssistance,
+        yearlyIncome: formData.yearlyIncome.trim(),
+        otherOccupation: formData.otherOccupation.trim(),
+        isSponsored: formData.isSponsored,
+        sponsorIncomeSource: formData.sponsorIncomeSource.trim(),
+        numberOfFamilyMembers:
+          formData.numberOfFamilyMembers === ""
+            ? undefined
+            : Number(formData.numberOfFamilyMembers),
+        availableFundsForVisit: formData.availableFundsForVisit.trim(),
+        hasFamilyOrFriendInUK: isUkDestination
+          ? formData.hasFamilyOrFriendInUK
+          : undefined,
+        willProvideInvitationLetter: isUkDestination
+          ? formData.willProvideInvitationLetter
+          : undefined,
         budget: formData.budget.trim(),
         makkahNights: isUmrah ? Number(formData.makkahNights) || 0 : 0,
         madinahNights: isUmrah ? Number(formData.madinahNights) || 0 : 0,
@@ -531,7 +697,7 @@ const LeadInquiryModal = ({
               />
             </Field>
 
-            <Field label="Email Address *">
+            <Field label="Email Address (Optional)">
               <input
                 type="email"
                 name="email"
@@ -558,7 +724,11 @@ const LeadInquiryModal = ({
 
           {isUmrah && (
             <>
-              <NumberFields formData={formData} handleChange={handleChange} />
+              <NumberFields
+                formData={formData}
+                handleChange={handleChange}
+                handleChildAgeChange={handleChildAgeChange}
+              />
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <Field label="Preferred Departure City *">
@@ -611,13 +781,6 @@ const LeadInquiryModal = ({
                   options={hotelOptions}
                 />
 
-                <AppSelect
-                  label="Visa Required? *"
-                  value={formData.visaRequired}
-                  onChange={(value) => handleSelectChange("visaRequired", value)}
-                  placeholder="Select option"
-                  options={yesNoOptions}
-                />
               </div>
             </>
           )}
@@ -657,25 +820,19 @@ const LeadInquiryModal = ({
                 </Field>
               </div>
 
-              <NumberFields formData={formData} handleChange={handleChange} />
+              <NumberFields
+                formData={formData}
+                handleChange={handleChange}
+                handleChildAgeChange={handleChildAgeChange}
+              />
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <AppSelect
-                  label="Hotel Category *"
-                  value={formData.hotelCategory}
-                  onChange={(value) => handleSelectChange("hotelCategory", value)}
-                  placeholder="Select hotel"
-                  options={hotelOptions}
-                />
-
-                <AppSelect
-                  label="Interested In *"
-                  value={formData.interestedIn}
-                  onChange={(value) => handleSelectChange("interestedIn", value)}
-                  placeholder="Select type"
-                  options={interestedInOptions}
-                />
-              </div>
+              <AppSelect
+                label="Hotel Category *"
+                value={formData.hotelCategory}
+                onChange={(value) => handleSelectChange("hotelCategory", value)}
+                placeholder="Select hotel"
+                options={hotelOptions}
+              />
             </>
           )}
 
@@ -727,7 +884,11 @@ const LeadInquiryModal = ({
                 </Field>
               </div>
 
-              <NumberFields formData={formData} handleChange={handleChange} />
+              <NumberFields
+                formData={formData}
+                handleChange={handleChange}
+                handleChildAgeChange={handleChildAgeChange}
+              />
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Preferred Airline">
@@ -838,47 +999,44 @@ const LeadInquiryModal = ({
                 />
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Current Occupation *">
-                  <input
-                    type="text"
-                    name="currentOccupation"
-                    value={formData.currentOccupation}
-                    onChange={handleChange}
-                    placeholder="Occupation"
-                    className={inputClass}
-                  />
-                </Field>
+              {(formData.traveledAbroadBefore === "Yes" ||
+                formData.visaRefusedBefore === "Yes") && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {formData.traveledAbroadBefore === "Yes" && (
+                    <Field label="Countries Traveled *">
+                      <input
+                        type="text"
+                        name="countriesTraveled"
+                        value={formData.countriesTraveled}
+                        onChange={handleChange}
+                        placeholder="Example: UAE, Saudi Arabia, Turkey"
+                        className={inputClass}
+                      />
+                    </Field>
+                  )}
 
-                <Field label="Monthly Income *">
-                  <input
-                    type="text"
-                    name="monthlyIncome"
-                    value={formData.monthlyIncome}
-                    onChange={handleChange}
-                    placeholder="Monthly income"
-                    className={inputClass}
-                  />
-                </Field>
-              </div>
+                  {formData.visaRefusedBefore === "Yes" && (
+                    <Field label="Countries Where Visa Was Refused *">
+                      <input
+                        type="text"
+                        name="visaRefusalCountries"
+                        value={formData.visaRefusalCountries}
+                        onChange={handleChange}
+                        placeholder="Example: UK, USA, Canada"
+                        className={inputClass}
+                      />
+                    </Field>
+                  )}
+                </div>
+              )}
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <AppSelect
-                  label="Flight Booking Assistance? *"
-                  value={formData.flightBookingAssistance}
-                  onChange={(value) => handleSelectChange("flightBookingAssistance", value)}
-                  placeholder="Select option"
-                  options={yesNoOptions}
-                />
-
-                <AppSelect
-                  label="Hotel Booking Assistance? *"
-                  value={formData.hotelBookingAssistance}
-                  onChange={(value) => handleSelectChange("hotelBookingAssistance", value)}
-                  placeholder="Select option"
-                  options={yesNoOptions}
-                />
-              </div>
+              <VisaApplicantProfileFields
+                formData={formData}
+                onChange={handleChange}
+                onSelectChange={handleSelectChange}
+                inputClass={inputClass}
+                labelClass={labelClass}
+              />
             </>
           )}
 
@@ -918,7 +1076,11 @@ const LeadInquiryModal = ({
                 </Field>
               </div>
 
-              <NumberFields formData={formData} handleChange={handleChange} />
+              <NumberFields
+                formData={formData}
+                handleChange={handleChange}
+                handleChildAgeChange={handleChildAgeChange}
+              />
             </>
           )}
 

@@ -10,11 +10,31 @@ import {
 
 import BannerSlider from "./BannerSlider"
 import ServiceSearchBar from "../ServiceSearchBar"
+import { umrahPackages } from "../../data/umrahPackagesData"
+
+/*
+|--------------------------------------------------------------------------
+| Same Umrah path as desktop ServiceSearchBar
+|--------------------------------------------------------------------------
+| Open 4th Umrah package = index 3.
+| If it does not exist, safely fall back to /umrah.
+*/
+const fourthUmrahPackage = umrahPackages?.[3]
+
+const umrahPackageId =
+  fourthUmrahPackage?.id ||
+  fourthUmrahPackage?._id ||
+  fourthUmrahPackage?.slug ||
+  ""
+
+const umrahPath = umrahPackageId
+  ? `/package/${encodeURIComponent(umrahPackageId)}`
+  : "/umrah"
 
 const mobileServices = [
   {
     title: "Umrah",
-    to: "/umrah",
+    to: umrahPath,
     icon: <FaKaaba />,
   },
   {
@@ -24,12 +44,12 @@ const mobileServices = [
   },
   {
     title: "Tours",
-    to: "/tours",
+    to: "/tours/custom-international-tour",
     icon: <FaGlobeAsia />,
   },
   {
     title: "Hotels",
-    to: "/hotels",
+    to: "/hotels/marriott-hotel",
     icon: <FaHotel />,
   },
   {
@@ -38,10 +58,10 @@ const mobileServices = [
     icon: <FaCar />,
   },
   {
-  title: "Tickets",
-  to: "/tickets",
-  icon: <FaTicketAlt />,
-},
+    title: "Tickets",
+    to: "/tickets",
+    icon: <FaTicketAlt />,
+  },
 ]
 
 const HeroV2 = () => {
@@ -107,8 +127,8 @@ const HeroV2 = () => {
               className="flex min-h-[72px] flex-col items-center justify-center rounded-[12px] border border-slate-100 bg-white px-2 py-2 text-center shadow-[0_8px_18px_rgba(11,42,74,0.07)] transition active:scale-[0.97]"
             >
               <span className="flex h-[32px] w-[32px] items-center justify-center text-[25px] text-[#FF6B00]">
-  {service.icon}
-</span>
+                {service.icon}
+              </span>
 
               <span className="mt-1.5 block font-poppins text-[10px] font-bold leading-tight text-slate-950">
                 {service.title}

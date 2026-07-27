@@ -30,7 +30,6 @@ const getTravelerCount = (lead = {}) => {
   return (
     getNumber(travelers.adults) +
     getNumber(travelers.children) +
-    getNumber(travelers.infants) +
     getNumber(lead.numberOfGuests) +
     getNumber(lead.numberOfApplicants) +
     getNumber(lead.passengerCount)

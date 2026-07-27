@@ -107,11 +107,6 @@ const ContactPage = () => {
       return
     }
 
-    if (!formData.email.trim()) {
-      setError("Please enter your email address.")
-      return
-    }
-
     if (!formData.phone.trim()) {
       setError("Please enter your phone or WhatsApp number.")
       return
@@ -278,7 +273,7 @@ ${formData.message.trim()}
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className={labelClass}>Email Address</label>
+                    <label className={labelClass}>Email Address (Optional)</label>
                     <input
                       type="email"
                       name="email"

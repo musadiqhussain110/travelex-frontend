@@ -14,9 +14,16 @@ import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
 import AppTimePicker from "../components/common/AppTimePicker"
+import ChildAgeFields from "../components/common/ChildAgeFields"
 import { publicApi } from "../services/publicApi"
 import { getLeadSource } from "../utils/leadSourceTracker"
 import carFormAsset from "../assets/Cars/car-form.png"
+import {
+  getChildAgesError,
+  getChildCount,
+  normalizeChildAges,
+  resizeChildAges,
+} from "../utils/travelerForm"
 
 const serviceRequiredOptions = [
   "Airport Pick-up",
@@ -50,7 +57,7 @@ const initialQuoteForm = {
 
   adults: "1",
   children: "0",
-  infants: "0",
+  childAges: [],
 
   checkedBags: "0",
   handCarryBags: "0",
@@ -92,10 +99,20 @@ const CarRentalPage = () => {
   const handleQuoteChange = (event) => {
     const { name, value } = event.target
 
-    setQuoteForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    setQuoteForm((prev) => {
+      if (name === "children") {
+        return {
+          ...prev,
+          children: value,
+          childAges: resizeChildAges(prev.childAges, value),
+        }
+      }
+
+      return {
+        ...prev,
+        [name]: value,
+      }
+    })
 
     setFormError("")
     setQuoteSent(false)
@@ -111,6 +128,18 @@ const CarRentalPage = () => {
     setQuoteSent(false)
   }
 
+  const handleChildAgeChange = (index, value) => {
+    setQuoteForm((prev) => ({
+      ...prev,
+      childAges: prev.childAges.map((age, ageIndex) =>
+        ageIndex === index ? value : age
+      ),
+    }))
+
+    setFormError("")
+    setQuoteSent(false)
+  }
+
   const resetFormState = () => {
     setQuoteForm(initialQuoteForm)
     setFormError("")
@@ -120,7 +149,6 @@ const CarRentalPage = () => {
     if (!quoteForm.fullName.trim()) return "Please enter your full name."
     if (!quoteForm.phone.trim())
       return "Please enter your mobile / WhatsApp number."
-    if (!quoteForm.email.trim()) return "Please enter your email address."
     if (!quoteForm.cityCountry.trim()) return "Please enter your city/country."
     if (!quoteForm.serviceRequired) return "Please select service required."
     if (!quoteForm.airline.trim()) return "Please enter airline name."
@@ -136,12 +164,17 @@ const CarRentalPage = () => {
       return "Please select vehicle preference."
 
     const adults = Number(quoteForm.adults) || 0
-    const children = Number(quoteForm.children) || 0
-    const infants = Number(quoteForm.infants) || 0
+    const children = getChildCount(quoteForm.children)
 
     if (adults < 1) return "Please enter at least 1 adult."
     if (children < 0) return "Children cannot be negative."
-    if (infants < 0) return "Infants cannot be negative."
+
+    const childAgesError = getChildAgesError(
+      quoteForm.childAges,
+      children
+    )
+
+    if (childAgesError) return childAgesError
 
     return ""
   }
@@ -162,9 +195,9 @@ const CarRentalPage = () => {
       setLoading(true)
 
       const adults = Math.max(1, Number(quoteForm.adults) || 1)
-      const children = Math.max(0, Number(quoteForm.children) || 0)
-      const infants = Math.max(0, Number(quoteForm.infants) || 0)
-      const passengerCount = adults + children + infants
+      const children = getChildCount(quoteForm.children)
+      const childAges = normalizeChildAges(quoteForm.childAges, children)
+      const passengerCount = adults + children
       const leadSource = getLeadSource()
 
       const luggageInfo = `Checked Bags: ${
@@ -177,7 +210,7 @@ const CarRentalPage = () => {
         "Personal Information",
         `Full Name: ${quoteForm.fullName}`,
         `Mobile / WhatsApp: ${quoteForm.phone}`,
-        `Email Address: ${quoteForm.email}`,
+        `Email Address: ${quoteForm.email || "Not provided"}`,
         `City/Country: ${quoteForm.cityCountry}`,
         "",
         "Service Required",
@@ -197,7 +230,7 @@ const CarRentalPage = () => {
         "Passengers",
         `Adults: ${adults}`,
         `Children: ${children}`,
-        `Infants: ${infants}`,
+        childAges.length ? `Child Ages: ${childAges.join(", ")}` : null,
         `Total Passengers: ${passengerCount}`,
         "",
         "Luggage Information",
@@ -208,7 +241,7 @@ const CarRentalPage = () => {
         quoteForm.additionalRequirements
           ? `Additional Requirements: ${quoteForm.additionalRequirements}`
           : "Additional Requirements: Not provided",
-      ].join("\n")
+      ].filter(Boolean).join("\n")
 
       const payload = {
         name: quoteForm.fullName.trim(),
@@ -241,7 +274,7 @@ const CarRentalPage = () => {
         travelers: {
           adults,
           children,
-          infants,
+          childAges,
         },
 
         additionalRequirements: quoteForm.additionalRequirements.trim(),
@@ -406,7 +439,7 @@ const CarRentalPage = () => {
                   </div>
 
                   <div>
-                    <label className={labelClass}>Email Address</label>
+                    <label className={labelClass}>Email Address (Optional)</label>
                     <div className="relative">
                       <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
                       <input
@@ -566,7 +599,7 @@ const CarRentalPage = () => {
                   Passengers
                 </h3>
 
-                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className={labelClass}>Adults</label>
                     <input
@@ -590,19 +623,15 @@ const CarRentalPage = () => {
                       className={inputClass}
                     />
                   </div>
-
-                  <div>
-                    <label className={labelClass}>Infants</label>
-                    <input
-                      type="number"
-                      name="infants"
-                      min="0"
-                      value={quoteForm.infants}
-                      onChange={handleQuoteChange}
-                      className={inputClass}
-                    />
-                  </div>
                 </div>
+
+                <ChildAgeFields
+                  ages={quoteForm.childAges}
+                  onChange={handleChildAgeChange}
+                  labelClass={labelClass}
+                  inputClass={inputClass}
+                  className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                />
               </div>
 
               {/* Luggage */}

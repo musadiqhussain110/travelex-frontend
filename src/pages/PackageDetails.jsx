@@ -15,12 +15,31 @@ import { umrahPackages as packages } from "../data/umrahPackagesData"
 import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
+import ChildAgeFields from "../components/common/ChildAgeFields"
 import { publicApi } from "../services/publicApi"
 import umrahFormAsset from "../assets/umrah/umrah-form.png"
+import {
+  getChildAgesError,
+  getChildCount,
+  normalizeChildAges,
+  resizeChildAges,
+} from "../utils/travelerForm"
 
-const packageOptions = ["Economy", "Executive"]
+const packageOptions = ["Economy", "Star"]
 const hotelPreferenceOptions = ["3 Star", "4 Star", "5 Star"]
-const yesNoOptions = ["Yes", "No"]
+const nightOptions = Array.from({ length: 30 }, (_, index) => String(index + 1))
+const airportOptions = [
+  "Islamabad — Islamabad International Airport",
+  "Lahore — Allama Iqbal International Airport",
+  "Karachi — Jinnah International Airport",
+  "Faisalabad — Faisalabad International Airport",
+  "Multan — Multan International Airport",
+  "Peshawar — Bacha Khan International Airport",
+  "Quetta — Quetta International Airport",
+  "Sialkot — Sialkot International Airport",
+  "Skardu — Skardu International Airport",
+  "Turbat — Turbat International Airport",
+]
 
 const labelClass =
   "mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs"
@@ -38,13 +57,14 @@ const initialForm = {
   city: "",
   adults: "1",
   children: "0",
-  infants: "0",
+  childAges: [],
   departureCity: "",
   departureDate: "",
   durationOfStay: "",
   packageRequired: "",
   hotelPreference: "",
-  visaRequired: "",
+  makkahNights: "",
+  madinahNights: "",
   additionalRequirements: "",
   companyWebsite: "",
 }
@@ -88,23 +108,60 @@ const PackageDetails = () => {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const isStarPackage = formData.packageRequired === "Star"
 
   const handleChange = (event) => {
     const { name, value } = event.target
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    setFormData((prev) => {
+      if (name === "children") {
+        const childCount = Math.max(0, Math.floor(Number(value) || 0))
+
+        return {
+          ...prev,
+          children: value,
+          childAges: resizeChildAges(prev.childAges, childCount),
+        }
+      }
+
+      return {
+        ...prev,
+        [name]: value,
+      }
+    })
 
     setError("")
     setSubmitted(false)
   }
 
   const handleSelectChange = (name, value) => {
+    setFormData((prev) => {
+      if (name === "packageRequired" && value !== "Star") {
+        return {
+          ...prev,
+          packageRequired: value,
+          hotelPreference: "",
+          makkahNights: "",
+          madinahNights: "",
+        }
+      }
+
+      return {
+        ...prev,
+        [name]: value,
+      }
+    })
+
+    setError("")
+    setSubmitted(false)
+  }
+
+  const handleChildAgeChange = (index, value) => {
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      childAges: prev.childAges.map((age, ageIndex) =>
+        ageIndex === index ? value : age
+      ),
     }))
 
     setError("")
@@ -126,18 +183,26 @@ const PackageDetails = () => {
       return
     }
 
-    if (!formData.email.trim()) {
-      setError("Please enter your email address.")
-      return
-    }
-
     if (!formData.city.trim()) {
       setError("Please enter your city.")
       return
     }
 
+    const childCount = getChildCount(formData.children)
+    const childAgesError = getChildAgesError(
+      formData.childAges,
+      childCount
+    )
+
+    if (childAgesError) {
+      setError(childAgesError)
+      return
+    }
+
+    const childAges = normalizeChildAges(formData.childAges, childCount)
+
     if (!formData.departureCity.trim()) {
-      setError("Please enter your preferred departure city.")
+      setError("Please select your preferred airport.")
       return
     }
 
@@ -156,23 +221,31 @@ const PackageDetails = () => {
       return
     }
 
-    if (!formData.hotelPreference) {
-      setError("Please select hotel preference.")
-      return
+    if (formData.packageRequired === "Star") {
+      if (!formData.hotelPreference) {
+        setError("Please select hotel preference for the Star package.")
+        return
+      }
+
+      if (getNumber(formData.makkahNights, 0) < 1) {
+        setError("Please select the number of nights in Makkah.")
+        return
+      }
+
+      if (getNumber(formData.madinahNights, 0) < 1) {
+        setError("Please select the number of nights in Madinah.")
+        return
+      }
     }
 
-    if (!formData.visaRequired) {
-      setError("Please select whether visa is required.")
-      return
-    }
 
     try {
       setLoading(true)
 
       const travelers = {
         adults: getNumber(formData.adults, 1),
-        children: getNumber(formData.children, 0),
-        infants: getNumber(formData.infants, 0),
+        children: childCount,
+        childAges,
       }
 
       const message = [
@@ -184,18 +257,23 @@ const PackageDetails = () => {
         `City: ${formData.city}`,
         `Adults: ${travelers.adults}`,
         `Children: ${travelers.children}`,
-        `Infants: ${travelers.infants}`,
-        `Preferred Departure City: ${formData.departureCity}`,
+        travelers.childAges.length
+          ? `Child Ages: ${travelers.childAges.join(", ")}`
+          : null,
+        `Preferred Airport: ${formData.departureCity}`,
         `Preferred Departure Date: ${formData.departureDate}`,
         `Duration of Stay: ${formData.durationOfStay}`,
         `Package Required: ${formData.packageRequired}`,
-        `Hotel Preference: ${formData.hotelPreference}`,
-        `Visa Required: ${formData.visaRequired}`,
+        isStarPackage
+          ? `Hotel Preference: ${formData.hotelPreference}`
+          : null,
+        isStarPackage ? `Nights in Makkah: ${formData.makkahNights}` : null,
+        isStarPackage ? `Nights in Madinah: ${formData.madinahNights}` : null,
         "",
         formData.additionalRequirements
           ? `Additional Requirements: ${formData.additionalRequirements}`
           : "Additional Requirements: Not provided",
-      ].join("\n")
+      ].filter(Boolean).join("\n")
 
       const payload = {
         name: formData.fullName.trim(),
@@ -214,9 +292,10 @@ const PackageDetails = () => {
         durationOfStay: formData.durationOfStay.trim(),
 
         packageRequired: formData.packageRequired,
-        hotelCategory: formData.hotelPreference,
-        preferredHotel: formData.hotelPreference,
-        visaRequired: formData.visaRequired,
+        hotelCategory: isStarPackage ? formData.hotelPreference : "",
+        preferredHotel: isStarPackage ? formData.hotelPreference : "",
+        makkahNights: isStarPackage ? getNumber(formData.makkahNights, 0) : 0,
+        madinahNights: isStarPackage ? getNumber(formData.madinahNights, 0) : 0,
 
         travelers,
         budget: pkg.price || "",
@@ -432,16 +511,15 @@ const PackageDetails = () => {
               )}
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className={labelClass}>Selected Package</label>
-
-                  <input
-                    type="text"
-                    value={pkg.title}
-                    readOnly
-                    className={`${inputClass} cursor-not-allowed bg-slate-50 text-slate-500`}
-                  />
-                </div>
+                <AppSelect
+                  label="Package Required *"
+                  value={formData.packageRequired}
+                  onChange={(value) =>
+                    handleSelectChange("packageRequired", value)
+                  }
+                  placeholder="Select package"
+                  options={packageOptions}
+                />
 
                 <div>
                   <label className={labelClass}>Full Name *</label>
@@ -480,7 +558,7 @@ const PackageDetails = () => {
                 </div>
 
                 <div>
-                  <label className={labelClass}>Email Address *</label>
+                  <label className={labelClass}>Email Address (Optional)</label>
 
                   <div className="relative">
                     <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
@@ -514,7 +592,7 @@ const PackageDetails = () => {
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className={labelClass}>Number of Adults *</label>
 
@@ -540,36 +618,25 @@ const PackageDetails = () => {
                     className={inputClass}
                   />
                 </div>
-
-                <div>
-                  <label className={labelClass}>Number of Infants</label>
-
-                  <input
-                    type="number"
-                    name="infants"
-                    min="0"
-                    value={formData.infants}
-                    onChange={handleChange}
-                    className={inputClass}
-                  />
-                </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div>
-                  <label className={labelClass}>
-                    Preferred Departure City *
-                  </label>
+              <ChildAgeFields
+                ages={formData.childAges}
+                onChange={handleChildAgeChange}
+                labelClass={labelClass}
+                inputClass={inputClass}
+              />
 
-                  <input
-                    type="text"
-                    name="departureCity"
-                    value={formData.departureCity}
-                    onChange={handleChange}
-                    placeholder="Karachi, Lahore, Islamabad..."
-                    className={inputClass}
-                  />
-                </div>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <AppSelect
+                  label="Preferred Airport *"
+                  value={formData.departureCity}
+                  onChange={(value) =>
+                    handleSelectChange("departureCity", value)
+                  }
+                  placeholder="Select preferred airport"
+                  options={airportOptions}
+                />
 
                 <AppDatePicker
                   label="Preferred Departure Date *"
@@ -594,37 +661,40 @@ const PackageDetails = () => {
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-3">
-                <AppSelect
-                  label="Package Required *"
-                  value={formData.packageRequired}
-                  onChange={(value) =>
-                    handleSelectChange("packageRequired", value)
-                  }
-                  placeholder="Select package"
-                  options={packageOptions}
-                />
+              {isStarPackage && (
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <AppSelect
+                    label="Hotel Preference *"
+                    value={formData.hotelPreference}
+                    onChange={(value) =>
+                      handleSelectChange("hotelPreference", value)
+                    }
+                    placeholder="Select hotel"
+                    options={hotelPreferenceOptions}
+                  />
 
-                <AppSelect
-                  label="Hotel Preference *"
-                  value={formData.hotelPreference}
-                  onChange={(value) =>
-                    handleSelectChange("hotelPreference", value)
-                  }
-                  placeholder="Select hotel"
-                  options={hotelPreferenceOptions}
-                />
+                  <AppSelect
+                    label="Nights in Makkah *"
+                    value={formData.makkahNights}
+                    onChange={(value) =>
+                      handleSelectChange("makkahNights", value)
+                    }
+                    placeholder="Select nights"
+                    options={nightOptions}
+                  />
 
-                <AppSelect
-                  label="Visa Required? *"
-                  value={formData.visaRequired}
-                  onChange={(value) =>
-                    handleSelectChange("visaRequired", value)
-                  }
-                  placeholder="Select option"
-                  options={yesNoOptions}
-                />
-              </div>
+                  <AppSelect
+                    label="Nights in Madinah *"
+                    value={formData.madinahNights}
+                    onChange={(value) =>
+                      handleSelectChange("madinahNights", value)
+                    }
+                    placeholder="Select nights"
+                    options={nightOptions}
+                  />
+                </div>
+              )}
+
 
               <div>
                 <label className={labelClass}>Additional Requirements</label>

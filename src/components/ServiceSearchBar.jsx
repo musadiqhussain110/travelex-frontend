@@ -41,7 +41,7 @@ const services = [
   {
     name: "Visa Assistance",
     icon: <FaPassport />,
-    path: "/visa-application",
+    path: "/visa",
     buttonLabel: "Apply for Visa Assistance",
   },
   {

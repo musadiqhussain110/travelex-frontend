@@ -15,11 +15,17 @@ import {
 import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
+import ChildAgeFields from "../components/common/ChildAgeFields"
 import { tours } from "../data/tours"
 import { publicApi } from "../services/publicApi"
+import {
+  getChildAgesError,
+  getChildCount,
+  normalizeChildAges,
+  resizeChildAges,
+} from "../utils/travelerForm"
 
 const hotelCategoryOptions = ["3 Star", "4 Star", "5 Star"]
-const interestedInOptions = ["Group Tour", "Private Tour"]
 
 const labelClass =
   "mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs"
@@ -40,9 +46,8 @@ const initialForm = {
   returnDate: "",
   adults: "1",
   children: "0",
-  infants: "0",
+  childAges: [],
   hotelCategory: "",
-  interestedIn: "",
   additionalRequirements: "",
   companyWebsite: "",
 }
@@ -74,10 +79,20 @@ const TourBookingPage = () => {
   const handleChange = (event) => {
     const { name, value } = event.target
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    setFormData((prev) => {
+      if (name === "children") {
+        return {
+          ...prev,
+          children: value,
+          childAges: resizeChildAges(prev.childAges, value),
+        }
+      }
+
+      return {
+        ...prev,
+        [name]: value,
+      }
+    })
 
     setError("")
   }
@@ -91,6 +106,18 @@ const TourBookingPage = () => {
     setError("")
   }
 
+  const handleChildAgeChange = (index, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      childAges: prev.childAges.map((age, ageIndex) =>
+        ageIndex === index ? value : age
+      ),
+    }))
+
+    setError("")
+    setSubmitted(false)
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
     setError("")
@@ -102,11 +129,6 @@ const TourBookingPage = () => {
 
     if (!formData.phone.trim()) {
       setError("Please enter your mobile / WhatsApp number.")
-      return
-    }
-
-    if (!formData.email.trim()) {
-      setError("Please enter your email address.")
       return
     }
 
@@ -135,18 +157,23 @@ const TourBookingPage = () => {
       return
     }
 
-    if (!formData.interestedIn) {
-      setError("Please select whether you are interested in group or private tour.")
+    const childCount = getChildCount(formData.children)
+    const childAgesError = getChildAgesError(formData.childAges, childCount)
+
+    if (childAgesError) {
+      setError(childAgesError)
       return
     }
+
+    const childAges = normalizeChildAges(formData.childAges, childCount)
 
     try {
       setLoading(true)
 
       const travelers = {
         adults: getNumber(formData.adults, 1),
-        children: getNumber(formData.children, 0),
-        infants: getNumber(formData.infants, 0),
+        children: childCount,
+        childAges,
       }
 
       const message = [
@@ -162,14 +189,15 @@ const TourBookingPage = () => {
         `Return Date: ${formData.returnDate}`,
         `Adults: ${travelers.adults}`,
         `Children: ${travelers.children}`,
-        `Infants: ${travelers.infants}`,
+        travelers.childAges.length
+          ? `Child Ages: ${travelers.childAges.join(", ")}`
+          : null,
         `Hotel Category: ${formData.hotelCategory}`,
-        `Interested In: ${formData.interestedIn}`,
         "",
         formData.additionalRequirements
           ? `Additional Requirements: ${formData.additionalRequirements}`
           : "Additional Requirements: Not provided",
-      ].join("\n")
+      ].filter(Boolean).join("\n")
 
       const payload = {
         name: formData.fullName.trim(),
@@ -185,7 +213,6 @@ const TourBookingPage = () => {
         travelers,
         hotelCategory: formData.hotelCategory,
         preferredHotel: formData.hotelCategory,
-        interestedIn: formData.interestedIn,
         budget: tour.price || "",
         additionalRequirements: formData.additionalRequirements.trim(),
         message,
@@ -397,7 +424,7 @@ const TourBookingPage = () => {
                   </div>
 
                   <div>
-                    <label className={labelClass}>Email Address *</label>
+                    <label className={labelClass}>Email Address (Optional)</label>
                     <div className="relative">
                       <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
                       <input
@@ -455,7 +482,7 @@ const TourBookingPage = () => {
                   />
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className={labelClass}>Number of Adults *</label>
                     <input type="number" name="adults" min="1" value={formData.adults} onChange={handleChange} className={inputClass} />
@@ -465,30 +492,22 @@ const TourBookingPage = () => {
                     <label className={labelClass}>Number of Children</label>
                     <input type="number" name="children" min="0" value={formData.children} onChange={handleChange} className={inputClass} />
                   </div>
-
-                  <div>
-                    <label className={labelClass}>Number of Infants</label>
-                    <input type="number" name="infants" min="0" value={formData.infants} onChange={handleChange} className={inputClass} />
-                  </div>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <AppSelect
-                    label="Hotel Category *"
-                    value={formData.hotelCategory}
-                    onChange={(value) => handleSelectChange("hotelCategory", value)}
-                    placeholder="Select hotel category"
-                    options={hotelCategoryOptions}
-                  />
+                <ChildAgeFields
+                  ages={formData.childAges}
+                  onChange={handleChildAgeChange}
+                  labelClass={labelClass}
+                  inputClass={inputClass}
+                />
 
-                  <AppSelect
-                    label="Interested In *"
-                    value={formData.interestedIn}
-                    onChange={(value) => handleSelectChange("interestedIn", value)}
-                    placeholder="Select tour type"
-                    options={interestedInOptions}
-                  />
-                </div>
+                <AppSelect
+                  label="Hotel Category *"
+                  value={formData.hotelCategory}
+                  onChange={(value) => handleSelectChange("hotelCategory", value)}
+                  placeholder="Select hotel category"
+                  options={hotelCategoryOptions}
+                />
 
                 <div>
                   <label className={labelClass}>Additional Requirements</label>

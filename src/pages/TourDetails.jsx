@@ -15,12 +15,18 @@ import { tours } from "../data/tours"
 import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
+import ChildAgeFields from "../components/common/ChildAgeFields"
 import { publicApi } from "../services/publicApi"
 import { getLeadSource } from "../utils/leadSourceTracker"
 import tourFormAsset from "../assets/tours/tour-form.png"
+import {
+  getChildAgesError,
+  getChildCount,
+  normalizeChildAges,
+  resizeChildAges,
+} from "../utils/travelerForm"
 
 const hotelCategoryOptions = ["3 Star", "4 Star", "5 Star"]
-const interestedInOptions = ["Group Tour", "Private Tour"]
 
 const labelClass =
   "mb-1.5 block font-poppins text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 sm:mb-2 sm:text-xs"
@@ -41,9 +47,8 @@ const initialForm = {
   returnDate: "",
   adults: "1",
   children: "0",
-  infants: "0",
+  childAges: [],
   hotelCategory: "",
-  interestedIn: "",
   additionalRequirements: "",
   companyWebsite: "",
 }
@@ -91,10 +96,20 @@ const TourDetails = () => {
   const handleChange = (event) => {
     const { name, value } = event.target
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    setFormData((prev) => {
+      if (name === "children") {
+        return {
+          ...prev,
+          children: value,
+          childAges: resizeChildAges(prev.childAges, value),
+        }
+      }
+
+      return {
+        ...prev,
+        [name]: value,
+      }
+    })
 
     setError("")
     setSubmitted(false)
@@ -104,6 +119,18 @@ const TourDetails = () => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }))
+
+    setError("")
+    setSubmitted(false)
+  }
+
+  const handleChildAgeChange = (index, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      childAges: prev.childAges.map((age, ageIndex) =>
+        ageIndex === index ? value : age
+      ),
     }))
 
     setError("")
@@ -122,11 +149,6 @@ const TourDetails = () => {
 
     if (!formData.phone.trim()) {
       setError("Please enter your mobile / WhatsApp number.")
-      return
-    }
-
-    if (!formData.email.trim()) {
-      setError("Please enter your email address.")
       return
     }
 
@@ -155,18 +177,23 @@ const TourDetails = () => {
       return
     }
 
-    if (!formData.interestedIn) {
-      setError("Please select whether you are interested in group or private tour.")
+    const childCount = getChildCount(formData.children)
+    const childAgesError = getChildAgesError(formData.childAges, childCount)
+
+    if (childAgesError) {
+      setError(childAgesError)
       return
     }
+
+    const childAges = normalizeChildAges(formData.childAges, childCount)
 
     try {
       setLoading(true)
 
       const travelers = {
         adults: getNumber(formData.adults, 1),
-        children: getNumber(formData.children, 0),
-        infants: getNumber(formData.infants, 0),
+        children: childCount,
+        childAges,
       }
 
       const leadSource = getLeadSource()
@@ -184,14 +211,15 @@ const TourDetails = () => {
         `Return Date: ${formData.returnDate}`,
         `Adults: ${travelers.adults}`,
         `Children: ${travelers.children}`,
-        `Infants: ${travelers.infants}`,
+        travelers.childAges.length
+          ? `Child Ages: ${travelers.childAges.join(", ")}`
+          : null,
         `Hotel Category: ${formData.hotelCategory}`,
-        `Interested In: ${formData.interestedIn}`,
         "",
         formData.additionalRequirements
           ? `Additional Requirements: ${formData.additionalRequirements}`
           : "Additional Requirements: Not provided",
-      ].join("\n")
+      ].filter(Boolean).join("\n")
 
       const payload = {
         name: formData.fullName.trim(),
@@ -213,7 +241,6 @@ const TourDetails = () => {
 
         hotelCategory: formData.hotelCategory,
         preferredHotel: formData.hotelCategory,
-        interestedIn: formData.interestedIn,
 
         budget: tour.price || "",
 
@@ -347,14 +374,15 @@ const TourDetails = () => {
                   className="font-fredoka font-semibold uppercase leading-[1.05] text-slate-950"
                 >
                   {/* Mobile heading */}
-                  <span className="flex flex-nowrap items-center justify-start gap-[3px] whitespace-nowrap text-[14px] tracking-[-0.05em] sm:hidden">
-                    <span className="whitespace-nowrap">Tours Made</span>
+                  <span className="flex flex-nowrap items-center justify-start gap-[3px] whitespace-nowrap text-[20px] tracking-[-0.05em] sm:hidden">
+                    <span className="whitespace-nowrap">Explore More,</span>
                     <span
                       className="whitespace-nowrap rounded-[3px] bg-[#FF6B00] px-1.5 py-0.5 leading-none tracking-[-0.04em] text-white shadow-sm"
                       style={{ animation: "bannerStampIn 0.9s ease-out 0.3s both" }}
                     >
-                      Easy
+                      Worry
                     </span>
+                    <span className="whitespace-nowrap">Less</span>
                   </span>
 
                   {/* Desktop heading */}
@@ -497,7 +525,7 @@ const TourDetails = () => {
                 </div>
 
                 <div>
-                  <label className={labelClass}>Email Address *</label>
+                  <label className={labelClass}>Email Address (Optional)</label>
 
                   <div className="relative">
                     <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
@@ -560,7 +588,7 @@ const TourDetails = () => {
                 />
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className={labelClass}>Number of Adults *</label>
 
@@ -586,42 +614,24 @@ const TourDetails = () => {
                     className={inputClass}
                   />
                 </div>
-
-                <div>
-                  <label className={labelClass}>Number of Infants</label>
-
-                  <input
-                    type="number"
-                    name="infants"
-                    min="0"
-                    value={formData.infants}
-                    onChange={handleChange}
-                    className={inputClass}
-                  />
-                </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <AppSelect
-                  label="Hotel Category *"
-                  value={formData.hotelCategory}
-                  onChange={(value) =>
-                    handleSelectChange("hotelCategory", value)
-                  }
-                  placeholder="Select hotel category"
-                  options={hotelCategoryOptions}
-                />
+              <ChildAgeFields
+                ages={formData.childAges}
+                onChange={handleChildAgeChange}
+                labelClass={labelClass}
+                inputClass={inputClass}
+              />
 
-                <AppSelect
-                  label="Interested In *"
-                  value={formData.interestedIn}
-                  onChange={(value) =>
-                    handleSelectChange("interestedIn", value)
-                  }
-                  placeholder="Select tour type"
-                  options={interestedInOptions}
-                />
-              </div>
+              <AppSelect
+                label="Hotel Category *"
+                value={formData.hotelCategory}
+                onChange={(value) =>
+                  handleSelectChange("hotelCategory", value)
+                }
+                placeholder="Select hotel category"
+                options={hotelCategoryOptions}
+              />
 
               <div>
                 <label className={labelClass}>Additional Requirements</label>

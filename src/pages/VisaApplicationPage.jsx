@@ -15,6 +15,8 @@ import {
 import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
+import VisaApplicantProfileFields from "../components/common/VisaApplicantProfileFields"
+import { isUnitedKingdomDestination } from "../utils/visaDestination"
 import { publicApi } from "../services/publicApi"
 import { getLeadSource } from "../utils/leadSourceTracker"
 import visaFormAsset from "../assets/visa/visa-form.png"
@@ -23,7 +25,6 @@ const whatsappNumber = "923111444192"
 
 const defaultVisaTypes = [
   "Tourist Visa",
-  "Visit Visa",
   "Business Visa",
   "Family Visit Visa",
   "Student Visa",
@@ -62,11 +63,19 @@ const VisaApplicationPage = () => {
     durationOfStay: "",
     numberOfApplicants: "1",
     traveledAbroadBefore: "",
+    countriesTraveled: "",
     visaRefusedBefore: "",
+    visaRefusalCountries: "",
     currentOccupation: "",
     monthlyIncome: "",
-    flightBookingAssistance: "",
-    hotelBookingAssistance: "",
+    yearlyIncome: "",
+    otherOccupation: "",
+    isSponsored: "",
+    sponsorIncomeSource: "",
+    numberOfFamilyMembers: "",
+    availableFundsForVisit: "",
+    hasFamilyOrFriendInUK: "",
+    willProvideInvitationLetter: "",
     additionalRequirements: "",
     companyWebsite: "",
   })
@@ -74,13 +83,24 @@ const VisaApplicationPage = () => {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const isUkDestination = isUnitedKingdomDestination(formData.destinationCountry)
 
   const handleChange = (event) => {
     const name = event.target.name
     const value = event.target.value
 
     setFormData(function (prev) {
-      return Object.assign({}, prev, { [name]: value })
+      const next = Object.assign({}, prev, { [name]: value })
+
+      if (
+        name === "destinationCountry" &&
+        !isUnitedKingdomDestination(value)
+      ) {
+        next.hasFamilyOrFriendInUK = ""
+        next.willProvideInvitationLetter = ""
+      }
+
+      return next
     })
 
     setError("")
@@ -88,7 +108,33 @@ const VisaApplicationPage = () => {
 
   const handleSelectChange = (name, value) => {
     setFormData(function (prev) {
-      return Object.assign({}, prev, { [name]: value })
+      const next = Object.assign({}, prev, { [name]: value })
+
+      if (name === "traveledAbroadBefore" && value !== "Yes") {
+        next.countriesTraveled = ""
+      }
+
+      if (name === "visaRefusedBefore" && value !== "Yes") {
+        next.visaRefusalCountries = ""
+      }
+
+      if (name === "currentOccupation") {
+        next.monthlyIncome = ""
+        next.yearlyIncome = ""
+        next.otherOccupation = ""
+        next.isSponsored = ""
+        next.sponsorIncomeSource = ""
+      }
+
+      if (name === "isSponsored" && value !== "Yes") {
+        next.sponsorIncomeSource = ""
+      }
+
+      if (name === "hasFamilyOrFriendInUK" && value !== "Yes") {
+        next.willProvideInvitationLetter = ""
+      }
+
+      return next
     })
 
     setError("")
@@ -111,17 +157,43 @@ const VisaApplicationPage = () => {
       "Duration of Stay: " + (formData.durationOfStay || "Not provided"),
       "Number of Applicants: " + formData.numberOfApplicants,
       "Traveled Abroad Before: " + (formData.traveledAbroadBefore || "Not selected"),
+      formData.traveledAbroadBefore === "Yes"
+        ? "Countries Traveled: " + formData.countriesTraveled
+        : null,
       "Visa Refused Before: " + (formData.visaRefusedBefore || "Not selected"),
+      formData.visaRefusedBefore === "Yes"
+        ? "Countries Where Visa Was Refused: " + formData.visaRefusalCountries
+        : null,
       "Current Occupation: " + (formData.currentOccupation || "Not provided"),
-      "Monthly Income: " + (formData.monthlyIncome || "Not provided"),
-      "Flight Booking Assistance: " + (formData.flightBookingAssistance || "Not selected"),
-      "Hotel Booking Assistance: " + (formData.hotelBookingAssistance || "Not selected"),
+      formData.currentOccupation === "Employment"
+        ? "Monthly Income: " + formData.monthlyIncome
+        : null,
+      formData.currentOccupation === "Business"
+        ? "Yearly Income: " + formData.yearlyIncome
+        : null,
+      formData.currentOccupation === "Others"
+        ? "Occupation Details: " + formData.otherOccupation
+        : null,
+      formData.currentOccupation === "Student" || formData.currentOccupation === "Others"
+        ? "Sponsored: " + formData.isSponsored
+        : null,
+      formData.isSponsored === "Yes"
+        ? "Income Source of Sponsor: " + formData.sponsorIncomeSource
+        : null,
+      "Number of Family Members: " + formData.numberOfFamilyMembers,
+      "Available Funds for Visit: " + formData.availableFundsForVisit,
+      isUkDestination
+        ? "Family or Friend in the UK: " + formData.hasFamilyOrFriendInUK
+        : null,
+      isUkDestination && formData.hasFamilyOrFriendInUK === "Yes"
+        ? "Will Provide Invitation Letter: " + formData.willProvideInvitationLetter
+        : null,
       "",
       "Additional Information / Requirements:",
       formData.additionalRequirements || "No additional information",
     ]
 
-    const message = lines.join("\n")
+    const message = lines.filter(Boolean).join("\n")
 
     return "https://wa.me/" + whatsappNumber + "?text=" + encodeURIComponent(message)
   }
@@ -137,11 +209,6 @@ const VisaApplicationPage = () => {
 
     if (!formData.phone.trim()) {
       setError("Please enter your mobile / WhatsApp number.")
-      return
-    }
-
-    if (!formData.email.trim()) {
-      setError("Please enter your email address.")
       return
     }
 
@@ -185,28 +252,78 @@ const VisaApplicationPage = () => {
       return
     }
 
+    if (formData.traveledAbroadBefore === "Yes" && !formData.countriesTraveled.trim()) {
+      setError("Please list the countries you have traveled to.")
+      return
+    }
+
     if (!formData.visaRefusedBefore) {
       setError("Please select whether you have been refused a visa before.")
       return
     }
 
-    if (!formData.currentOccupation.trim()) {
-      setError("Please enter current occupation.")
+    if (formData.visaRefusedBefore === "Yes" && !formData.visaRefusalCountries.trim()) {
+      setError("Please list the countries where your visa was refused.")
       return
     }
 
-    if (!formData.monthlyIncome.trim()) {
+    if (!formData.currentOccupation) {
+      setError("Please select current occupation.")
+      return
+    }
+
+    if (formData.currentOccupation === "Employment" && !formData.monthlyIncome.trim()) {
       setError("Please enter monthly income.")
       return
     }
 
-    if (!formData.flightBookingAssistance) {
-      setError("Please select whether you require flight booking assistance.")
+    if (formData.currentOccupation === "Business" && !formData.yearlyIncome.trim()) {
+      setError("Please enter yearly income.")
       return
     }
 
-    if (!formData.hotelBookingAssistance) {
-      setError("Please select whether you require hotel booking assistance.")
+    if (formData.currentOccupation === "Others" && !formData.otherOccupation.trim()) {
+      setError("Please specify your occupation.")
+      return
+    }
+
+    if (
+      (formData.currentOccupation === "Student" || formData.currentOccupation === "Others") &&
+      !formData.isSponsored
+    ) {
+      setError("Please select whether the applicant is sponsored.")
+      return
+    }
+
+    if (formData.isSponsored === "Yes" && !formData.sponsorIncomeSource.trim()) {
+      setError("Please enter the income source of the sponsor.")
+      return
+    }
+
+    if (
+      formData.numberOfFamilyMembers === "" ||
+      Number(formData.numberOfFamilyMembers) < 0
+    ) {
+      setError("Please enter the number of family members.")
+      return
+    }
+
+    if (!formData.availableFundsForVisit.trim()) {
+      setError("Please enter the available funds for the visit.")
+      return
+    }
+
+    if (isUkDestination && !formData.hasFamilyOrFriendInUK) {
+      setError("Please select whether you have family or a friend in the UK.")
+      return
+    }
+
+    if (
+      isUkDestination &&
+      formData.hasFamilyOrFriendInUK === "Yes" &&
+      !formData.willProvideInvitationLetter
+    ) {
+      setError("Please select whether they will provide an invitation letter.")
       return
     }
 
@@ -221,7 +338,7 @@ const VisaApplicationPage = () => {
         "",
         "Full Name: " + formData.fullName,
         "Mobile / WhatsApp: " + formData.phone,
-        "Email Address: " + formData.email,
+        "Email Address: " + (formData.email || "Not provided"),
         "City: " + formData.city,
         "Nationality: " + formData.nationality,
         "Destination Country: " + formData.destinationCountry,
@@ -230,18 +347,44 @@ const VisaApplicationPage = () => {
         "Duration of Stay: " + formData.durationOfStay,
         "Number of Applicants: " + applicants,
         "Have You Traveled Abroad Before?: " + formData.traveledAbroadBefore,
+        formData.traveledAbroadBefore === "Yes"
+          ? "Countries Traveled: " + formData.countriesTraveled
+          : null,
         "Have You Been Refused a Visa Before?: " + formData.visaRefusedBefore,
+        formData.visaRefusedBefore === "Yes"
+          ? "Countries Where Visa Was Refused: " + formData.visaRefusalCountries
+          : null,
         "Current Occupation: " + formData.currentOccupation,
-        "Monthly Income: " + formData.monthlyIncome,
-        "Do You Require Flight Booking Assistance?: " + formData.flightBookingAssistance,
-        "Do You Require Hotel Booking Assistance?: " + formData.hotelBookingAssistance,
+        formData.currentOccupation === "Employment"
+          ? "Monthly Income: " + formData.monthlyIncome
+          : null,
+        formData.currentOccupation === "Business"
+          ? "Yearly Income: " + formData.yearlyIncome
+          : null,
+        formData.currentOccupation === "Others"
+          ? "Occupation Details: " + formData.otherOccupation
+          : null,
+        formData.currentOccupation === "Student" || formData.currentOccupation === "Others"
+          ? "Sponsored: " + formData.isSponsored
+          : null,
+        formData.isSponsored === "Yes"
+          ? "Income Source of Sponsor: " + formData.sponsorIncomeSource
+          : null,
+        "Number of Family Members: " + formData.numberOfFamilyMembers,
+        "Available Funds for Visit: " + formData.availableFundsForVisit,
+        isUkDestination
+          ? "Family or Friend in the UK: " + formData.hasFamilyOrFriendInUK
+          : null,
+        isUkDestination && formData.hasFamilyOrFriendInUK === "Yes"
+          ? "Will Provide Invitation Letter: " + formData.willProvideInvitationLetter
+          : null,
         "",
         formData.additionalRequirements
           ? "Additional Information / Requirements: " + formData.additionalRequirements
           : "Additional Information / Requirements: Not provided",
       ]
 
-      const message = messageLines.join("\n")
+      const message = messageLines.filter(Boolean).join("\n")
 
       const payload = {
         name: formData.fullName.trim(),
@@ -266,15 +409,27 @@ const VisaApplicationPage = () => {
         travelers: {
           adults: applicants,
           children: 0,
-          infants: 0,
+          childAges: [],
         },
 
         traveledAbroadBefore: formData.traveledAbroadBefore,
+        countriesTraveled: formData.countriesTraveled.trim(),
         visaRefusedBefore: formData.visaRefusedBefore,
-        currentOccupation: formData.currentOccupation.trim(),
+        visaRefusalCountries: formData.visaRefusalCountries.trim(),
+        currentOccupation: formData.currentOccupation,
         monthlyIncome: formData.monthlyIncome.trim(),
-        flightBookingAssistance: formData.flightBookingAssistance,
-        hotelBookingAssistance: formData.hotelBookingAssistance,
+        yearlyIncome: formData.yearlyIncome.trim(),
+        otherOccupation: formData.otherOccupation.trim(),
+        isSponsored: formData.isSponsored,
+        sponsorIncomeSource: formData.sponsorIncomeSource.trim(),
+        numberOfFamilyMembers: Number(formData.numberOfFamilyMembers),
+        availableFundsForVisit: formData.availableFundsForVisit.trim(),
+        hasFamilyOrFriendInUK: isUkDestination
+          ? formData.hasFamilyOrFriendInUK
+          : undefined,
+        willProvideInvitationLetter: isUkDestination
+          ? formData.willProvideInvitationLetter
+          : undefined,
         additionalRequirements: formData.additionalRequirements.trim(),
 
         message: message,
@@ -322,10 +477,11 @@ const VisaApplicationPage = () => {
           Visa Approvals Made Simple
         </p>
 <h2 className="flex flex-nowrap items-center justify-start gap-[3px] whitespace-nowrap font-fredoka text-[16px] font-semibold uppercase leading-[1.05] tracking-[-0.04em] text-slate-950 sm:gap-3 sm:text-[34px] sm:tracking-wide lg:text-[38px]">
-  <span className="whitespace-nowrap">Visa Made</span>
+  <span className="whitespace-nowrap">Apply.</span>
   <span className="whitespace-nowrap rounded-[3px] bg-[#FF6B00] px-1.5 py-0.5 leading-none tracking-[-0.03em] text-white shadow-sm sm:rounded-[6px] sm:px-4 sm:py-1.5 sm:tracking-wide">
-    Easy
+    Approve.
   </span>
+  <span className="whitespace-nowrap">Travel.</span>
 </h2>
       </div>
     </div>
@@ -438,7 +594,7 @@ const VisaApplicationPage = () => {
               </div>
 
               <div>
-                <label className={labelClass}>Email Address *</label>
+                <label className={labelClass}>Email Address (Optional)</label>
                 <div className="relative">
                   <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
                   <input
@@ -553,49 +709,47 @@ const VisaApplicationPage = () => {
               />
             </div>
 
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className={labelClass}>Current Occupation *</label>
-                <input
-                  type="text"
-                  name="currentOccupation"
-                  value={formData.currentOccupation}
-                  onChange={handleChange}
-                  placeholder="Job, business, student..."
-                  className={inputClass}
-                />
+            {(formData.traveledAbroadBefore === "Yes" ||
+              formData.visaRefusedBefore === "Yes") && (
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                {formData.traveledAbroadBefore === "Yes" && (
+                  <div>
+                    <label className={labelClass}>Countries Traveled *</label>
+                    <input
+                      type="text"
+                      name="countriesTraveled"
+                      value={formData.countriesTraveled}
+                      onChange={handleChange}
+                      placeholder="Example: UAE, Saudi Arabia, Turkey"
+                      className={inputClass}
+                    />
+                  </div>
+                )}
+
+                {formData.visaRefusedBefore === "Yes" && (
+                  <div>
+                    <label className={labelClass}>Countries Where Visa Was Refused *</label>
+                    <input
+                      type="text"
+                      name="visaRefusalCountries"
+                      value={formData.visaRefusalCountries}
+                      onChange={handleChange}
+                      placeholder="Example: UK, USA, Canada"
+                      className={inputClass}
+                    />
+                  </div>
+                )}
               </div>
+            )}
 
-              <div>
-                <label className={labelClass}>Monthly Income *</label>
-                <input
-                  type="text"
-                  name="monthlyIncome"
-                  value={formData.monthlyIncome}
-                  onChange={handleChange}
-                  placeholder="Example: PKR 150,000"
-                  className={inputClass}
-                />
-              </div>
-            </div>
-
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <AppSelect
-                label="Require Flight Booking Assistance? *"
-                value={formData.flightBookingAssistance}
-                onChange={(value) => handleSelectChange("flightBookingAssistance", value)}
-                placeholder="Select option"
-                options={yesNoOptions}
-              />
-
-              <AppSelect
-                label="Require Hotel Booking Assistance? *"
-                value={formData.hotelBookingAssistance}
-                onChange={(value) => handleSelectChange("hotelBookingAssistance", value)}
-                placeholder="Select option"
-                options={yesNoOptions}
-              />
-            </div>
+            <VisaApplicantProfileFields
+              formData={formData}
+              onChange={handleChange}
+              onSelectChange={handleSelectChange}
+              inputClass={inputClass}
+              labelClass={labelClass}
+              className="mt-4"
+            />
 
             <div className="mt-4">
               <label className={labelClass}>

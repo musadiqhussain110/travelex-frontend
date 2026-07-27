@@ -5,13 +5,10 @@ import {
   FaBell,
   FaCalendarAlt,
   FaCheckCircle,
-  FaClock,
-  FaCrown,
   FaExclamationTriangle,
   FaEye,
   FaFire,
   FaPhoneAlt,
-  FaPlaneDeparture,
   FaRocket,
   FaSyncAlt,
   FaTasks,
@@ -56,10 +53,6 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString()
 }
 
-const formatDateTime = (date) => {
-  if (!date) return "-"
-  return new Date(date).toLocaleString()
-}
 
 const getWhatsappUrl = (phone = "") => {
   const cleanPhone = String(phone).replace(/[^\d]/g, "")
@@ -107,7 +100,7 @@ const getLeadSubtitle = (lead = {}) => {
   }
 
   if (lead.serviceType === "tour") {
-    return [lead.city, lead.destination, lead.interestedIn]
+    return [lead.city, lead.destination]
       .filter(Boolean)
       .join(" • ")
   }
@@ -374,7 +367,6 @@ const PipelineStageCard = ({ stage, count, total }) => {
 
 const AdminCommandCenterPage = () => {
   const [leads, setLeads] = useState([])
-  const [stats, setStats] = useState(null)
   const [contactStats, setContactStats] = useState(null)
   const [notificationStats, setNotificationStats] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -389,15 +381,10 @@ const AdminCommandCenterPage = () => {
       params.set("limit", "100")
       params.set("sort", "-createdAt")
 
-      const [leadsData, leadStatsData] = await Promise.all([
-        adminApi.getLeads(`?${params.toString()}`),
-        adminApi.getLeadStats ? adminApi.getLeadStats() : Promise.resolve(null),
-      ])
-
+      const leadsData = await adminApi.getLeads(`?${params.toString()}`)
       const nextLeads = leadsData.leads || leadsData.data?.leads || []
 
       setLeads(nextLeads)
-      setStats(leadStatsData || null)
 
       if (typeof adminApi.getContactInquiryStats === "function") {
         const data = await adminApi.getContactInquiryStats()

@@ -6,7 +6,6 @@ import {
   FaCalendarAlt,
   FaCheckCircle,
   FaClock,
-  FaCrown,
   FaExclamationTriangle,
   FaEye,
   FaFilter,
@@ -249,7 +248,7 @@ const getLeadSubtitle = (lead) => {
   }
 
   if (lead.serviceType === "tour") {
-    return [lead.city, lead.destination, lead.interestedIn]
+    return [lead.city, lead.destination]
       .filter(Boolean)
       .join(" • ")
   }

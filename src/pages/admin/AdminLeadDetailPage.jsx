@@ -380,9 +380,14 @@ const UmrahLeadDetails = ({ lead }) => {
           ["City", lead.city],
           ["Adults", travelers.adults || lead.numberOfAdults],
           ["Children", travelers.children || lead.numberOfChildren],
-          ["Infants", travelers.infants || lead.numberOfInfants],
           [
-            "Preferred Departure City",
+            "Child Ages",
+            travelers.childAges?.length
+              ? travelers.childAges.join(", ")
+              : "",
+          ],
+          [
+            "Preferred Airport",
             lead.preferredDepartureCity || lead.departureCity,
           ],
           [
@@ -391,8 +396,12 @@ const UmrahLeadDetails = ({ lead }) => {
           ],
           ["Duration of Stay", lead.durationOfStay],
           ["Package Required", lead.packageRequired],
-          ["Hotel Preference", lead.hotelPreference || lead.preferredHotel],
-          ["Visa Required", lead.visaRequired],
+          [
+            "Hotel Preference",
+            lead.hotelPreference || lead.hotelCategory || lead.preferredHotel,
+          ],
+          ["Nights in Makkah", lead.makkahNights],
+          ["Nights in Madinah", lead.madinahNights],
           ["Source", lead.source],
           ["Priority", formatPriority(lead.priority)],
         ]}
@@ -417,9 +426,11 @@ const TourLeadDetails = ({ lead }) => {
           ["Return Date", formatDateOnly(lead.returnDate)],
           ["Adults", travelers.adults || lead.numberOfAdults],
           ["Children", travelers.children || lead.numberOfChildren],
-          ["Infants", travelers.infants || lead.numberOfInfants],
+          [
+            "Child Ages",
+            travelers.childAges?.length ? travelers.childAges.join(", ") : "",
+          ],
           ["Hotel Category", lead.hotelCategory],
-          ["Interested In", lead.interestedIn],
           ["Source", lead.source],
           ["Priority", formatPriority(lead.priority)],
         ]}
@@ -444,7 +455,10 @@ const TicketLeadDetails = ({ lead }) => {
           ["Return Date", formatDateOnly(lead.returnDate)],
           ["Adults", travelers.adults || lead.numberOfAdults],
           ["Children", travelers.children || lead.numberOfChildren],
-          ["Infants", travelers.infants || lead.numberOfInfants],
+          [
+            "Child Ages",
+            travelers.childAges?.length ? travelers.childAges.join(", ") : "",
+          ],
           ["Preferred Airline", lead.preferredAirline],
           ["Class", lead.travelClass],
           ["Source", lead.source],
@@ -474,11 +488,19 @@ const VisaLeadDetails = ({ lead }) => {
           ["Duration of Stay", lead.durationOfStay],
           ["Number of Applicants", lead.numberOfApplicants],
           ["Traveled Abroad Before", lead.traveledAbroadBefore],
+          ["Countries Traveled", lead.countriesTraveled],
           ["Visa Refused Before", lead.visaRefusedBefore],
+          ["Countries Where Visa Was Refused", lead.visaRefusalCountries],
           ["Current Occupation", lead.currentOccupation],
+          ["Occupation Details", lead.otherOccupation],
           ["Monthly Income", lead.monthlyIncome],
-          ["Flight Booking Assistance", lead.flightBookingAssistance],
-          ["Hotel Booking Assistance", lead.hotelBookingAssistance],
+          ["Yearly Income", lead.yearlyIncome],
+          ["Sponsored", lead.isSponsored],
+          ["Income Source of Sponsor", lead.sponsorIncomeSource],
+          ["Number of Family Members", lead.numberOfFamilyMembers],
+          ["Available Funds for Visit", lead.availableFundsForVisit],
+          ["Family or Friend in the UK", lead.hasFamilyOrFriendInUK],
+          ["Will Provide Invitation Letter", lead.willProvideInvitationLetter],
           ["Source", lead.source],
           ["Priority", formatPriority(lead.priority)],
         ]}
@@ -506,7 +528,10 @@ const HotelLeadDetails = ({ lead }) => {
           ["Duration", lead.durationOfStay],
           ["Adults", travelers.adults],
           ["Children", travelers.children],
-          ["Infants", travelers.infants],
+          [
+            "Child Ages",
+            travelers.childAges?.length ? travelers.childAges.join(", ") : "",
+          ],
           ["Total Guests", lead.numberOfGuests],
           ["Number of Rooms", lead.numberOfRooms],
           ["Room Type", lead.roomType],
@@ -543,7 +568,10 @@ const AirportTransferLeadDetails = ({ lead }) => {
           ["Drop-off Location", lead.dropoffLocation],
           ["Adults", travelers.adults],
           ["Children", travelers.children],
-          ["Infants", travelers.infants],
+          [
+            "Child Ages",
+            travelers.childAges?.length ? travelers.childAges.join(", ") : "",
+          ],
           ["Total Passengers", lead.passengerCount],
           ["Luggage", lead.luggage],
           ["Vehicle Preference", lead.vehicleType],
@@ -569,7 +597,10 @@ const GenericLeadDetails = ({ lead }) => {
           ["Travel Date", formatDateOnly(lead.travelDate)],
           ["Adults", travelers.adults],
           ["Children", travelers.children],
-          ["Infants", travelers.infants],
+          [
+            "Child Ages",
+            travelers.childAges?.length ? travelers.childAges.join(", ") : "",
+          ],
           ["Budget", lead.budget],
           ["Preferred Hotel", lead.preferredHotel],
           ["Pickup Location", lead.pickupLocation],
@@ -692,7 +723,7 @@ const AdminLeadDetailPage = () => {
       {
         icon: <FaEnvelope />,
         label: "Email Address",
-        value: lead.email,
+        value: lead.email || "Not provided",
       },
       {
         icon: <FaCalendarAlt />,
@@ -1105,13 +1136,15 @@ const AdminLeadDetailPage = () => {
                 Call
               </a>
 
-              <a
-                href={`mailto:${lead.email || ""}`}
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-white/10 px-4 py-3 font-poppins text-sm font-semibold text-white backdrop-blur transition hover:bg-[#00AEEF]"
-              >
-                <FaEnvelope />
-                Email
-              </a>
+              {lead.email && (
+                <a
+                  href={`mailto:${lead.email}`}
+                  className="inline-flex items-center justify-center gap-2 rounded-[5px] bg-white/10 px-4 py-3 font-poppins text-sm font-semibold text-white backdrop-blur transition hover:bg-[#00AEEF]"
+                >
+                  <FaEnvelope />
+                  Email
+                </a>
+              )}
             </div>
           </div>
         </div>
@@ -1504,13 +1537,15 @@ const AdminLeadDetailPage = () => {
                 Call Customer
               </a>
 
-              <a
-                href={`mailto:${lead.email || ""}`}
-                className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 bg-white px-4 py-3 text-center font-poppins text-sm font-semibold text-slate-700 transition hover:border-[#00AEEF] hover:text-[#00AEEF]"
-              >
-                <FaEnvelope />
-                Send Email
-              </a>
+              {lead.email && (
+                <a
+                  href={`mailto:${lead.email}`}
+                  className="inline-flex items-center justify-center gap-2 rounded-[5px] border border-slate-200 bg-white px-4 py-3 text-center font-poppins text-sm font-semibold text-slate-700 transition hover:border-[#00AEEF] hover:text-[#00AEEF]"
+                >
+                  <FaEnvelope />
+                  Send Email
+                </a>
+              )}
 
               <Link
                 to={getBackUrl(lead?.serviceType)}

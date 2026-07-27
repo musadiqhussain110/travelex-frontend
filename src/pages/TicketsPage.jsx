@@ -13,9 +13,16 @@ import {
 import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
+import ChildAgeFields from "../components/common/ChildAgeFields"
 import { publicApi } from "../services/publicApi"
 import { getLeadSource } from "../utils/leadSourceTracker"
 import ticketFormAsset from "../assets/ticket/ticket-form.png"
+import {
+  getChildAgesError,
+  getChildCount,
+  normalizeChildAges,
+  resizeChildAges,
+} from "../utils/travelerForm"
 
 const classOptions = ["Economy", "Premium Economy", "Business", "First Class"]
 
@@ -38,7 +45,7 @@ const initialForm = {
   returnDate: "",
   adults: "1",
   children: "0",
-  infants: "0",
+  childAges: [],
   preferredAirline: "",
   travelClass: "",
   additionalRequirements: "",
@@ -62,10 +69,20 @@ const TicketsPage = () => {
   const handleChange = (event) => {
     const { name, value } = event.target
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+    setFormData((prev) => {
+      if (name === "children") {
+        return {
+          ...prev,
+          children: value,
+          childAges: resizeChildAges(prev.childAges, value),
+        }
+      }
+
+      return {
+        ...prev,
+        [name]: value,
+      }
+    })
 
     setError("")
     setSuccess("")
@@ -75,6 +92,18 @@ const TicketsPage = () => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }))
+
+    setError("")
+    setSuccess("")
+  }
+
+  const handleChildAgeChange = (index, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      childAges: prev.childAges.map((age, ageIndex) =>
+        ageIndex === index ? value : age
+      ),
     }))
 
     setError("")
@@ -93,11 +122,6 @@ const TicketsPage = () => {
 
     if (!formData.phone.trim()) {
       setError("Please enter your mobile / WhatsApp number.")
-      return
-    }
-
-    if (!formData.email.trim()) {
-      setError("Please enter your email address.")
       return
     }
 
@@ -121,13 +145,23 @@ const TicketsPage = () => {
       return
     }
 
+    const childCount = getChildCount(formData.children)
+    const childAgesError = getChildAgesError(formData.childAges, childCount)
+
+    if (childAgesError) {
+      setError(childAgesError)
+      return
+    }
+
+    const childAges = normalizeChildAges(formData.childAges, childCount)
+
     try {
       setLoading(true)
 
       const travelers = {
         adults: getNumber(formData.adults, 1),
-        children: getNumber(formData.children, 0),
-        infants: getNumber(formData.infants, 0),
+        children: childCount,
+        childAges,
       }
 
       const leadSource = getLeadSource()
@@ -137,21 +171,23 @@ const TicketsPage = () => {
         "",
         `Full Name: ${formData.fullName}`,
         `Mobile / WhatsApp: ${formData.phone}`,
-        `Email Address: ${formData.email}`,
+        `Email Address: ${formData.email || "Not provided"}`,
         `Departure City: ${formData.departureCity}`,
         `Destination City: ${formData.destinationCity}`,
         `Departure Date: ${formData.departureDate}`,
         `Return Date: ${formData.returnDate || "Not provided"}`,
         `Adults: ${travelers.adults}`,
         `Children: ${travelers.children}`,
-        `Infants: ${travelers.infants}`,
+        travelers.childAges.length
+          ? `Child Ages: ${travelers.childAges.join(", ")}`
+          : null,
         `Preferred Airline: ${formData.preferredAirline || "Not provided"}`,
         `Class: ${formData.travelClass}`,
         "",
         formData.additionalRequirements
           ? `Additional Requirements: ${formData.additionalRequirements}`
           : "Additional Requirements: Not provided",
-      ].join("\n")
+      ].filter(Boolean).join("\n")
 
       const payload = {
         name: formData.fullName.trim(),
@@ -262,14 +298,15 @@ const TicketsPage = () => {
                   style={{ animation: "bannerFadeUp 0.6s ease-out 0.15s both" }}
                   className="flex flex-nowrap items-center justify-start gap-[2px] whitespace-nowrap font-fredoka text-[9px] font-semibold uppercase leading-[1.05] tracking-[-0.09em] text-slate-950 sm:gap-3 sm:text-[34px] sm:tracking-wide lg:text-[38px]"
                 >
-                  <span className="whitespace-nowrap">Take Off With</span>
+                  <span className="whitespace-nowrap">Book &</span>
 
                   <span
                     className="whitespace-nowrap rounded-[3px] bg-[#FF6B00] px-1 py-[2px] leading-none tracking-[-0.07em] text-white shadow-sm sm:rounded-[6px] sm:px-4 sm:py-1.5 sm:tracking-wide"
                     style={{ animation: "bannerStampIn 0.9s ease-out 0.3s both" }}
                   >
-                    Confidence
+                    Fly
                   </span>
+                                    <span className="whitespace-nowrap"> Today</span>
                 </h2>
               </div>
             </div>
@@ -364,7 +401,7 @@ const TicketsPage = () => {
               </div>
 
               <div>
-                <label className={labelClass}>Email Address *</label>
+                <label className={labelClass}>Email Address (Optional)</label>
                 <div className="relative">
                   <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
                   <input
@@ -427,7 +464,7 @@ const TicketsPage = () => {
               />
             </div>
 
-            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>
                 <label className={labelClass}>Adults *</label>
                 <input
@@ -451,19 +488,15 @@ const TicketsPage = () => {
                   className={inputClass}
                 />
               </div>
-
-              <div>
-                <label className={labelClass}>Infants</label>
-                <input
-                  type="number"
-                  name="infants"
-                  min="0"
-                  value={formData.infants}
-                  onChange={handleChange}
-                  className={inputClass}
-                />
-              </div>
             </div>
+
+            <ChildAgeFields
+              ages={formData.childAges}
+              onChange={handleChildAgeChange}
+              labelClass={labelClass}
+              inputClass={inputClass}
+              className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            />
 
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div>

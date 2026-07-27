@@ -18,8 +18,15 @@ import {
 import Footer from "../components/Footer"
 import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
+import ChildAgeFields from "../components/common/ChildAgeFields"
 import { hotels } from "../data/hotelsData"
 import { publicApi } from "../services/publicApi"
+import {
+  getChildAgesError,
+  getChildCount,
+  normalizeChildAges,
+  resizeChildAges,
+} from "../utils/travelerForm"
 
 const roomTypeOptions = ["Standard", "Suite", "Apartment"]
 
@@ -93,7 +100,7 @@ const getInitialBooking = (hotel) => ({
 
   adults: "1",
   children: "0",
-  infants: "0",
+  childAges: [],
 
   rooms: "1",
   roomType: "Standard",
@@ -137,18 +144,39 @@ const HotelBookingPage = () => {
 
   const totalGuests = useMemo(() => {
     const adults = Math.max(0, Number(booking.adults) || 0)
-    const children = Math.max(0, Number(booking.children) || 0)
-    const infants = Math.max(0, Number(booking.infants) || 0)
+    const children = getChildCount(booking.children)
 
-    return adults + children + infants
-  }, [booking.adults, booking.children, booking.infants])
+    return adults + children
+  }, [booking.adults, booking.children])
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target
 
+    setBooking((prev) => {
+      if (name === "children") {
+        return {
+          ...prev,
+          children: value,
+          childAges: resizeChildAges(prev.childAges, value),
+        }
+      }
+
+      return {
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      }
+    })
+
+    setFormError("")
+    setSuccess(false)
+  }
+
+  const handleChildAgeChange = (index, value) => {
     setBooking((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      childAges: prev.childAges.map((age, ageIndex) =>
+        ageIndex === index ? value : age
+      ),
     }))
 
     setFormError("")
@@ -168,7 +196,6 @@ const HotelBookingPage = () => {
   const validateForm = () => {
     if (!booking.fullName.trim()) return "Please enter full name."
     if (!booking.phone.trim()) return "Please enter mobile / WhatsApp number."
-    if (!booking.email.trim()) return "Please enter email address."
     if (!booking.city.trim()) return "Please enter your city."
     if (!booking.destination.trim()) return "Please enter destination city/country."
     if (!booking.checkInDate) return "Please select check-in date."
@@ -186,9 +213,12 @@ const HotelBookingPage = () => {
       return "Children cannot be negative."
     }
 
-    if (Number(booking.infants) < 0) {
-      return "Infants cannot be negative."
-    }
+    const childAgesError = getChildAgesError(
+      booking.childAges,
+      booking.children
+    )
+
+    if (childAgesError) return childAgesError
 
     if (!booking.rooms || Number(booking.rooms) < 1) {
       return "Please enter number of rooms."
@@ -216,10 +246,10 @@ const HotelBookingPage = () => {
       setLoading(true)
 
       const adults = Math.max(1, Number(booking.adults) || 1)
-      const children = Math.max(0, Number(booking.children) || 0)
-      const infants = Math.max(0, Number(booking.infants) || 0)
+      const children = getChildCount(booking.children)
+      const childAges = normalizeChildAges(booking.childAges, children)
       const rooms = Math.max(1, Number(booking.rooms) || 1)
-      const guests = adults + children + infants
+      const guests = adults + children
 
       const selectedHotelName =
         booking.hotelName.trim() || hotel?.name || "Not specified"
@@ -245,7 +275,7 @@ const HotelBookingPage = () => {
         "Personal Information",
         `Full Name: ${booking.fullName}`,
         `Mobile / WhatsApp: ${booking.phone}`,
-        `Email Address: ${booking.email}`,
+        `Email Address: ${booking.email || "Not provided"}`,
         `City: ${booking.city}`,
         "",
         "Hotel Requirements",
@@ -258,7 +288,7 @@ const HotelBookingPage = () => {
         "Guests",
         `Adults: ${adults}`,
         `Children: ${children}`,
-        `Infants: ${infants}`,
+        childAges.length ? `Child Ages: ${childAges.join(", ")}` : null,
         `Total Guests: ${guests}`,
         "",
         "Room Requirements",
@@ -271,7 +301,7 @@ const HotelBookingPage = () => {
         booking.additionalRequirements
           ? `Additional Requirements: ${booking.additionalRequirements}`
           : "Additional Requirements: Not provided",
-      ].join("\n")
+      ].filter(Boolean).join("\n")
 
       const payload = {
         name: booking.fullName.trim(),
@@ -299,7 +329,7 @@ const HotelBookingPage = () => {
         travelers: {
           adults,
           children,
-          infants,
+          childAges,
         },
 
         numberOfGuests: guests,
@@ -526,7 +556,7 @@ const HotelBookingPage = () => {
                   </div>
 
                   <div>
-                    <label className={labelClass}>Email Address</label>
+                    <label className={labelClass}>Email Address (Optional)</label>
 
                     <div className="relative">
                       <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 sm:left-4 sm:text-sm" />
@@ -641,7 +671,7 @@ const HotelBookingPage = () => {
                   Guests
                 </h3>
 
-                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <div>
                     <label className={labelClass}>Adults</label>
 
@@ -671,20 +701,15 @@ const HotelBookingPage = () => {
                       className={inputClass}
                     />
                   </div>
-
-                  <div>
-                    <label className={labelClass}>Infants</label>
-
-                    <input
-                      type="number"
-                      name="infants"
-                      min="0"
-                      value={booking.infants}
-                      onChange={handleChange}
-                      className={inputClass}
-                    />
-                  </div>
                 </div>
+
+                <ChildAgeFields
+                  ages={booking.childAges}
+                  onChange={handleChildAgeChange}
+                  labelClass={labelClass}
+                  inputClass={inputClass}
+                  className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                />
               </div>
 
               {/* Room Requirements */}

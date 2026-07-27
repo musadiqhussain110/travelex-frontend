@@ -67,19 +67,6 @@ const serviceLabels = {
   general: "General",
 }
 
-const getToneClass = (tone = "blue") => {
-  const tones = {
-    blue: "bg-[#00AEEF]/10 text-[#00AEEF]",
-    orange: "bg-[#FF6B00]/10 text-[#FF6B00]",
-    red: "bg-red-50 text-red-700",
-    green: "bg-emerald-50 text-emerald-700",
-    purple: "bg-purple-50 text-purple-700",
-    dark: "bg-slate-950 text-white",
-  }
-
-  return tones[tone] || tones.blue
-}
-
 const getSectionBorder = (tone = "blue") => {
   const tones = {
     blue: "border-t-[#00AEEF]",
@@ -252,7 +239,7 @@ const getLeadSubtitle = (lead = {}) => {
   }
 
   if (lead.serviceType === "tour") {
-    return [lead.city, lead.destination, lead.interestedIn]
+    return [lead.city, lead.destination]
       .filter(Boolean)
       .join(" • ")
   }

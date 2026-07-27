@@ -32,6 +32,7 @@ export const visaServices = [
       "Last 3 months bank account statement with maintenance certificate, signed and stamped by bank",
       "Letterhead scanned",
       "Employment or business details",
+      "FRC (in case of family)",
     ],
     details: ["Clear scanned documents required."],
   },

@@ -74,7 +74,7 @@ Please share any additional details if needed, so we can assist you better.`,
 We have received your Umrah package inquiry. Please confirm the following details:
 
 • Preferred travel date
-• Number of adults, children, and infants
+• Number of adults, children, and child ages
 • Departure city
 • Hotel preference
 • Package duration

@@ -4,7 +4,6 @@ import {
   FaAngleLeft,
   FaAngleRight,
   FaArrowRight,
-  FaCalendarAlt,
   FaCheckCircle,
   FaClock,
   FaDownload,
@@ -301,7 +300,6 @@ const getLeadSubtitle = (lead) => {
       lead.city,
       lead.destination,
       formatShortDate(lead.travelDate),
-      lead.interestedIn,
     ]
       .filter(Boolean)
       .join(" • ")
