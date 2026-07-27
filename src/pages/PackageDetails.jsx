@@ -17,7 +17,7 @@ import AppSelect from "../components/common/AppSelect"
 import AppDatePicker from "../components/common/AppDatePicker"
 import ChildAgeFields from "../components/common/ChildAgeFields"
 import { publicApi } from "../services/publicApi"
-import umrahFormAsset from "../assets/umrah/umrah-form.png"
+import umrahFormAsset from "../assets/Umrah/umrah-form.png"
 import {
   getChildAgesError,
   getChildCount,
